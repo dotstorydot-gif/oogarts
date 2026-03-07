@@ -11,7 +11,10 @@ const Appointments = () => {
                         <h1 className="text-3xl font-bold text-slate-900 mb-2">Appointments</h1>
                         <p className="text-slate-500">Manage patient schedules and telemedicine sessions.</p>
                     </div>
-                    <button className="flex items-center gap-2.5 px-6 py-3 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 transition-all font-bold shadow-lg shadow-indigo-100">
+                    <button
+                        className="flex items-center gap-2.5 px-6 py-3 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 transition-all font-bold shadow-lg shadow-indigo-100"
+                        onClick={() => alert('Launching Appointment Scheduler...')}
+                    >
                         <Plus className="w-5 h-5" />
                         <span>Schedule Appointment</span>
                     </button>

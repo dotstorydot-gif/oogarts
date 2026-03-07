@@ -43,7 +43,7 @@ const Inventory = () => {
                             <Download className="w-4 h-4" />
                             Export CSV
                         </Button>
-                        <Button variant="primary" className="gap-2 px-8">
+                        <Button variant="primary" className="gap-2 px-8" onClick={() => alert('Initializing Inventory Provisioning flow...')}>
                             <Plus className="w-5 h-5" />
                             Provision New Item
                         </Button>

@@ -83,7 +83,7 @@ const Settings = () => {
                                         <div className="flex flex-col items-center justify-center p-6 sm:p-8 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 order-1 md:order-2">
                                             <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-white shadow-xl p-1 mb-6">
                                                 <img
-                                                    src="https://images.unsplash.com/photo-1559839734-2b71f1536783?auto=format&fit=crop&q=80&w=200"
+                                                    src="/avatars/jack_chain.png"
                                                     className="w-full h-full rounded-full object-cover"
                                                 />
                                             </div>

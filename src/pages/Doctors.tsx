@@ -8,7 +8,8 @@ import {
     Edit2,
     Mail,
     Phone,
-    ShieldCheck
+    ShieldCheck,
+    Users
 } from 'lucide-react';
 
 interface Doctor {
@@ -96,15 +97,28 @@ const Doctors = () => {
                 </div>
 
                 <Card className="mb-10 bg-slate-50/50 border-slate-100 p-6 lg:p-8">
-                    <div className="relative max-w-xl group">
-                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-indigo-600 transition-all" />
-                        <input
-                            type="text"
-                            placeholder="Search by name or specialty..."
-                            className="w-full bg-white border-2 border-slate-100 rounded-2xl pl-16 pr-8 py-4 focus:ring-4 focus:ring-indigo-50 focus:border-indigo-100 transition-all outline-none font-bold text-slate-900"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                    <div className="flex flex-col md:flex-row gap-6">
+                        <div className="relative flex-1 group">
+                            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-indigo-600 transition-all" />
+                            <input
+                                type="text"
+                                placeholder="Search staff members..."
+                                className="w-full bg-white border-2 border-slate-100 rounded-2xl pl-16 pr-8 py-4 focus:ring-4 focus:ring-indigo-50 focus:border-indigo-100 transition-all outline-none font-bold text-slate-900"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <div className="relative w-full md:w-72">
+                            <div className="absolute left-6 top-1/2 -translate-y-1/2 text-indigo-600">
+                                <Users className="w-5 h-5" />
+                            </div>
+                            <select className="w-full h-full bg-white border-2 border-slate-100 rounded-2xl pl-16 pr-8 py-4 focus:ring-4 focus:ring-indigo-50 focus:border-indigo-100 transition-all outline-none font-bold text-slate-900 appearance-none cursor-pointer">
+                                <option value="">Select Active Patient</option>
+                                <option value="p1">Jeffrey Hessel</option>
+                                <option value="p2">Sarah Connor</option>
+                                <option value="p3">John Doe</option>
+                            </select>
+                        </div>
                     </div>
                 </Card>
 

@@ -40,7 +40,7 @@ const Laboratory = () => {
                             <Download className="w-4 h-4" />
                             Log
                         </Button>
-                        <Button variant="dark" className="gap-2 px-8">
+                        <Button variant="dark" className="gap-2 px-8" onClick={() => alert('Opening New Test Order Flow...')}>
                             <Plus className="w-5 h-5" />
                             New Test Order
                         </Button>

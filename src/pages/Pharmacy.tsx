@@ -41,7 +41,7 @@ const Pharmacy = () => {
                             <Download className="w-4 h-4" />
                             Report
                         </Button>
-                        <Button variant="dark" className="gap-2 px-8">
+                        <Button variant="dark" className="gap-2 px-8" onClick={() => alert('Initializing New Medication Entry...')}>
                             <Plus className="w-5 h-5" />
                             New Entry
                         </Button>
@@ -85,12 +85,12 @@ const Pharmacy = () => {
                         </Card>
 
                         <Card className="min-h-[400px] lg:min-h-[500px] flex flex-col items-center justify-center text-center p-8 lg:p-20 bg-white/40 border-slate-100/50">
-                            <div className="w-24 h-24 bg-slate-50 rounded-[32px] flex items-center justify-center mb-8 animate-pulse">
-                                <Activity className="w-10 h-10 text-slate-200" />
+                            <div className="w-24 h-24 bg-indigo-600/10 rounded-[32px] flex items-center justify-center mb-8">
+                                <Activity className="w-10 h-10 text-indigo-600 animate-pulse" />
                             </div>
-                            <h3 className="text-2xl font-black text-slate-900 mb-3">Initializing Pharma Core</h3>
-                            <p className="text-slate-500 font-medium max-w-sm mb-10">Synchronizing global medication database. Please ensure secure credentials are active.</p>
-                            <Button variant="ghost" className="gap-2 font-black text-indigo-600">
+                            <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">Active Pharmacy Systems</h3>
+                            <p className="text-slate-500 font-medium max-w-sm mb-10 leading-relaxed">External medication database synchronized. All dispensing protocols active and secure.</p>
+                            <Button variant="ghost" className="gap-2 font-black text-indigo-600 hover:bg-white" onClick={() => alert('Fetching Recent Dispensing history...')}>
                                 <Clock className="w-4 h-4" />
                                 View Recent Dispensing
                             </Button>

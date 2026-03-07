@@ -55,7 +55,7 @@ const UserProfile = () => (
         <div className="relative">
             <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-indigo-500 to-sky-400 p-[2px] shadow-lg">
                 <img
-                    src="https://images.unsplash.com/photo-1559839734-2b71f1536783?auto=format&fit=crop&q=80&w=100"
+                    src="/avatars/jack_chain.png"
                     alt="User"
                     className="w-full h-full rounded-[10px] object-cover border-2 border-white"
                 />
