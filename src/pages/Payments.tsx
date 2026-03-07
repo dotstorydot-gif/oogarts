@@ -52,117 +52,124 @@ const Payments = () => {
 
                 <div className="grid grid-cols-12 gap-10">
                     <div className="col-span-4 space-y-8">
-                        <Card>
-                            <div className="flex items-center justify-between mb-8">
-                                <h3 className="font-black text-slate-900 text-lg">Insurance Info</h3>
-                                <span className="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase rounded-full flex items-center gap-1.5">
-                                    <ShieldCheck className="w-3.5 h-3.5" />
+                        <Card className="p-10">
+                            <div className="flex items-center justify-between mb-10">
+                                <h3 className="font-black text-slate-900 text-xl tracking-tight">Insurance Info</h3>
+                                <span className="px-4 py-1.5 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-100 flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                                     Verified
                                 </span>
                             </div>
 
-                            <div className="space-y-6">
-                                <div className="p-5 rounded-[24px] bg-slate-50 space-y-4">
+                            <div className="space-y-8">
+                                <div className="p-8 rounded-[32px] bg-slate-50/80 border border-slate-100 space-y-6">
                                     <div>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Provider</p>
-                                        <p className="text-sm font-bold text-slate-900">Blue Cross Blue Shield</p>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Provider</p>
+                                        <p className="text-base font-black text-slate-900 tracking-tight">Blue Cross Blue Shield</p>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-2 gap-6">
                                         <div>
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Policy Number</p>
-                                            <p className="text-xs font-black text-slate-900 truncate">BCBS123456789</p>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Policy No.</p>
+                                            <p className="text-[13px] font-black text-slate-900 truncate tracking-tight">BCBS123456789</p>
                                         </div>
                                         <div>
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Group Number</p>
-                                            <p className="text-xs font-black text-slate-900">GRP001</p>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Group ID</p>
+                                            <p className="text-[13px] font-black text-slate-900 tracking-tight">GRP001</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100/50">
-                                        <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Coverage</p>
-                                        <p className="text-xl font-black text-indigo-600">80%</p>
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="p-6 rounded-[24px] bg-indigo-50/50 border border-indigo-100/50">
+                                        <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-2">Coverage</p>
+                                        <p className="text-2xl font-black text-indigo-600 tracking-tighter">80%</p>
                                     </div>
-                                    <div className="p-4 rounded-2xl bg-slate-50">
-                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Copay</p>
-                                        <p className="text-xl font-black text-slate-900">$25</p>
+                                    <div className="p-6 rounded-[24px] bg-slate-50 border border-slate-100">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Copay</p>
+                                        <p className="text-2xl font-black text-slate-900 tracking-tighter">$25</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <Button className="w-full mt-10 p-4 rounded-2xl bg-slate-900 font-bold text-sm tracking-tight hover:bg-slate-800 transition-colors">
+                            <Button variant="dark" className="w-full mt-12 py-5 shadow-2xl shadow-slate-200">
                                 Re-verify Insurance
                             </Button>
                         </Card>
 
-                        <Card className="bg-indigo-600 text-white border-0">
-                            <h3 className="font-black text-lg mb-6 flex items-center gap-2">
-                                <DollarSign className="w-5 h-5 text-indigo-200" />
+                        <Card className="bg-indigo-600 text-white border-0 shadow-2xl shadow-indigo-100/50 relative overflow-hidden p-12">
+                            <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl animate-pulse" />
+                            <h3 className="font-black text-xl mb-10 flex items-center gap-3 relative z-10">
+                                <DollarSign className="w-6 h-6 text-indigo-300" />
                                 Financial Summary
                             </h3>
-                            <div className="space-y-4 font-medium opacity-90">
+                            <div className="space-y-6 relative z-10">
                                 {[
-                                    { label: 'Total Submitted', value: '$227.00', bold: true },
+                                    { label: 'Total Submitted', value: '$227.00' },
                                     { label: 'Insurance Covered', value: '$181.60' },
                                     { label: 'Patient Responsibility', value: '$145.40' },
                                     { label: 'Outstanding Balance', value: '$65.40', accent: true },
                                 ].map((item) => (
                                     <div key={item.label} className={cn(
-                                        "flex justify-between items-center text-sm",
-                                        item.accent && "pt-4 border-t border-white/20 mt-4 text-emerald-400 font-black text-lg opacity-100"
+                                        "flex justify-between items-center",
+                                        item.accent ? "pt-8 border-t border-white/10 mt-6" : ""
                                     )}>
-                                        <span className="text-indigo-100">{item.label}</span>
-                                        <span>{item.value}</span>
+                                        <span className="text-[13px] font-black uppercase tracking-widest text-indigo-200/80">{item.label}</span>
+                                        <span className={cn(
+                                            "font-black tracking-tight",
+                                            item.accent ? "text-3xl text-emerald-400" : "text-lg text-white"
+                                        )}>{item.value}</span>
                                     </div>
                                 ))}
                             </div>
                         </Card>
                     </div>
 
-                    <div className="col-span-8 flex flex-col gap-6">
-                        <div className="flex items-center justify-between px-2">
-                            <h3 className="font-black text-slate-900 text-xl tracking-tight">Claims History</h3>
-                            <button className="flex items-center gap-2 text-indigo-600 font-bold text-xs uppercase tracking-widest px-4 py-2 hover:bg-indigo-50 rounded-xl transition-all">
-                                <History className="w-4 h-4" />
-                                View All
-                            </button>
+                    <div className="col-span-8 space-y-8">
+                        <div className="flex items-center justify-between px-4 mb-2">
+                            <div>
+                                <h3 className="font-black text-slate-900 text-2xl tracking-tighter">Claims History</h3>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1">Transaction logs & audit</p>
+                            </div>
+                            <Button variant="ghost" size="sm" className="gap-2">
+                                <History size={16} />
+                                <span>Export Audit</span>
+                            </Button>
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                             {claims.map((claim, idx) => (
-                                <Card key={idx} className="hover:scale-[1.01] transition-transform cursor-pointer overflow-hidden relative">
-                                    <div className="flex items-center gap-6">
+                                <Card key={idx} className="p-0 hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-300 border-slate-100 group">
+                                    <div className="flex items-center gap-8 p-10">
                                         <div className={cn(
-                                            "w-14 h-14 rounded-2xl flex items-center justify-center shrink-0",
-                                            claim.type === 'prescription' ? "bg-indigo-50 text-indigo-600" : "bg-sky-50 text-sky-600"
+                                            "w-16 h-16 rounded-[24px] flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 duration-500",
+                                            claim.type === 'prescription' ? "bg-indigo-50 text-indigo-600 shadow-lg shadow-indigo-100/50" : "bg-sky-50 text-sky-600 shadow-lg shadow-sky-100/50"
                                         )}>
-                                            {claim.type === 'prescription' ? <ShieldCheck className="w-6 h-6" /> : <FileText className="w-6 h-6" />}
+                                            {claim.type === 'prescription' ? <ShieldCheck className="w-8 h-8" /> : <FileText className="w-8 h-8" />}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-center justify-between mb-1.5">
-                                                <h4 className="font-bold text-slate-900 truncate pr-4">{claim.name}</h4>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <h4 className="font-black text-slate-900 text-lg tracking-tight truncate pr-4">{claim.name}</h4>
                                                 <span className={cn(
-                                                    "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest",
-                                                    claim.status === 'approved' ? "bg-emerald-50 text-emerald-600 border border-emerald-100" :
-                                                        claim.status === 'processing' ? "bg-sky-50 text-sky-600 border border-sky-100" :
-                                                            "bg-amber-50 text-amber-600 border border-amber-100"
+                                                    "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border",
+                                                    claim.status === 'approved' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
+                                                        claim.status === 'processing' ? "bg-sky-50 text-sky-600 border-sky-100" :
+                                                            "bg-amber-50 text-amber-600 border-amber-100"
                                                 )}>
                                                     {claim.status}
                                                 </span>
                                             </div>
-                                            <div className="flex items-center gap-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
-                                                <span>{claim.type}</span>
+                                            <div className="flex items-center gap-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                                <span className="text-indigo-600 bg-indigo-50/50 px-2 py-0.5 rounded-lg">{claim.type}</span>
                                                 <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                                                <span className="flex items-center gap-1">
-                                                    <Clock className="w-3 h-3" />
+                                                <span className="flex items-center gap-1.5">
+                                                    <Clock size={12} className="text-slate-300" />
                                                     {claim.date}
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className="text-right border-l border-slate-100 pl-8 ml-4">
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Patient Owes</p>
-                                            <p className="text-lg font-black text-slate-900">${claim.patient}</p>
+                                        <div className="text-right border-l-2 border-slate-50 pl-12 ml-6">
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Patient Owes</p>
+                                            <p className="text-2xl font-black text-slate-900 tracking-tighter">${claim.patient}</p>
                                         </div>
                                     </div>
                                 </Card>
