@@ -43,10 +43,10 @@ const Queue = () => {
                         <p className="text-slate-500 font-bold text-sm">Real-time patient flow and automated ticket status tracking.</p>
                     </div>
                     <div className="flex gap-4">
-                        <Button variant="outline" className="gap-2">
+                        <Button variant="outline" className="gap-2" onClick={() => alert('Printing all tickets...')}>
                             <span className="text-sm">Print All Tickets</span>
                         </Button>
-                        <Button variant="dark" className="gap-2 shadow-2xl shadow-slate-200">
+                        <Button variant="dark" className="gap-2 shadow-2xl shadow-slate-200" onClick={() => alert('Opening Ticket Generator...')}>
                             <Plus size={20} />
                             <span>Generate New Ticket</span>
                         </Button>
@@ -116,10 +116,16 @@ const Queue = () => {
                                                     </span>
                                                 </td>
                                                 <td className="px-8 py-6">
-                                                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
-                                                        <Button variant="ghost" size="sm" className="w-10 h-10 p-0 rounded-xl"><Play size={18} /></Button>
-                                                        <Button variant="ghost" size="sm" className="w-10 h-10 p-0 rounded-xl"><CheckCircle2 size={18} /></Button>
-                                                        <Button variant="ghost" size="sm" className="w-10 h-10 p-0 rounded-xl"><MoreVertical size={18} /></Button>
+                                                    <div className="flex items-center justify-end gap-2 transition-all duration-300">
+                                                        <Button variant="ghost" size="sm" className="w-10 h-10 p-0 rounded-xl hover:bg-white hover:shadow-sm hover:text-indigo-600 transition-all" onClick={() => alert(`Starting consultation flow for ${p.name}...`)}>
+                                                            <Play size={18} />
+                                                        </Button>
+                                                        <Button variant="ghost" size="sm" className="w-10 h-10 p-0 rounded-xl hover:bg-white hover:shadow-sm hover:text-emerald-600 transition-all" onClick={() => alert(`Marking ${p.name} as processed...`)}>
+                                                            <CheckCircle2 size={18} />
+                                                        </Button>
+                                                        <Button variant="ghost" size="sm" className="w-10 h-10 p-0 rounded-xl hover:bg-white hover:shadow-sm transition-all">
+                                                            <MoreVertical size={18} />
+                                                        </Button>
                                                     </div>
                                                 </td>
                                             </tr>
