@@ -156,7 +156,7 @@ const PatientDashboard = () => {
                                 </div>
                                 <h4 className="font-bold text-slate-900 text-sm">Medical Records</h4>
                             </Card>
-                            <Card className="p-6 text-center cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all border-slate-100" onClick={() => navigate('/patient-records')}>
+                            <Card className="p-6 text-center cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all border-slate-100" onClick={() => navigate('/patient-billing')}>
                                 <div className="w-12 h-12 mx-auto bg-slate-50 text-slate-600 rounded-2xl flex items-center justify-center mb-4">
                                     <Activity className="w-6 h-6" />
                                 </div>

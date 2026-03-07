@@ -17,6 +17,8 @@ import Settings from './pages/Settings';
 import PatientDashboard from './pages/PatientDashboard';
 import PatientBooking from './pages/PatientBooking';
 import Telemedicine from './pages/Telemedicine';
+import PatientRecords from './pages/PatientRecords';
+import PatientBilling from './pages/PatientBilling';
 
 function App() {
     // Simple auth check for now
@@ -93,6 +95,14 @@ function App() {
                 <Route
                     path="/telemedicine"
                     element={isAuthenticated ? <Telemedicine /> : <Navigate to="/login" />}
+                />
+                <Route
+                    path="/patient-records"
+                    element={isAuthenticated ? <PatientRecords /> : <Navigate to="/login" />}
+                />
+                <Route
+                    path="/patient-billing"
+                    element={isAuthenticated ? <PatientBilling /> : <Navigate to="/login" />}
                 />
                 <Route path="/" element={<Navigate to="/dashboard" />} />
             </Routes>
