@@ -1,5 +1,5 @@
 import { Layout } from '../components/layout/Layout';
-import { Card, Button } from '../components/layout/BaseUI';
+import { Card, Button, cn } from '../components/layout/BaseUI';
 import {
     Heart,
     Brain,

@@ -7,7 +7,6 @@ import {
     FileText,
     Shield,
     CheckCircle2,
-    Plus,
     Trash2,
     Upload,
     ChevronRight,

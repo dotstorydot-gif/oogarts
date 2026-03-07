@@ -4,7 +4,6 @@ import {
     Users,
     ClipboardList,
     Stethoscope,
-    FileText,
     Activity,
     Heart,
     Thermometer,

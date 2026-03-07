@@ -1,21 +1,16 @@
-import { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Card, Button, cn } from '../components/layout/BaseUI';
 import {
     Search,
     ShieldCheck,
-    ShieldAlert,
     FileText,
     History,
     DollarSign,
-    CheckCircle2,
     Clock,
     UserCircle2
 } from 'lucide-react';
 
 const Payments = () => {
-    const [view, setView] = useState('billing'); // 'billing' or 'search'
-
     const claims = [
         { name: 'Metformin 500mg', type: 'prescription', status: 'approved', total: 45, covered: 36, patient: 34, date: '2024-01-15' },
         { name: 'Lisinopril 10mg', type: 'prescription', status: 'approved', total: 32, covered: 25.6, patient: 31.4, date: '2024-01-15' },
@@ -33,7 +28,6 @@ const Payments = () => {
                     </div>
                 </div>
 
-                {/* Patient Search */}
                 <Card className="mb-10 bg-indigo-50 border-indigo-100/50">
                     <div className="flex items-center gap-6">
                         <div className="relative flex-1">
@@ -57,7 +51,6 @@ const Payments = () => {
                 </Card>
 
                 <div className="grid grid-cols-12 gap-10">
-                    {/* Left: Verification & Details */}
                     <div className="col-span-4 space-y-8">
                         <Card>
                             <div className="flex items-center justify-between mb-8">
@@ -127,7 +120,6 @@ const Payments = () => {
                         </Card>
                     </div>
 
-                    {/* Right: Claims History */}
                     <div className="col-span-8 flex flex-col gap-6">
                         <div className="flex items-center justify-between px-2">
                             <h3 className="font-black text-slate-900 text-xl tracking-tight">Claims History</h3>

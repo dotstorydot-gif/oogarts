@@ -84,6 +84,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                         <SidebarItem to="/specialties" icon={Stethoscope} label="Specialties" />
                         <SidebarItem to="/pharmacy" icon={Package} label="Pharmacy" />
                         <SidebarItem to="/lab" icon={FileText} label="Laboratory" />
+                        <SidebarItem to="/doctor-reports" icon={Stethoscope} label="Doctor Reports" />
                     </div>
 
                     <div className="px-6 mb-4">
