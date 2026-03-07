@@ -3,32 +3,21 @@
 :root {
   --font-family: 'Poppins', sans-serif;
 
-  /* Modern Blue Color Palette */
+  /* Premium Indigo Palette */
   --primary: #4f46e5;
   --primary-light: #818cf8;
   --primary-dark: #3730a3;
-  --secondary: #0ea5e9;
+  --secondary: #10b981;
+  /* Emerald for better contrast */
   --accent: #f43f5e;
 
   /* Backgrounds */
   --bg-main: #f8fafc;
-  --bg-card: #ffffff;
-  --bg-sidebar: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.85);
 
-  /* Text */
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --text-inverse: #ffffff;
-
-  /* Glassmorphism Effect */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.3);
-  --glass-blur: blur(12px);
-
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  /* Transparent colors for glassmorphism */
+  --glass-white: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.4);
 }
 
 @layer base {
@@ -39,48 +28,70 @@
   }
 
   body {
-    @apply antialiased bg-slate-50 text-slate-900;
+    @apply antialiased bg-[#f1f5f9] text-slate-900;
     font-family: var(--font-family);
-  }
-
-  #root {
-    @apply min-h-screen;
-    display: flex;
+    overflow: hidden;
   }
 }
 
 @layer components {
-
-  /* Glass Card Style */
   .glass-card {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
+    background: var(--glass-white);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
-    border-radius: 32px;
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
   }
 
-  /* Custom Scrollbar Styling */
+  .nav-blur {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* Custom Scrollbar */
   .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
+    width: 5px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+    @apply bg-slate-200 rounded-full hover:bg-slate-300;
   }
 }
 
-/* Base utility overrides */
-button {
-  font-family: inherit;
-  @apply cursor-pointer bg-none border-none outline-none;
+/* Stunning Animations */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
 }
 
-a {
-  @apply no-underline text-inherit;
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes pulse-gentle {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-pulse-gentle {
+  animation: pulse-gentle 4s ease-in-out infinite;
 }

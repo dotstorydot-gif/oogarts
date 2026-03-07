@@ -13,6 +13,7 @@ import Inventory from './pages/Inventory';
 import HelpCenter from './pages/HelpCenter';
 import Reports from './pages/Reports';
 import DoctorReports from './pages/DoctorReports';
+import Settings from './pages/Settings';
 
 function App() {
     // Simple auth check for now
@@ -73,6 +74,10 @@ function App() {
                 <Route
                     path="/reports"
                     element={isAuthenticated ? <Reports /> : <Navigate to="/login" />}
+                />
+                <Route
+                    path="/settings"
+                    element={isAuthenticated ? <Settings /> : <Navigate to="/login" />}
                 />
                 <Route path="/" element={<Navigate to="/dashboard" />} />
             </Routes>
