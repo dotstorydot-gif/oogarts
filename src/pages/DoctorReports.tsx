@@ -45,71 +45,85 @@ const DoctorReports = () => {
                 <div className="grid grid-cols-12 gap-8">
                     {/* Left Column: Patient Profile & Vitals */}
                     <div className="col-span-4 space-y-8">
-                        <Card className="bg-gradient-to-br from-slate-900 to-slate-800 border-0 text-white p-8">
-                            <div className="flex items-center gap-4 mb-8">
-                                <div className="p-3 bg-white/10 rounded-2xl"><Users className="w-6 h-6" /></div>
+                        <Card className="bg-gradient-to-br from-slate-900 to-slate-800 border-0 text-white shadow-2xl shadow-slate-200">
+                            <div className="flex items-center gap-5 mb-10">
+                                <div className="p-4 bg-white/10 rounded-2xl backdrop-blur-md">
+                                    <Users className="w-6 h-6 text-indigo-400" />
+                                </div>
                                 <div>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Queue #: 42</p>
-                                    <div className="flex items-center gap-2">
-                                        <h2 className="text-2xl font-black">John Smith</h2>
-                                        <span className="px-2 py-0.5 bg-emerald-500 text-[10px] font-black uppercase rounded-full">In Progress</span>
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1.5">Queue Status: Priority</p>
+                                    <div className="flex items-center gap-3">
+                                        <h2 className="text-2xl font-black tracking-tight">John Smith</h2>
+                                        <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase rounded-full border border-emerald-500/20">Active</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-slate-400 font-medium">Age / Gender</span>
-                                    <span className="font-bold">41 years, Male</span>
+                            <div className="space-y-5">
+                                <div className="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
+                                    <span className="text-slate-400 text-xs font-bold">Age / Gender</span>
+                                    <span className="font-black text-sm text-indigo-300">41 yrs, Male</span>
                                 </div>
-                                <div className="pt-4 border-t border-white/10">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Chief Complaint</p>
-                                    <p className="text-sm font-medium leading-relaxed">Chest pain and shortness of breath</p>
+                                <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Chief Complaint</p>
+                                    <p className="text-sm font-bold leading-relaxed text-indigo-100">Patient reports sudden onset chest pain and severe shortness of breath during exertion.</p>
                                 </div>
                             </div>
                         </Card>
 
                         <Card>
-                            <h3 className="font-black text-slate-900 mb-6 flex items-center gap-2">
-                                <Activity className="w-5 h-5 text-indigo-600" />
-                                <span>Vital Signs</span>
-                            </h3>
+                            <div className="flex items-center gap-3 mb-8">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
+                                    <Activity className="w-5 h-5 text-indigo-600" />
+                                </div>
+                                <h3 className="font-black text-slate-900 tracking-tight">Vital Signs</h3>
+                            </div>
+
                             <div className="grid grid-cols-2 gap-4">
                                 {[
-                                    { label: 'Temp', value: '98.6°F', icon: Thermometer, color: 'text-rose-500 bg-rose-50' },
-                                    { label: 'BP', value: '140/90', icon: Heart, color: 'text-indigo-500 bg-indigo-50' },
-                                    { label: 'Pulse', value: '85', icon: Activity, color: 'text-emerald-500 bg-emerald-50' },
-                                    { label: 'O2 Sat', value: '98%', icon: Droplet, color: 'text-sky-500 bg-sky-50' },
+                                    { label: 'Temp', value: '98.6°F', icon: Thermometer, color: 'indigo' },
+                                    { label: 'BP', value: '140/90', icon: Heart, color: 'rose' },
+                                    { label: 'Pulse', value: '85', icon: Activity, color: 'emerald' },
+                                    { label: 'O2 Sat', value: '98%', icon: Droplet, color: 'sky' },
                                 ].map((v) => (
-                                    <div key={v.label} className="p-4 rounded-3xl bg-slate-50 border border-slate-100/50">
-                                        <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center mb-3", v.color)}>
-                                            <v.icon className="w-4 h-4" />
+                                    <div key={v.label} className="p-5 rounded-[24px] bg-slate-50/50 border border-slate-100/50 hover:bg-white hover:shadow-xl hover:shadow-slate-100 transition-all group overflow-hidden relative">
+                                        <div className={cn(
+                                            "w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110",
+                                            v.color === 'indigo' && "bg-indigo-50 text-indigo-600",
+                                            v.color === 'rose' && "bg-rose-50 text-rose-600",
+                                            v.color === 'emerald' && "bg-emerald-50 text-emerald-600",
+                                            v.color === 'sky' && "bg-sky-50 text-sky-600"
+                                        )}>
+                                            <v.icon className="w-5 h-5" />
                                         </div>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{v.label}</p>
-                                        <p className="text-lg font-black text-slate-900">{v.value}</p>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{v.label}</p>
+                                        <p className="text-xl font-black text-slate-900 tracking-tighter">{v.value}</p>
                                     </div>
                                 ))}
                             </div>
                         </Card>
 
                         <Card>
-                            <h3 className="font-black text-slate-900 mb-6 flex items-center gap-2">
-                                <ClipboardList className="w-5 h-5 text-indigo-600" />
-                                <span>Background</span>
-                            </h3>
-                            <div className="space-y-6">
+                            <div className="flex items-center gap-3 mb-8">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
+                                    <ClipboardList className="w-5 h-5 text-indigo-600" />
+                                </div>
+                                <h3 className="font-black text-slate-900 tracking-tight">Background</h3>
+                            </div>
+
+                            <div className="space-y-8">
                                 <div>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Medical History</p>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Medical History</p>
                                     <div className="flex flex-wrap gap-2">
-                                        <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold">Hypertension</span>
-                                        <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold">Type 2 Diabetes</span>
+                                        <span className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-black border border-slate-200/50">Hypertension</span>
+                                        <span className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-black border border-slate-200/50">Type 2 Diabetes</span>
                                     </div>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-2">Allergies</p>
+                                    <p className="text-[10px] font-black text-rose-500 uppercase tracking-[0.2em] mb-4">Known Allergies</p>
                                     <div className="flex flex-wrap gap-2">
-                                        <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-lg text-xs font-bold">Penicillin</span>
-                                        <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-lg text-xs font-bold">Shellfish</span>
+                                        <span className="px-4 py-2 bg-rose-50 text-rose-600 rounded-xl text-xs font-black border border-rose-100">Penicillin</span>
+                                        <span className="px-4 py-2 bg-rose-50 text-rose-600 rounded-xl text-xs font-black border border-rose-100">Shellfish</span>
                                     </div>
                                 </div>
                             </div>
@@ -133,98 +147,117 @@ const DoctorReports = () => {
                             ))}
                         </div>
 
-                        <Card className="p-10 min-h-[500px]">
+                        <Card className="min-h-[600px] shadow-2xl shadow-indigo-50/20">
                             {activeTab === 'Examination' && (
-                                <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2">
-                                    <div>
-                                        <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-3">
+                                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <div className="flex items-center gap-4 mb-10">
+                                        <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center">
                                             <Stethoscope className="w-6 h-6 text-indigo-600" />
-                                            <span>Clinical Examination</span>
-                                        </h3>
-                                        <textarea
-                                            className="w-full bg-slate-50 border-none rounded-[32px] p-8 min-h-[300px] text-lg font-medium text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
-                                            placeholder="Enter physical examination details..."
-                                        />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-2xl font-black text-slate-900 tracking-tight">Clinical Examination</h3>
+                                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Physical assessment & findings</p>
+                                        </div>
                                     </div>
+                                    <textarea
+                                        className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 rounded-[32px] p-10 min-h-[400px] text-lg font-medium text-slate-700 focus:bg-white transition-all outline-none shadow-inner"
+                                        placeholder="Begin typing clinical observations..."
+                                    />
                                 </div>
                             )}
 
                             {activeTab === 'Diagnosis' && (
-                                <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2">
+                                <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                     <div>
-                                        <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-3">
-                                            <FileText className="w-6 h-6 text-indigo-600" />
-                                            <span>Diagnosis & ICD-10 Coding</span>
-                                        </h3>
-                                        <div className="space-y-4">
-                                            <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                                        <div className="flex items-center gap-4 mb-10">
+                                            <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center">
+                                                <FileText className="w-6 h-6 text-indigo-600" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-2xl font-black text-slate-900 tracking-tight">Diagnosis & ICD-10</h3>
+                                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Clinical coding & impression</p>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-6">
+                                            <div className="flex items-center gap-4 p-6 bg-slate-50 rounded-[24px] border border-slate-100 focus-within:border-indigo-200 transition-colors">
+                                                <Search className="w-5 h-5 text-slate-400" />
                                                 <input
                                                     type="text"
-                                                    className="w-full bg-transparent border-none p-0 font-bold text-lg text-slate-900 focus:ring-0 outline-none"
+                                                    className="flex-1 bg-transparent border-none p-0 font-bold text-lg text-slate-900 focus:ring-0 outline-none placeholder:text-slate-400"
                                                     placeholder="Search ICD-10 code (e.g. I10 for Hypertension)..."
                                                 />
                                             </div>
                                             <div className="flex flex-wrap gap-2">
-                                                <span className="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl text-sm font-bold flex items-center gap-2">
+                                                <span className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-black flex items-center gap-2 shadow-lg shadow-indigo-100">
                                                     I10 - Essential Hypertension
-                                                    <CircleDot className="w-3 h-3" />
+                                                    <CircleDot className="w-3.5 h-3.5" />
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
-                                    <div>
-                                        <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Doctor's Impression</h4>
+                                    <div className="pt-8 border-t border-slate-100/50">
+                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Doctor's Impression</h4>
                                         <textarea
-                                            className="w-full bg-slate-50 border-none rounded-3xl p-6 min-h-[150px] font-medium text-slate-700 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
-                                            placeholder="Enter clinical impression..."
+                                            className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 rounded-[28px] p-8 min-h-[150px] font-medium text-slate-700 focus:bg-white transition-all outline-none shadow-inner"
+                                            placeholder="Enter overall clinical impression..."
                                         />
                                     </div>
                                 </div>
                             )}
 
                             {activeTab === 'Treatment' && (
-                                <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2">
+                                <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                     <div>
-                                        <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-3">
-                                            <Pill className="w-6 h-6 text-indigo-600" />
-                                            <span>Treatment Plan & Prescriptions</span>
-                                        </h3>
-                                        <div className="p-6 bg-indigo-50/50 rounded-3xl border border-indigo-100/50 border-dashed text-center">
-                                            <Button className="bg-white text-indigo-600 border border-indigo-100 hover:bg-slate-50 font-bold rounded-2xl">
-                                                + Add New Prescription
-                                            </Button>
+                                        <div className="flex items-center gap-4 mb-10">
+                                            <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center">
+                                                <Pill className="w-6 h-6 text-indigo-600" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-2xl font-black text-slate-900 tracking-tight">Treatment Plan</h3>
+                                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Prescriptions & advice</p>
+                                            </div>
+                                        </div>
+                                        <div className="p-12 rounded-[32px] bg-slate-50/50 border-2 border-slate-100 border-dashed flex flex-col items-center justify-center group hover:border-indigo-200 transition-all cursor-pointer">
+                                            <div className="p-5 bg-white rounded-2xl shadow-xl shadow-slate-200 mb-6 group-hover:scale-110 transition-transform">
+                                                <Plus className="w-8 h-8 text-indigo-600" />
+                                            </div>
+                                            <p className="text-slate-900 font-black text-lg mb-2">Issue New Prescription</p>
+                                            <p className="text-slate-400 text-sm font-medium">Click to search medication inventory</p>
                                         </div>
                                     </div>
-                                    <div>
-                                        <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Patient Education/Advice</h4>
+                                    <div className="pt-8 border-t border-slate-100/50">
+                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Patient Instructions</h4>
                                         <textarea
-                                            className="w-full bg-slate-50 border-none rounded-3xl p-6 min-h-[150px] font-medium text-slate-700 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
-                                            placeholder="Instructions for the patient..."
+                                            className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 rounded-[28px] p-8 min-h-[150px] font-medium text-slate-700 focus:bg-white transition-all outline-none shadow-inner"
+                                            placeholder="Advice provided to the patient..."
                                         />
                                     </div>
                                 </div>
                             )}
 
                             {activeTab === 'Orders' && (
-                                <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2">
-                                    <div>
-                                        <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-3">
+                                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <div className="flex items-center gap-4 mb-10">
+                                        <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center">
                                             <CircleDot className="w-6 h-6 text-indigo-600" />
-                                            <span>Laboratory & Radiology Orders</span>
-                                        </h3>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            {[
-                                                'Complete Blood Count',
-                                                'Lipid Profile',
-                                                'Chest X-Ray',
-                                                'ECG/EKG'
-                                            ].map((test) => (
-                                                <div key={test} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between hover:border-indigo-200 transition-colors cursor-pointer group">
-                                                    <span className="text-sm font-bold text-slate-700">{test}</span>
-                                                    <Button variant="ghost" className="h-8 p-1 text-slate-400 group-hover:text-indigo-600">Add</Button>
-                                                </div>
-                                            ))}
                                         </div>
+                                        <div>
+                                            <h3 className="text-2xl font-black text-slate-900 tracking-tight">Lab & Imaging</h3>
+                                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Diagnostic requests</p>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {[
+                                            'Complete Blood Count',
+                                            'Lipid Profile',
+                                            'Chest X-Ray',
+                                            'ECG/EKG'
+                                        ].map((test) => (
+                                            <div key={test} className="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between hover:border-indigo-100 hover:bg-white hover:shadow-xl hover:shadow-slate-100 transition-all cursor-pointer group">
+                                                <span className="text-base font-black text-slate-700 tracking-tight">{test}</span>
+                                                <Button variant="ghost" size="sm" className="hidden group-hover:flex">Add Order</Button>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                             )}

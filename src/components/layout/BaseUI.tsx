@@ -14,11 +14,11 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 export const Card = ({ className, glass = true, variant = 'default', ...props }: CardProps) => (
     <div
         className={cn(
-            "rounded-[24px] transition-all duration-300",
+            "rounded-[32px] transition-all duration-300 p-8",
             glass && "backdrop-blur-xl border border-white/20",
-            variant === 'default' && "bg-white/80 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)]",
+            variant === 'default' && "bg-white/80 shadow-[0_8px_32px_0_rgba(31,38,135,0.04)]",
             variant === 'flat' && "bg-slate-50 border-slate-100",
-            variant === 'elevated' && "bg-white shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)]",
+            variant === 'elevated' && "bg-white shadow-[0_25px_50px_-12px_rgba(31,38,135,0.1)]",
             className
         )}
         {...props}
@@ -26,7 +26,7 @@ export const Card = ({ className, glass = true, variant = 'default', ...props }:
 );
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: 'primary' | 'secondary' | 'ghost' | 'outline' | 'glass';
+    variant?: 'primary' | 'secondary' | 'ghost' | 'outline' | 'glass' | 'dark';
     size?: 'sm' | 'md' | 'lg';
 }
 
@@ -37,17 +37,18 @@ export const Button = ({
     ...props
 }: ButtonProps) => {
     const variants = {
-        primary: "bg-indigo-600 text-white hover:bg-slate-900 shadow-[0_10px_20px_-5px_rgba(79,70,229,0.3)] hover:shadow-indigo-200",
-        secondary: "bg-emerald-500 text-white hover:bg-emerald-600 shadow-[0_10px_20px_-5px_rgba(16,185,129,0.3)]",
-        ghost: "hover:bg-slate-50 text-slate-500 hover:text-indigo-600",
-        outline: "border border-slate-200 hover:border-indigo-600 hover:text-indigo-600 bg-transparent",
-        glass: "bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20"
+        primary: "bg-indigo-600 text-white hover:bg-slate-900 shadow-[0_10px_20px_-5px_rgba(79,70,229,0.2)] hover:shadow-indigo-100",
+        secondary: "bg-emerald-500 text-white hover:bg-emerald-600 shadow-[0_10px_20px_-5px_rgba(16,185,129,0.2)]",
+        ghost: "hover:bg-slate-100 text-slate-500 hover:text-indigo-600",
+        outline: "border-2 border-slate-100 hover:border-indigo-600 hover:text-indigo-600 bg-transparent",
+        glass: "bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20",
+        dark: "bg-slate-900 text-white hover:bg-indigo-600 shadow-xl shadow-slate-200 hover:shadow-indigo-100"
     };
 
     const sizes = {
-        sm: "px-4 py-2 text-xs font-bold uppercase tracking-wider",
-        md: "px-6 py-3 text-sm font-bold tracking-tight",
-        lg: "px-8 py-4 text-base font-black tracking-tight"
+        sm: "px-4 py-2 text-xs font-black uppercase tracking-widest",
+        md: "px-8 py-3.5 text-sm font-black tracking-tight",
+        lg: "px-10 py-5 text-base font-black tracking-tight"
     };
 
     return (

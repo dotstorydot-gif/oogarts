@@ -108,35 +108,35 @@ const Specialties = () => {
                 {/* Specialties Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {specialties.map((spec) => (
-                        <Card key={spec.name} className="flex flex-col p-8 group hover:shadow-2xl hover:shadow-indigo-50 transition-all duration-300">
-                            <div className="flex items-center gap-5 mb-8">
-                                <div className={cn("w-16 h-16 rounded-[24px] flex items-center justify-center group-hover:scale-110 transition-transform", spec.color)}>
-                                    <spec.icon className="w-8 h-8" />
+                        <Card key={spec.name} className="flex flex-col group hover:shadow-2xl hover:shadow-indigo-50/50 transition-all duration-500 overflow-hidden relative">
+                            <div className="flex items-center gap-5 mb-10">
+                                <div className={cn("w-20 h-20 rounded-[28px] flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg", spec.color)}>
+                                    <spec.icon className="w-10 h-10" />
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="text-xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors">{spec.name}</h3>
-                                    <p className="text-xs text-slate-500 font-bold leading-relaxed">{spec.desc}</p>
+                                    <h3 className="text-2xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors tracking-tight">{spec.name}</h3>
+                                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mt-1">{spec.desc}</p>
                                 </div>
                             </div>
 
-                            <div className="space-y-4 mb-8">
-                                <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50/50">
-                                    <span className="text-xs font-bold text-slate-500">Doctors Available:</span>
-                                    <span className="text-xs font-black text-slate-900">{spec.doctors}</span>
+                            <div className="space-y-4 mb-10">
+                                <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50/50 border border-slate-100/50">
+                                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Active Doctors</span>
+                                    <span className="text-sm font-black text-slate-900">{spec.doctors}</span>
                                 </div>
-                                <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50/50">
-                                    <span className="text-xs font-bold text-slate-500">Patients in Queue:</span>
-                                    <span className="text-xs font-black text-slate-900">{spec.queue}</span>
+                                <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50/50 border border-slate-100/50">
+                                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Total Queue</span>
+                                    <span className="text-sm font-black text-slate-900">{spec.queue}</span>
                                 </div>
-                                <div className="flex items-center justify-between p-3 rounded-2xl bg-indigo-50/30">
-                                    <span className="text-xs font-bold text-indigo-600">Est. Wait Time:</span>
-                                    <span className="text-xs font-black text-indigo-600">{spec.waitTime}</span>
+                                <div className="flex items-center justify-between p-4 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100">
+                                    <span className="text-xs font-black uppercase tracking-widest">Est. Wait Time</span>
+                                    <span className="text-sm font-black">{spec.waitTime}</span>
                                 </div>
                             </div>
 
-                            <Button className="w-full rounded-2xl py-4 font-black tracking-tight flex items-center justify-center gap-2 group/btn">
+                            <Button variant="dark" className="w-full gap-2 group/btn">
                                 <span>Route Patient</span>
-                                <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                                <ChevronRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
                             </Button>
                         </Card>
                     ))}

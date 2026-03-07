@@ -131,39 +131,42 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
             {/* Main Content */}
             <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
                 {/* Header */}
-                <header className="h-24 bg-white/60 backdrop-blur-2xl border-b border-slate-200/50 flex items-center justify-between px-12 sticky top-0 z-40 shrink-0">
-                    <div className="relative w-[500px] group">
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-indigo-600 transition-colors" />
+                <header className="h-28 bg-white/60 backdrop-blur-3xl border-b border-slate-200/50 flex items-center justify-between px-16 sticky top-0 z-40 shrink-0">
+                    <div className="relative w-[600px] group">
+                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 w-6 h-6 group-focus-within:text-indigo-600 transition-all duration-300" />
                         <input
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Universal search across patients, staff, and records..."
-                            className="w-full bg-slate-100/50 border-2 border-transparent focus:border-indigo-100 rounded-2xl pl-14 pr-6 py-4 focus:bg-white placeholder:text-slate-400 text-sm font-medium transition-all outline-none"
+                            className="w-full bg-slate-100/50 border-2 border-transparent focus:border-indigo-100/50 rounded-2xl pl-16 pr-8 py-5 focus:bg-white placeholder:text-slate-400 text-[15px] font-bold tracking-tight transition-all duration-300 outline-none shadow-inner"
                         />
                         {searchQuery && (
-                            <div className="absolute top-full left-0 right-0 mt-3 p-2 bg-white rounded-3xl shadow-2xl border border-slate-100 z-50 animate-in fade-in slide-in-from-top-2">
-                                <div className="p-4 text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50">Quick Results for "{searchQuery}"</div>
-                                <div className="p-8 text-center">
-                                    <p className="text-slate-400 text-sm">No exact matches found.</p>
+                            <div className="absolute top-full left-0 right-0 mt-4 p-4 bg-white rounded-[32px] shadow-2xl border border-slate-100 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
+                                <div className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-50 mb-4">Results for "{searchQuery}"</div>
+                                <div className="p-12 text-center">
+                                    <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                        <Search className="w-8 h-8 text-slate-200" />
+                                    </div>
+                                    <p className="text-slate-400 font-bold text-sm">No clinical records found.</p>
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <button className="flex items-center gap-3 px-6 py-3.5 bg-slate-900 text-white rounded-2xl hover:bg-indigo-600 transition-all shadow-xl shadow-slate-200 hover:shadow-indigo-100 group">
-                            <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" />
-                            <span className="text-sm font-black">Quick Action</span>
-                        </button>
+                    <div className="flex items-center gap-6">
+                        <Button variant="dark" className="gap-3 shadow-2xl shadow-slate-200 group">
+                            <Plus className="w-6 h-6 group-hover:rotate-90 transition-transform duration-500" />
+                            <span>Quick Action</span>
+                        </Button>
 
-                        <div className="flex items-center gap-3 px-3">
-                            <button className="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100/50 text-slate-500 hover:text-indigo-600 hover:bg-white hover:shadow-sm transition-all relative group">
+                        <div className="flex items-center gap-3 px-6 border-l border-slate-200 h-10">
+                            <button className="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-white hover:shadow-xl hover:shadow-indigo-50 transition-all relative group">
                                 <Bell className="w-5 h-5 group-hover:animate-bounce" />
-                                <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white"></span>
+                                <span className="absolute top-3.5 right-3.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white shadow-sm font-sans"></span>
                             </button>
-                            <button className="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100/50 text-slate-500 hover:text-indigo-600 hover:bg-white hover:shadow-sm transition-all group">
-                                <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform" />
+                            <button className="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-white hover:shadow-xl hover:shadow-indigo-50 transition-all group">
+                                <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform duration-500" />
                             </button>
                         </div>
 
