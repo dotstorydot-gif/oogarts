@@ -3,6 +3,11 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Queue from './pages/Queue';
 import Patients from './pages/Patients';
+import Appointments from './pages/Appointments';
+import Specialties from './pages/Specialties';
+import Pharmacy from './pages/Pharmacy';
+import Laboratory from './pages/Laboratory';
+import Doctors from './pages/Doctors';
 
 function App() {
     // Simple auth check for now
@@ -17,12 +22,32 @@ function App() {
                     element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}
                 />
                 <Route
+                    path="/appointments"
+                    element={isAuthenticated ? <Appointments /> : <Navigate to="/login" />}
+                />
+                <Route
                     path="/queue"
                     element={isAuthenticated ? <Queue /> : <Navigate to="/login" />}
                 />
                 <Route
                     path="/patients"
                     element={isAuthenticated ? <Patients /> : <Navigate to="/login" />}
+                />
+                <Route
+                    path="/specialties"
+                    element={isAuthenticated ? <Specialties /> : <Navigate to="/login" />}
+                />
+                <Route
+                    path="/pharmacy"
+                    element={isAuthenticated ? <Pharmacy /> : <Navigate to="/login" />}
+                />
+                <Route
+                    path="/lab"
+                    element={isAuthenticated ? <Laboratory /> : <Navigate to="/login" />}
+                />
+                <Route
+                    path="/doctors"
+                    element={isAuthenticated ? <Doctors /> : <Navigate to="/login" />}
                 />
                 <Route path="/" element={<Navigate to="/dashboard" />} />
             </Routes>
