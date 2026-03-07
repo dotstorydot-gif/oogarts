@@ -318,7 +318,11 @@ const Dashboard = () => {
                                 <p className="text-white/70 text-[10px] font-black uppercase tracking-[0.2em]">Dermatology</p>
                             </div>
                         </div>
-                        <Button variant="ghost" className="w-full justify-between px-2 hover:bg-slate-50 group py-4">
+                        <Button
+                            variant="ghost"
+                            className="w-full justify-between px-2 hover:bg-slate-50 group py-4"
+                            onClick={() => navigate('/doctors?filter=Kamal')}
+                        >
                             <span className="text-sm font-black text-slate-700 group-hover:text-indigo-600 transition-colors">View Full Schedule</span>
                             <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
                         </Button>

@@ -245,7 +245,7 @@ const Patients = () => {
                                                         <label className="text-sm font-black text-slate-900">{item.label}</label>
                                                     </div>
                                                 </div>
-                                                <div className="flex gap-3 mb-6">
+                                                <div className="flex flex-col sm:flex-row gap-3 mb-6">
                                                     <input
                                                         type="text"
                                                         placeholder={`Add ${item.key.slice(0, -1)}...`}
@@ -256,7 +256,7 @@ const Patients = () => {
                                                     />
                                                     <Button
                                                         onClick={() => addItem(item.key as any)}
-                                                        className="rounded-2xl px-6 bg-slate-900 hover:bg-black"
+                                                        className="rounded-2xl px-6 py-3.5 bg-slate-900 hover:bg-black w-full sm:w-auto"
                                                     >Add</Button>
                                                 </div>
                                                 <div className="flex flex-wrap gap-2">
