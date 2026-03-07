@@ -52,10 +52,10 @@ const HelpCenter = () => {
                     <button className="px-8 py-4 bg-white text-indigo-600 rounded-2xl font-bold hover:bg-slate-50 transition-colors relative z-10 shadow-lg">
                         Contact Us
                     </button>
-                    <HelpCircle className="absolute right-10 bottom-10 w-32 h-32 text-white/5 -rotate-12" />
+                    <HelpCircle className="absolute right-10 bottom-10 w-32 h-32 text-white/5" />
                 </div>
             </div>
-        </Layout>
+        </Layout >
     );
 };
 

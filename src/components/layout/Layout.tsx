@@ -87,7 +87,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                     <div className="flex items-center gap-4">
                         <div
                             onClick={() => navigate('/dashboard')}
-                            className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center shadow-2xl shadow-slate-200 rotate-3 transition-transform hover:rotate-0 cursor-pointer"
+                            className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center shadow-2xl shadow-slate-200 transition-transform cursor-pointer hover:scale-105"
                         >
                             <Activity className="text-white w-7 h-7" />
                         </div>

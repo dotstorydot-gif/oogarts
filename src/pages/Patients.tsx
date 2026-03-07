@@ -141,7 +141,7 @@ const Patients = () => {
                         ))}
 
                         <div className="p-6 bg-indigo-900 rounded-[32px] text-white mt-8 lg:mt-12 relative overflow-hidden hidden lg:block">
-                            <Activity className="absolute -right-4 -bottom-4 w-24 h-24 text-white/10 rotate-12" />
+                            <Activity className="absolute -right-4 -bottom-4 w-24 h-24 text-white/10" />
                             <Info className="w-5 h-5 text-indigo-300 mb-4" />
                             <p className="text-xs font-bold leading-relaxed mb-4">Complete all required fields marked with an asterisk (*)</p>
                             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-[10px] font-black">

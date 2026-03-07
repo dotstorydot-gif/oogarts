@@ -128,7 +128,7 @@ const Doctors = () => {
                             <div className="flex items-start justify-between mb-8">
                                 <div className="flex items-center gap-5">
                                     <div className="relative">
-                                        <div className="w-20 h-20 rounded-[24px] bg-gradient-to-tr from-indigo-500 to-sky-400 p-[2px] shadow-lg group-hover:rotate-3 transition-transform duration-500">
+                                        <div className="w-20 h-20 rounded-[24px] bg-gradient-to-tr from-indigo-500 to-sky-400 p-[2px] shadow-lg transition-transform duration-500">
                                             <img
                                                 src={doctor.image}
                                                 alt={doctor.name}

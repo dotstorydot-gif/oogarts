@@ -32,7 +32,7 @@ const data = [
 const StatCard = ({ icon: Icon, label, value, trend, trendUp, color }: any) => (
     <Card variant="default" className="p-8">
         <div className="flex items-start justify-between mb-8">
-            <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg shadow-slate-100 rotate-3", color)}>
+            <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg shadow-slate-100", color)}>
                 <Icon className="w-7 h-7 text-white" />
             </div>
             {trend && (
