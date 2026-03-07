@@ -1,32 +1,137 @@
 import { Layout } from '../components/layout/Layout';
-import { Card } from '../components/layout/BaseUI';
-import { TestTube, Microscope } from 'lucide-react';
+import { Card, Button, cn } from '../components/layout/BaseUI';
+import {
+    Activity,
+    Microscope,
+    TestTube,
+    FlaskConical,
+    ClipboardCheck,
+    TrendingUp,
+    Plus,
+    Download,
+    ArrowUpRight,
+    ShieldAlert
+} from 'lucide-react';
 
 const Laboratory = () => {
+    const activeTests = [
+        { name: 'Full Blood Count', id: 'LAB-0842', status: 'In Analysis', priority: 'High', tech: 'Dr. Sarah K.' },
+        { name: 'Lipid Profile', id: 'LAB-0911', status: 'Pending Review', priority: 'Routine', tech: 'Dr. Mike R.' },
+        { name: 'Blood Glucose', id: 'LAB-1022', status: 'Completed', priority: 'Critical', tech: 'Dr. Anna L.' },
+        { name: 'Thyroid Panel', id: 'LAB-1045', status: 'In Analysis', priority: 'Routine', tech: 'Dr. Sarah K.' },
+    ];
+
     return (
         <Layout>
-            <div className="max-w-[1200px] mx-auto text-left">
-                <div className="mb-10">
-                    <h1 className="text-3xl font-bold text-slate-900 mb-2">Laboratory System</h1>
-                    <p className="text-slate-500">Process test orders and manage results.</p>
+            <div className="max-w-[1600px] text-left">
+                {/* Header Section */}
+                <div className="flex items-end justify-between mb-12">
+                    <div>
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+                                <Microscope className="w-6 h-6" />
+                            </div>
+                            <span className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em]">Clinical Diagnostics</span>
+                        </div>
+                        <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2">Laboratory OS</h1>
+                        <p className="text-slate-500 font-medium">Real-time specimen tracking, automated pathology results, and equipment monitoring.</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <Button variant="outline" className="gap-2">
+                            <Download className="w-4 h-4" />
+                            Log
+                        </Button>
+                        <Button variant="dark" className="gap-2 px-8">
+                            <Plus className="w-5 h-5" />
+                            New Test Order
+                        </Button>
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-12 gap-8">
-                    <div className="col-span-4">
-                        <Card className="bg-gradient-to-br from-indigo-600 to-indigo-700 text-white border-0">
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="p-3 bg-white/10 rounded-xl"><TestTube className="w-6 h-6" /></div>
-                                <h3 className="font-bold">Pending Tests</h3>
+                <div className="grid grid-cols-4 gap-6 mb-12">
+                    {[
+                        { label: 'Active Tests', value: '42', icon: TestTube, color: 'bg-indigo-600' },
+                        { label: 'Pending Review', value: '18', icon: ClipboardCheck, color: 'bg-emerald-500' },
+                        { label: 'Critical Results', value: '03', icon: ShieldAlert, color: 'bg-rose-500' },
+                        { label: 'Avail. Equipment', value: '94%', icon: FlaskConical, color: 'bg-sky-500' },
+                    ].map((stat) => (
+                        <Card key={stat.label} variant="flat" className="p-8 group hover:translate-y-[-4px] transition-all duration-300">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-slate-200", stat.color)}>
+                                    <stat.icon className="w-6 h-6 text-white" />
+                                </div>
+                                <ArrowUpRight className="w-5 h-5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                             </div>
-                            <h2 className="text-4xl font-black">24</h2>
-                            <p className="text-white/70 text-sm mt-2 font-medium">Requiring immediate processing</p>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
+                            <h3 className="text-3xl font-black text-slate-900 tracking-tighter">{stat.value}</h3>
+                        </Card>
+                    ))}
+                </div>
+
+                <div className="grid grid-cols-12 gap-10">
+                    <div className="col-span-8">
+                        <Card className="p-0 overflow-hidden border-slate-100">
+                            <div className="p-8 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
+                                <h3 className="font-black text-slate-900 text-lg tracking-tight">Active Specimens</h3>
+                                <div className="flex gap-2">
+                                    <span className="px-3 py-1 bg-white border border-slate-100 rounded-lg text-[10px] font-black uppercase text-indigo-600">All Labs</span>
+                                    <span className="px-3 py-1 bg-slate-100 rounded-lg text-[10px] font-black uppercase text-slate-400">Genetics</span>
+                                </div>
+                            </div>
+                            <div className="divide-y divide-slate-50">
+                                {activeTests.map((test) => (
+                                    <div key={test.id} className="p-8 hover:bg-slate-50 transition-colors flex items-center justify-between group">
+                                        <div className="flex items-center gap-6">
+                                            <div className="w-14 h-14 bg-white border border-slate-100 rounded-2xl flex items-center justify-center text-slate-300 group-hover:text-indigo-600 group-hover:border-indigo-100 transition-all shadow-sm">
+                                                <FlaskConical className="w-6 h-6" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-black text-slate-900 text-[15px] tracking-tight">{test.name}</h4>
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">ID: {test.id} • Assigned: {test.tech}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-12">
+                                            <div className="text-right">
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                                                <p className={cn(
+                                                    "text-xs font-black uppercase",
+                                                    test.status === 'Completed' ? 'text-emerald-500' : 'text-indigo-600'
+                                                )}>{test.status}</p>
+                                            </div>
+                                            <div className="w-24 text-right">
+                                                <span className={cn(
+                                                    "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest",
+                                                    test.priority === 'Critical' ? 'bg-rose-50 text-rose-600' : 'bg-slate-100 text-slate-500'
+                                                )}>
+                                                    {test.priority}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </Card>
                     </div>
-                    <div className="col-span-8">
-                        <Card className="min-h-[300px] flex flex-col items-center justify-center text-center">
-                            <Microscope className="w-12 h-12 text-slate-200 mb-4" />
-                            <h3 className="font-bold text-slate-900 mb-1">Laboratory Equipment Active</h3>
-                            <p className="text-slate-500 text-sm">Real-time status tracking is being synchronized.</p>
+
+                    <div className="col-span-4">
+                        <Card className="p-10 bg-indigo-50 border-indigo-100/50 relative overflow-hidden">
+                            <div className="relative z-10 flex flex-col items-center text-center py-10">
+                                <div className="w-24 h-24 bg-white rounded-[40px] shadow-2xl shadow-indigo-200/50 flex items-center justify-center mb-10 group cursor-pointer hover:scale-105 transition-transform duration-500">
+                                    <Activity className="w-10 h-10 text-indigo-600" />
+                                </div>
+                                <h3 className="text-xl font-black text-slate-900 mb-4 tracking-tight">Machine Intelligence</h3>
+                                <p className="text-sm font-medium text-slate-500 max-w-[240px] leading-relaxed mb-10">Real-time automation active. Connecting to digital centrifuge and PCR arrays.</p>
+                                <div className="flex gap-4 w-full">
+                                    <div className="flex-1 p-5 bg-white rounded-3xl border border-indigo-100/50 text-center shadow-sm">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase mb-2">Sync</p>
+                                        <p className="text-lg font-black text-indigo-600">99.8%</p>
+                                    </div>
+                                    <div className="flex-1 p-5 bg-white rounded-3xl border border-indigo-100/50 text-center shadow-sm">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase mb-2">Error</p>
+                                        <p className="text-lg font-black text-rose-500">0.01%</p>
+                                    </div>
+                                </div>
+                            </div>
                         </Card>
                     </div>
                 </div>
@@ -34,5 +139,7 @@ const Laboratory = () => {
         </Layout>
     );
 };
+
+export default Laboratory;
 
 export default Laboratory;

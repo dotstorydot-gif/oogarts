@@ -3,6 +3,7 @@ import { Layout } from '../components/layout/Layout';
 import { Card, Button, cn } from '../components/layout/BaseUI';
 import {
     User,
+    Users,
     Stethoscope,
     FileText,
     Shield,
@@ -73,23 +74,24 @@ const Patients = () => {
 
     return (
         <Layout>
-            <div className="max-w-[1400px] text-left py-8">
+            <div className="max-w-[1600px] text-left">
                 {/* Header Section */}
-                <div className="mb-12 flex items-end justify-between">
+                <div className="flex items-end justify-between mb-12">
                     <div>
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
-                                <User className="w-5 h-5 text-white" />
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+                                <Users className="w-6 h-6" />
                             </div>
-                            <span className="text-xs font-black text-indigo-600 uppercase tracking-[0.3em]">Patient Intake</span>
+                            <span className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em]">Patient Records</span>
                         </div>
-                        <h1 className="text-4xl font-black text-slate-900 tracking-tight">Onboarding Wizard</h1>
+                        <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2">Onboarding Registry</h1>
+                        <p className="text-slate-500 font-medium">Digital intake and clinical registry for new patient enrollment.</p>
                     </div>
-                    <div className="text-right">
-                        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Overall Progress</p>
-                        <div className="flex items-center gap-3">
-                            <span className="text-2xl font-black text-indigo-600">{Math.round((step / 5) * 100)}%</span>
-                            <div className="w-32 h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="text-right pb-1">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Onboarding Progress</p>
+                        <div className="flex items-center gap-4">
+                            <span className="text-3xl font-black text-indigo-600 tracking-tighter">{Math.round((step / 5) * 100)}%</span>
+                            <div className="w-32 h-2.5 bg-slate-100 rounded-full overflow-hidden">
                                 <div
                                     className="h-full bg-indigo-600 transition-all duration-700 ease-out"
                                     style={{ width: `${(step / 5) * 100}%` }}
