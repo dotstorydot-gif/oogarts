@@ -113,7 +113,7 @@ const Inventory = () => {
                                 <Button variant="outline" className="gap-2 h-14 px-8 rounded-2xl">
                                     <Filter className="w-5 h-5" />
                                     Advanced Filters
-                                </button>
+                                </Button>
                             </div>
                         </Card>
 
@@ -186,8 +186,8 @@ const Inventory = () => {
                         </Card>
                     </div>
                 </div>
-            </div>
-        </Layout>
+            </div >
+        </Layout >
     );
 };
 
