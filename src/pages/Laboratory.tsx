@@ -1,6 +1,6 @@
 import { Layout } from '../components/layout/Layout';
 import { Card } from '../components/layout/BaseUI';
-import { FileText, TestTube, Microscope } from 'lucide-react';
+import { TestTube, Microscope } from 'lucide-react';
 
 const Laboratory = () => {
     return (
