@@ -149,5 +149,3 @@ const Pharmacy = () => {
 };
 
 export default Pharmacy;
-
-export default Pharmacy;

@@ -6,7 +6,6 @@ import {
     TestTube,
     FlaskConical,
     ClipboardCheck,
-    TrendingUp,
     Plus,
     Download,
     ArrowUpRight,
@@ -139,7 +138,5 @@ const Laboratory = () => {
         </Layout>
     );
 };
-
-export default Laboratory;
 
 export default Laboratory;
