@@ -128,12 +128,12 @@ const Appointments = () => {
                                             <span className="text-[10px] font-bold text-slate-400 uppercase">Mar</span>
                                             <span className="text-sm font-black text-slate-900">{10 + i}</span>
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-slate-900">Dr. Sarah Johnson</p>
-                                            <div className="flex items-center gap-2 mt-0.5">
-                                                <Button variant="outline" className="flex-1 py-3 text-slate-500">Reschedule</Button>
-                                                <Button className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-200" onClick={() => navigate('/telemedicine')}>
-                                                    Join Telemedicine
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-bold text-slate-900 truncate mb-2">Dr. Sarah Johnson</p>
+                                            <div className="flex gap-2">
+                                                <Button variant="outline" className="flex-1 py-2 px-2 text-xs text-slate-500 h-auto">Reschedule</Button>
+                                                <Button className="flex-1 py-2 px-2 text-xs bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-200 h-auto whitespace-nowrap" onClick={() => navigate('/telemedicine')}>
+                                                    Join Call
                                                 </Button>
                                             </div>
                                         </div>
