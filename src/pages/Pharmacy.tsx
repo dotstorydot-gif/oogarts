@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Card, Button, cn } from '../components/layout/BaseUI';
 import {
@@ -10,10 +11,14 @@ import {
     AlertCircle,
     Activity,
     Clock,
-    ChevronRight
+    ChevronRight,
+    X,
+    Database,
+    ShieldCheck
 } from 'lucide-react';
 
 const Pharmacy = () => {
+    const [showEntryForm, setShowEntryForm] = useState(false);
     const categories = [
         { name: 'Antibiotics', items: 124, status: 'Stable', color: 'bg-indigo-50 text-indigo-600' },
         { name: 'Pain Relief', items: 85, status: 'Low Stock', color: 'bg-rose-50 text-rose-600' },
@@ -41,12 +46,51 @@ const Pharmacy = () => {
                             <Download className="w-4 h-4" />
                             Report
                         </Button>
-                        <Button variant="dark" className="gap-2 px-8" onClick={() => alert('Initializing New Medication Entry...')}>
+                        <Button variant="dark" className="gap-2 px-8 active:scale-95" onClick={() => setShowEntryForm(true)}>
                             <Plus className="w-5 h-5" />
                             New Entry
                         </Button>
                     </div>
                 </div>
+
+                {showEntryForm && (
+                    <Card className="mb-12 p-10 animate-in fade-in zoom-in-95 duration-500 bg-slate-900 border-indigo-500/30 text-white relative overflow-hidden shadow-2xl">
+                        <div className="absolute top-0 right-0 p-6">
+                            <button onClick={() => setShowEntryForm(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/40">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="mb-10 text-left">
+                            <h2 className="text-2xl font-bold tracking-tight">Medication Intake</h2>
+                            <p className="text-indigo-300/60 font-medium">Provision new pharmaceutical assets to global decentralized registry.</p>
+                        </div>
+                        <form onSubmit={(e) => { e.preventDefault(); alert('Medication Intake Synchronized!'); setShowEntryForm(false); }} className="grid grid-cols-2 gap-8 text-left">
+                            <div className="col-span-2 sm:col-span-1">
+                                <label className="block text-[10px] font-black text-indigo-300/40 uppercase tracking-widest mb-3">Medication Name</label>
+                                <div className="relative">
+                                    <Database className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-500/50" />
+                                    <input type="text" placeholder="e.g. Amoxicillin" className="w-full pl-14 pr-6 py-4 bg-white/5 border-2 border-transparent focus:border-indigo-500/50 rounded-2xl font-bold outline-none transition-all placeholder:text-indigo-300/20" required />
+                                </div>
+                            </div>
+                            <div className="col-span-2 sm:col-span-1">
+                                <label className="block text-[10px] font-black text-indigo-300/40 uppercase tracking-widest mb-3">System Category</label>
+                                <select className="w-full px-6 py-4 bg-white/5 border-2 border-transparent focus:border-indigo-500/50 rounded-2xl font-bold outline-none transition-all appearance-none cursor-pointer">
+                                    <option className="bg-slate-900">Antibiotics</option>
+                                    <option className="bg-slate-900">Pain Relief</option>
+                                    <option className="bg-slate-900">Cardiology</option>
+                                    <option className="bg-slate-900">Vaccines</option>
+                                </select>
+                            </div>
+                            <div className="col-span-2">
+                                <Button type="submit" className="w-full h-16 rounded-[24px] bg-indigo-600 hover:bg-indigo-500 text-white font-black flex items-center justify-center gap-3 shadow-xl shadow-indigo-900/40 group">
+                                    <ShieldCheck className="w-5 h-5" />
+                                    <span>Synchronize Registry Entry</span>
+                                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform opacity-40 ml-auto" />
+                                </Button>
+                            </div>
+                        </form>
+                    </Card>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                     {categories.map((cat) => (

@@ -11,7 +11,8 @@ import {
     Key,
     Lock,
     Save,
-    ShieldCheck
+    ShieldCheck,
+    Box
 } from 'lucide-react';
 
 const Settings = () => {
@@ -119,7 +120,56 @@ const Settings = () => {
                             </div>
                         )}
 
-                        {activeTab !== 'Account Profile' && (
+                        {activeTab === 'Security & Access' && (
+                            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+                                <Card className="p-10">
+                                    <h3 className="text-xl font-black text-slate-900 mb-8 flex items-center gap-3">
+                                        <Shield className="w-6 h-6 text-indigo-600" />
+                                        Two-Factor Authentication
+                                    </h3>
+                                    <div className="flex items-center justify-between p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                                        <div className="flex items-center gap-6">
+                                            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                                                <Smartphone className="w-6 h-6 text-slate-400" />
+                                            </div>
+                                            <div className="text-left">
+                                                <p className="font-black text-slate-900 tracking-tight">Authenticator App</p>
+                                                <p className="text-xs text-slate-500 font-medium italic">Use Google Authenticator or Authy to secure your account.</p>
+                                            </div>
+                                        </div>
+                                        <Button variant="outline" size="sm" className="font-black">Enable 2FA</Button>
+                                    </div>
+                                </Card>
+
+                                <Card className="p-10">
+                                    <h3 className="text-xl font-black text-slate-900 mb-8 flex items-center gap-3">
+                                        <Key className="w-6 h-6 text-indigo-600" />
+                                        Active Sessions
+                                    </h3>
+                                    <div className="space-y-4">
+                                        {[
+                                            { device: 'MacBook Pro 16"', location: 'Cairo, Egypt', status: 'Current Session' },
+                                            { device: 'iPhone 15 Pro', location: 'Dubai, UAE', status: '2 hours ago' }
+                                        ].map((session, i) => (
+                                            <div key={i} className="flex items-center justify-between p-5 hover:bg-slate-50 rounded-2xl transition-all group">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:text-indigo-600 transition-all">
+                                                        <Box className="w-5 h-5" />
+                                                    </div>
+                                                    <div className="text-left">
+                                                        <p className="text-sm font-black text-slate-900 tracking-tight">{session.device}</p>
+                                                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{session.location} • {session.status}</p>
+                                                    </div>
+                                                </div>
+                                                <Button variant="ghost" className="text-rose-500 font-black text-[10px] uppercase tracking-widest">Revoke</Button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </Card>
+                            </div>
+                        )}
+
+                        {activeTab !== 'Account Profile' && activeTab !== 'Security & Access' && (
                             <Card className="flex flex-col items-center justify-center py-32 text-center">
                                 <div className="w-20 h-20 bg-slate-50 rounded-[32px] flex items-center justify-center mb-6">
                                     <ShieldCheck className="w-10 h-10 text-slate-200" />

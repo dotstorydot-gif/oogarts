@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Card, Button, Input, cn } from '../components/layout/BaseUI';
 import {
@@ -11,17 +12,20 @@ import {
     MoreHorizontal,
     Box,
     Layers,
-    Stethoscope
+    Stethoscope,
+    ChevronRight,
+    X
 } from 'lucide-react';
 
 const Inventory = () => {
-    const stockItems = [
+    const [showProvisionForm, setShowProvisionForm] = useState(false);
+    const [stockItems] = useState([
         { name: 'Surgical Masks (Level 3)', category: 'Protective Gear', status: 'low', stock: 85, unit: 'Boxes', trend: '+12%' },
         { name: 'Nitrile Gloves (Large)', category: 'Protective Gear', status: 'normal', stock: 420, unit: 'Boxes', trend: '-5%' },
         { name: 'IV Fluids (Saline)', category: 'Clinical Supplies', status: 'low', stock: 45, unit: 'Units', trend: '+20%' },
         { name: 'Digital Thermometers', category: 'Devices', status: 'normal', stock: 120, unit: 'Units', trend: '0%' },
         { name: 'Antibacterial Wipes', category: 'Sanitization', status: 'normal', stock: 230, unit: 'Canisters', trend: '+8%' },
-    ];
+    ]);
 
     return (
         <Layout>
@@ -43,12 +47,59 @@ const Inventory = () => {
                             <Download className="w-4 h-4" />
                             Export CSV
                         </Button>
-                        <Button variant="primary" className="gap-2 px-8" onClick={() => alert('Initializing Inventory Provisioning flow...')}>
+                        <Button variant="primary" className="gap-2 px-8 active:scale-95" onClick={() => setShowProvisionForm(true)}>
                             <Plus className="w-5 h-5" />
                             Provision New Item
                         </Button>
                     </div>
                 </div>
+
+                {showProvisionForm && (
+                    <Card className="mb-12 p-10 animate-in fade-in zoom-in-95 duration-500 bg-white/80 backdrop-blur-xl border-white shadow-2xl relative">
+                        <button onClick={() => setShowProvisionForm(false)} className="absolute top-6 right-6 p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400">
+                            <X className="w-5 h-5" />
+                        </button>
+                        <div className="mb-10 text-left">
+                            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Provision New Supply</h2>
+                            <p className="text-slate-500 font-medium">Add clinical assets to global inventory database.</p>
+                        </div>
+                        <form onSubmit={(e) => { e.preventDefault(); alert('Item provisioned successfully!'); setShowProvisionForm(false); }} className="space-y-8">
+                            <div className="grid grid-cols-3 gap-8">
+                                <div className="col-span-1 text-left">
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Item Name</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Surgical Gloves"
+                                        className="w-full px-6 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl font-bold outline-none transition-all"
+                                        required
+                                    />
+                                </div>
+                                <div className="text-left">
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Category</label>
+                                    <select className="w-full px-6 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl font-bold outline-none transition-all appearance-none">
+                                        <option>Clinical Supplies</option>
+                                        <option>Protective Gear</option>
+                                        <option>Devices</option>
+                                        <option>Sanitization</option>
+                                    </select>
+                                </div>
+                                <div className="text-left">
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Initial Stock</label>
+                                    <input
+                                        type="number"
+                                        placeholder="0"
+                                        className="w-full px-6 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-2xl font-bold outline-none transition-all"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <Button type="submit" className="w-full h-16 rounded-[24px] bg-slate-900 hover:bg-black font-black flex items-center justify-center gap-3 group transition-all">
+                                <span>Finalize Provisioning</span>
+                                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                            </Button>
+                        </form>
+                    </Card>
+                )}
 
                 {/* Quick Stats Grid */}
                 <div className="grid grid-cols-4 gap-6 mb-10">

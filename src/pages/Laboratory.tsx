@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Card, Button, cn } from '../components/layout/BaseUI';
 import {
@@ -9,16 +10,21 @@ import {
     Plus,
     Download,
     ArrowUpRight,
-    ShieldAlert
+    ShieldAlert,
+    X,
+    ChevronRight,
+    User,
+    Syringe
 } from 'lucide-react';
 
 const Laboratory = () => {
-    const activeTests = [
+    const [showOrderForm, setShowOrderForm] = useState(false);
+    const [activeTests] = useState([
         { name: 'Full Blood Count', id: 'LAB-0842', status: 'In Analysis', priority: 'High', tech: 'Dr. Sarah K.' },
         { name: 'Lipid Profile', id: 'LAB-0911', status: 'Pending Review', priority: 'Routine', tech: 'Dr. Mike R.' },
         { name: 'Blood Glucose', id: 'LAB-1022', status: 'Completed', priority: 'Critical', tech: 'Dr. Anna L.' },
         { name: 'Thyroid Panel', id: 'LAB-1045', status: 'In Analysis', priority: 'Routine', tech: 'Dr. Sarah K.' },
-    ];
+    ]);
 
     return (
         <Layout>
@@ -40,12 +46,53 @@ const Laboratory = () => {
                             <Download className="w-4 h-4" />
                             Log
                         </Button>
-                        <Button variant="dark" className="gap-2 px-8" onClick={() => alert('Opening New Test Order Flow...')}>
+                        <Button variant="dark" className="gap-2 px-8 active:scale-95" onClick={() => setShowOrderForm(true)}>
                             <Plus className="w-5 h-5" />
                             New Test Order
                         </Button>
                     </div>
                 </div>
+
+                {showOrderForm && (
+                    <Card className="mb-12 p-10 animate-in fade-in slide-in-from-top-4 duration-500 bg-white/80 backdrop-blur-xl border-white shadow-2xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-6">
+                            <button onClick={() => setShowOrderForm(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="mb-10 text-left">
+                            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Technical Request</h2>
+                            <p className="text-slate-500 font-medium">Initialize diagnostic specimen analysis protocol.</p>
+                        </div>
+                        <form onSubmit={(e) => { e.preventDefault(); alert('Test Order Placed!'); setShowOrderForm(false); }} className="grid grid-cols-2 gap-8 text-left">
+                            <div className="col-span-2 sm:col-span-1">
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Patient Identity</label>
+                                <div className="relative">
+                                    <User className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
+                                    <input type="text" placeholder="Search patient..." className="w-full pl-14 pr-6 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-100 rounded-2xl font-bold outline-none transition-all" required />
+                                </div>
+                            </div>
+                            <div className="col-span-2 sm:col-span-1">
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Analysis Type</label>
+                                <div className="relative">
+                                    <Syringe className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
+                                    <select className="w-full pl-14 pr-6 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-100 rounded-2xl font-bold outline-none transition-all appearance-none">
+                                        <option>Full Blood Count</option>
+                                        <option>Lipid Profile</option>
+                                        <option>Blood Glucose</option>
+                                        <option>Thyroid Panel</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="col-span-2">
+                                <Button type="submit" className="w-full h-16 rounded-[24px] bg-indigo-600 hover:bg-indigo-700 text-white font-black flex items-center justify-center gap-3 shadow-xl shadow-indigo-100 group">
+                                    <span>Execute Laboratory Protocol</span>
+                                    <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                </Button>
+                            </div>
+                        </form>
+                    </Card>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                     {[

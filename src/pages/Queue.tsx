@@ -13,6 +13,8 @@ import {
 
 const Queue = () => {
     const [activeTab, setActiveTab] = useState('active');
+    const [showTicketForm, setShowTicketForm] = useState(false);
+    const [newTicket, setNewTicket] = useState({ name: '', dept: 'General Medicine' });
     const [patients, setPatients] = useState([
         { id: 'Q-001', name: 'Sarah Ahmed', time: '09:00 AM', status: 'In Consultation', dept: 'General Medicine', type: 'Emergency' },
         { id: 'Q-002', name: 'James Wilson', time: '09:15 AM', status: 'Waiting', dept: 'Cardiology', type: 'Routine' },
@@ -21,6 +23,23 @@ const Queue = () => {
     ]);
 
     const currentPatient = patients.find(p => p.status === 'In Consultation') || patients[0];
+
+    const handleGenerateTicket = (e: React.FormEvent) => {
+        e.preventDefault();
+        const id = `Q-${(patients.length + 1).toString().padStart(3, '0')}`;
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        setPatients([...patients, {
+            id,
+            name: newTicket.name,
+            time,
+            status: 'Waiting',
+            dept: newTicket.dept,
+            type: 'Routine'
+        }]);
+        setNewTicket({ name: '', dept: 'General Medicine' });
+        setShowTicketForm(false);
+        alert(`Ticket ${id} generated successfully!`);
+    };
 
     const handleNextPatient = () => {
         const nextIndex = patients.findIndex(p => p.id === currentPatient.id) + 1;
@@ -46,165 +65,204 @@ const Queue = () => {
                         <Button variant="outline" className="gap-2" onClick={() => alert('Printing all tickets...')}>
                             <span className="text-sm">Print All Tickets</span>
                         </Button>
-                        <Button variant="dark" className="gap-2 shadow-2xl shadow-slate-200" onClick={() => alert('Opening Ticket Generator...')}>
+                        <Button
+                            variant="dark"
+                            className="gap-2 shadow-2xl shadow-slate-200 active:scale-95"
+                            onClick={() => setShowTicketForm(true)}
+                        >
                             <Plus size={20} />
                             <span>Generate New Ticket</span>
                         </Button>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-12 gap-10">
-                    {/* Main Queue List */}
-                    <div className="col-span-8 space-y-8">
-                        <div className="flex items-center gap-2 bg-slate-200/50 p-1.5 rounded-2xl w-fit">
-                            {[
-                                { id: 'active', label: 'Active Queue', count: 12 },
-                                { id: 'completed', label: 'Completed', count: 45 }
-                            ].map((tab) => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={cn(
-                                        "px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300",
-                                        activeTab === tab.id ? "bg-white text-indigo-600 shadow-xl shadow-slate-200" : "text-slate-500 hover:text-slate-700"
-                                    )}
+                {showTicketForm && (
+                    <Card className="mb-10 p-8 border-indigo-100 bg-indigo-50/30 animate-in slide-in-from-top-4 duration-500">
+                        <form onSubmit={handleGenerateTicket} className="flex flex-col md:flex-row items-end gap-6">
+                            <div className="flex-1 text-left">
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Patient Name</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter full name..."
+                                    className="w-full px-6 py-4 bg-white border-2 border-slate-100 focus:border-indigo-200 rounded-2xl font-bold outline-none"
+                                    value={newTicket.name}
+                                    onChange={(e) => setNewTicket({ ...newTicket, name: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div className="flex-1 text-left">
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Department</label>
+                                <select
+                                    className="w-full px-6 py-4 bg-white border-2 border-slate-100 focus:border-indigo-200 rounded-2xl font-bold outline-none appearance-none"
+                                    value={newTicket.dept}
+                                    onChange={(e) => setNewTicket({ ...newTicket, dept: e.target.value })}
                                 >
-                                    {tab.label} ({tab.count})
-                                </button>
-                            ))}
+                                    <option>General Medicine</option>
+                                    <option>Cardiology</option>
+                                    <option>Pediatrics</option>
+                                    <option>Dermatology</option>
+                                </select>
+                            </div>
+                            <div className="flex gap-3">
+                                <Button type="submit" variant="dark" className="px-10 h-[60px] rounded-2xl font-black">Generate</Button>
+                                <Button type="button" variant="outline" className="px-6 h-[60px] rounded-2xl font-black" onClick={() => setShowTicketForm(false)}>Cancel</Button>
+                            </div>
+                        </form>
+                    </Card>
+                )}
+            </div>
+
+            <div className="grid grid-cols-12 gap-10 max-w-[1400px] mx-auto px-10">
+                {/* Main Queue List */}
+                <div className="col-span-8 space-y-8">
+                    <div className="flex items-center gap-2 bg-slate-200/50 p-1.5 rounded-2xl w-fit">
+                        {[
+                            { id: 'active', label: 'Active Queue', count: 12 },
+                            { id: 'completed', label: 'Completed', count: 45 }
+                        ].map((tab) => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={cn(
+                                    "px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300",
+                                    activeTab === tab.id ? "bg-white text-indigo-600 shadow-xl shadow-slate-200" : "text-slate-500 hover:text-slate-700"
+                                )}
+                            >
+                                {tab.label} ({tab.count})
+                            </button>
+                        ))}
+                    </div>
+
+                    <Card className="p-0 overflow-hidden border-slate-100 shadow-2xl shadow-slate-100/50">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left font-sans border-collapse">
+                                <thead>
+                                    <tr className="bg-slate-50/50 border-b border-slate-100">
+                                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Token ID</th>
+                                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Patient Name</th>
+                                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Time</th>
+                                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Status</th>
+                                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {patients.map((p) => (
+                                        <tr key={p.id} className="hover:bg-indigo-50/30 transition-colors group">
+                                            <td className="px-8 py-6">
+                                                <span className="font-black text-slate-900 text-base tracking-tight">{p.id}</span>
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center font-black text-sm group-hover:bg-white group-hover:shadow-md transition-all">
+                                                        {p.name.charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-black text-slate-900 text-[15px] tracking-tight">{p.name}</p>
+                                                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5">{p.dept}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <span className="text-sm font-bold text-slate-500">{p.time}</span>
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <span className={cn(
+                                                    "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border",
+                                                    p.status === 'In Consultation' ? "bg-indigo-50 text-indigo-600 border-indigo-100" :
+                                                        p.status === 'Waiting' ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-rose-50 text-rose-600 border-rose-100"
+                                                )}>
+                                                    {p.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <div className="flex items-center justify-end gap-2 transition-all duration-300">
+                                                    <Button variant="ghost" size="sm" className="w-10 h-10 p-0 rounded-xl hover:bg-white hover:shadow-sm hover:text-indigo-600 transition-all" onClick={() => alert(`Starting consultation flow for ${p.name}...`)}>
+                                                        <Play size={18} />
+                                                    </Button>
+                                                    <Button variant="ghost" size="sm" className="w-10 h-10 p-0 rounded-xl hover:bg-white hover:shadow-sm hover:text-emerald-600 transition-all" onClick={() => alert(`Marking ${p.name} as processed...`)}>
+                                                        <CheckCircle2 size={18} />
+                                                    </Button>
+                                                    <Button variant="ghost" size="sm" className="w-10 h-10 p-0 rounded-xl hover:bg-white hover:shadow-sm transition-all">
+                                                        <MoreVertical size={18} />
+                                                    </Button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </Card>
+                </div>
+
+                {/* Side Info */}
+                <div className="col-span-4 space-y-8">
+                    <Card className="bg-indigo-600 border-0 relative overflow-hidden text-white shadow-2xl shadow-indigo-100/50 p-10">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl animate-pulse" />
+                        <div className="relative z-10">
+                            <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mb-6 shadow-sm">Currently Serving</p>
+                            <div className="space-y-2 mb-10">
+                                <h2 className="text-6xl font-black tracking-tighter">{currentPatient?.id}</h2>
+                                <p className="text-xl font-black text-indigo-100">{currentPatient?.name}</p>
+                            </div>
+                            <div className="pt-8 border-t border-white/10 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
+                                    <span className="text-sm font-black uppercase tracking-widest text-white/90">Room 302</span>
+                                </div>
+                                <Button
+                                    variant="glass"
+                                    size="sm"
+                                    className="font-black text-[10px] border-white/20 hover:bg-white hover:text-indigo-600"
+                                    onClick={handleNextPatient}
+                                >
+                                    NEXT PATIENT
+                                </Button>
+                            </div>
+                        </div>
+                    </Card>
+
+                    <Card>
+                        <div className="flex items-center gap-3 mb-10">
+                            <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center">
+                                <Users className="w-5 h-5 text-slate-400" />
+                            </div>
+                            <h3 className="font-black text-slate-900 tracking-tight">Queue Insights</h3>
                         </div>
 
-                        <Card className="p-0 overflow-hidden border-slate-100 shadow-2xl shadow-slate-100/50">
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left font-sans border-collapse">
-                                    <thead>
-                                        <tr className="bg-slate-50/50 border-b border-slate-100">
-                                            <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Token ID</th>
-                                            <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Patient Name</th>
-                                            <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Time</th>
-                                            <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Status</th>
-                                            <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-50">
-                                        {patients.map((p) => (
-                                            <tr key={p.id} className="hover:bg-indigo-50/30 transition-colors group">
-                                                <td className="px-8 py-6">
-                                                    <span className="font-black text-slate-900 text-base tracking-tight">{p.id}</span>
-                                                </td>
-                                                <td className="px-8 py-6">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center font-black text-sm group-hover:bg-white group-hover:shadow-md transition-all">
-                                                            {p.name.charAt(0)}
-                                                        </div>
-                                                        <div>
-                                                            <p className="font-black text-slate-900 text-[15px] tracking-tight">{p.name}</p>
-                                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5">{p.dept}</p>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-8 py-6">
-                                                    <span className="text-sm font-bold text-slate-500">{p.time}</span>
-                                                </td>
-                                                <td className="px-8 py-6">
-                                                    <span className={cn(
-                                                        "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border",
-                                                        p.status === 'In Consultation' ? "bg-indigo-50 text-indigo-600 border-indigo-100" :
-                                                            p.status === 'Waiting' ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-rose-50 text-rose-600 border-rose-100"
-                                                    )}>
-                                                        {p.status}
-                                                    </span>
-                                                </td>
-                                                <td className="px-8 py-6">
-                                                    <div className="flex items-center justify-end gap-2 transition-all duration-300">
-                                                        <Button variant="ghost" size="sm" className="w-10 h-10 p-0 rounded-xl hover:bg-white hover:shadow-sm hover:text-indigo-600 transition-all" onClick={() => alert(`Starting consultation flow for ${p.name}...`)}>
-                                                            <Play size={18} />
-                                                        </Button>
-                                                        <Button variant="ghost" size="sm" className="w-10 h-10 p-0 rounded-xl hover:bg-white hover:shadow-sm hover:text-emerald-600 transition-all" onClick={() => alert(`Marking ${p.name} as processed...`)}>
-                                                            <CheckCircle2 size={18} />
-                                                        </Button>
-                                                        <Button variant="ghost" size="sm" className="w-10 h-10 p-0 rounded-xl hover:bg-white hover:shadow-sm transition-all">
-                                                            <MoreVertical size={18} />
-                                                        </Button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </Card>
-                    </div>
-
-                    {/* Side Info */}
-                    <div className="col-span-4 space-y-8">
-                        <Card className="bg-indigo-600 border-0 relative overflow-hidden text-white shadow-2xl shadow-indigo-100/50 p-10">
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl animate-pulse" />
-                            <div className="relative z-10">
-                                <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mb-6 shadow-sm">Currently Serving</p>
-                                <div className="space-y-2 mb-10">
-                                    <h2 className="text-6xl font-black tracking-tighter">{currentPatient?.id}</h2>
-                                    <p className="text-xl font-black text-indigo-100">{currentPatient?.name}</p>
-                                </div>
-                                <div className="pt-8 border-t border-white/10 flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
-                                        <span className="text-sm font-black uppercase tracking-widest text-white/90">Room 302</span>
+                        <div className="space-y-8">
+                            <div className="flex items-center justify-between group">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-slate-50 rounded-2xl text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors"><Clock className="w-5 h-5" /></div>
+                                    <div>
+                                        <p className="text-sm font-black text-slate-900 tracking-tight">Avg. Wait Time</p>
+                                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Global average</p>
                                     </div>
-                                    <Button
-                                        variant="glass"
-                                        size="sm"
-                                        className="font-black text-[10px] border-white/20 hover:bg-white hover:text-indigo-600"
-                                        onClick={handleNextPatient}
-                                    >
-                                        NEXT PATIENT
-                                    </Button>
                                 </div>
+                                <span className="text-lg font-black text-slate-900">12m</span>
                             </div>
-                        </Card>
-
-                        <Card>
-                            <div className="flex items-center gap-3 mb-10">
-                                <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center">
-                                    <Users className="w-5 h-5 text-slate-400" />
+                            <div className="flex items-center justify-between group">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-slate-50 rounded-2xl text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors"><Users className="w-5 h-5" /></div>
+                                    <div>
+                                        <p className="text-sm font-black text-slate-900 tracking-tight">Patients Waiting</p>
+                                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">In registry</p>
+                                    </div>
                                 </div>
-                                <h3 className="font-black text-slate-900 tracking-tight">Queue Insights</h3>
+                                <span className="text-lg font-black text-slate-900">08</span>
                             </div>
-
-                            <div className="space-y-8">
-                                <div className="flex items-center justify-between group">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 bg-slate-50 rounded-2xl text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors"><Clock className="w-5 h-5" /></div>
-                                        <div>
-                                            <p className="text-sm font-black text-slate-900 tracking-tight">Avg. Wait Time</p>
-                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Global average</p>
-                                        </div>
+                            <div className="flex items-center justify-between group">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-slate-50 rounded-2xl text-slate-400 group-hover:bg-rose-50 group-hover:text-rose-600 transition-colors"><AlertCircle className="w-5 h-5" /></div>
+                                    <div>
+                                        <p className="text-sm font-black text-slate-900 tracking-tight">Critical Case</p>
+                                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Immediate priority</p>
                                     </div>
-                                    <span className="text-lg font-black text-slate-900">12m</span>
                                 </div>
-                                <div className="flex items-center justify-between group">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 bg-slate-50 rounded-2xl text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors"><Users className="w-5 h-5" /></div>
-                                        <div>
-                                            <p className="text-sm font-black text-slate-900 tracking-tight">Patients Waiting</p>
-                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">In registry</p>
-                                        </div>
-                                    </div>
-                                    <span className="text-lg font-black text-slate-900">08</span>
-                                </div>
-                                <div className="flex items-center justify-between group">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-3 bg-slate-50 rounded-2xl text-slate-400 group-hover:bg-rose-50 group-hover:text-rose-600 transition-colors"><AlertCircle className="w-5 h-5" /></div>
-                                        <div>
-                                            <p className="text-sm font-black text-slate-900 tracking-tight">Critical Case</p>
-                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Immediate priority</p>
-                                        </div>
-                                    </div>
-                                    <span className="text-lg font-black text-rose-500">01</span>
-                                </div>
+                                <span className="text-lg font-black text-rose-500">01</span>
                             </div>
-                        </Card>
-                    </div>
+                        </div>
+                    </Card>
                 </div>
             </div>
         </Layout>
