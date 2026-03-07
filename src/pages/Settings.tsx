@@ -29,15 +29,15 @@ const Settings = () => {
 
     return (
         <Layout>
-            <div className="max-w-[1400px] text-left">
+            <div className="max-w-[1400px] mx-auto text-left">
                 <div className="mb-12">
-                    <h1 className="text-4xl font-black text-slate-900 mb-3 tracking-tighter">System Configuration</h1>
+                    <h1 className="text-2xl sm:text-4xl font-black text-slate-900 mb-3 tracking-tighter italic">System Configuration</h1>
                     <p className="text-slate-500 font-medium">Manage your workspace, security, and integration preferences.</p>
                 </div>
 
-                <div className="grid grid-cols-12 gap-10">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
                     {/* Navigation Sidebar for Settings */}
-                    <div className="col-span-3 space-y-2">
+                    <div className="col-span-1 lg:col-span-3 space-y-2">
                         {tabs.map((item) => (
                             <button
                                 key={item.label}
@@ -56,17 +56,17 @@ const Settings = () => {
                     </div>
 
                     {/* Main Settings Content */}
-                    <div className="col-span-9 space-y-8">
+                    <div className="col-span-1 lg:col-span-9 space-y-8">
                         {activeTab === 'Account Profile' && (
                             <div className="space-y-8">
-                                <Card className="p-10">
+                                <Card className="p-6 sm:p-10">
                                     <h3 className="text-xl font-black text-slate-900 mb-8 flex items-center gap-3">
                                         <User className="w-6 h-6 text-indigo-600" />
                                         Public Profile
                                     </h3>
 
-                                    <div className="grid grid-cols-2 gap-12">
-                                        <div className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-start">
+                                        <div className="space-y-6 order-2 md:order-1 text-left">
                                             <div>
                                                 <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">Display Name</label>
                                                 <Input placeholder="Jack Chain" />
@@ -80,8 +80,8 @@ const Settings = () => {
                                                 <Input placeholder="jack.chain@oogarts.io" />
                                             </div>
                                         </div>
-                                        <div className="flex flex-col items-center justify-center p-8 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 border-spacing-4">
-                                            <div className="w-32 h-32 rounded-full bg-white shadow-xl p-1 mb-6">
+                                        <div className="flex flex-col items-center justify-center p-6 sm:p-8 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 order-1 md:order-2">
+                                            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-white shadow-xl p-1 mb-6">
                                                 <img
                                                     src="https://images.unsplash.com/photo-1559839734-2b71f1536783?auto=format&fit=crop&q=80&w=200"
                                                     className="w-full h-full rounded-full object-cover"
@@ -93,7 +93,7 @@ const Settings = () => {
                                     </div>
                                 </Card>
 
-                                <Card className="p-10 border-rose-100 bg-rose-50/10">
+                                <Card className="p-6 sm:p-10 border-rose-100 bg-rose-50/10">
                                     <h3 className="text-xl font-black text-slate-900 mb-8 flex items-center gap-3">
                                         <Lock className="w-6 h-6 text-rose-500" />
                                         Login & Password
@@ -103,7 +103,7 @@ const Settings = () => {
                                             <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">Current Password</label>
                                             <Input type="password" placeholder="••••••••••••" />
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
                                                 <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">New Password</label>
                                                 <Input type="password" />
@@ -130,9 +130,9 @@ const Settings = () => {
                             </Card>
                         )}
 
-                        <div className="flex items-center justify-end gap-4 mt-12">
-                            <Button variant="ghost">Reset Changes</Button>
-                            <Button variant="dark" className="gap-2">
+                        <div className="flex flex-col sm:flex-row items-center justify-end gap-4 mt-12">
+                            <Button variant="ghost" className="w-full sm:w-auto">Reset Changes</Button>
+                            <Button variant="dark" className="w-full sm:w-auto gap-2">
                                 <Save className="w-4 h-4" />
                                 Save Configuration
                             </Button>

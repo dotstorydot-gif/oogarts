@@ -74,9 +74,9 @@ const Patients = () => {
 
     return (
         <Layout>
-            <div className="max-w-[1600px] text-left">
+            <div className="max-w-[1600px] mx-auto text-left">
                 {/* Header Section */}
-                <div className="flex items-end justify-between mb-12">
+                <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
                     <div>
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
@@ -84,14 +84,14 @@ const Patients = () => {
                             </div>
                             <span className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em]">Patient Records</span>
                         </div>
-                        <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2">Onboarding Registry</h1>
+                        <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tighter mb-2 italic">Onboarding Registry</h1>
                         <p className="text-slate-500 font-medium">Digital intake and clinical registry for new patient enrollment.</p>
                     </div>
-                    <div className="text-right pb-1">
+                    <div className="text-left lg:text-right pb-1">
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Onboarding Progress</p>
                         <div className="flex items-center gap-4">
-                            <span className="text-3xl font-black text-indigo-600 tracking-tighter">{Math.round((step / 5) * 100)}%</span>
-                            <div className="w-32 h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                            <span className="text-2xl sm:text-3xl font-black text-indigo-600 tracking-tighter">{Math.round((step / 5) * 100)}%</span>
+                            <div className="w-24 sm:w-32 h-2.5 bg-slate-100 rounded-full overflow-hidden">
                                 <div
                                     className="h-full bg-indigo-600 transition-all duration-700 ease-out"
                                     style={{ width: `${(step / 5) * 100}%` }}
@@ -101,9 +101,9 @@ const Patients = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-12 gap-10">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
                     {/* Sidebar Steps Navigation */}
-                    <div className="col-span-3 space-y-4">
+                    <div className="col-span-1 lg:col-span-3 space-y-4">
                         {steps.map((s) => (
                             <div
                                 key={s.id}
@@ -121,12 +121,12 @@ const Patients = () => {
                                 )}
                                 <div className="flex items-center gap-4">
                                     <div className={cn(
-                                        "w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
+                                        "w-10 h-10 rounded-xl flex items-center justify-center transition-colors shrink-0",
                                         s.id === step ? "bg-indigo-50 text-indigo-600" : "bg-slate-100 text-slate-400"
                                     )}>
                                         <s.icon className="w-5 h-5" />
                                     </div>
-                                    <div>
+                                    <div className="min-w-0">
                                         <p className={cn(
                                             "text-[10px] font-black uppercase tracking-[0.1em]",
                                             s.id === step ? "text-indigo-600" : "text-slate-400"
@@ -140,7 +140,7 @@ const Patients = () => {
                             </div>
                         ))}
 
-                        <div className="p-6 bg-indigo-900 rounded-[32px] text-white mt-12 relative overflow-hidden">
+                        <div className="p-6 bg-indigo-900 rounded-[32px] text-white mt-8 lg:mt-12 relative overflow-hidden hidden lg:block">
                             <Activity className="absolute -right-4 -bottom-4 w-24 h-24 text-white/10 rotate-12" />
                             <Info className="w-5 h-5 text-indigo-300 mb-4" />
                             <p className="text-xs font-bold leading-relaxed mb-4">Complete all required fields marked with an asterisk (*)</p>
@@ -152,46 +152,46 @@ const Patients = () => {
                     </div>
 
                     {/* Main Form Content */}
-                    <div className="col-span-9 flex flex-col gap-8">
-                        <Card className="p-10 md:p-14 bg-white/70 backdrop-blur-xl border-white shadow-2xl shadow-indigo-100/20 min-h-[600px] flex flex-col">
+                    <div className="col-span-1 lg:col-span-9 flex flex-col gap-8">
+                        <Card className="p-6 sm:p-10 md:p-14 bg-white/70 backdrop-blur-xl border-white shadow-2xl shadow-indigo-100/20 min-h-[500px] lg:min-h-[600px] flex flex-col">
                             {step === 1 && (
                                 <div className="animate-in fade-in slide-in-from-right-4 duration-500 flex-1">
                                     <div className="mb-10">
                                         <h2 className="text-2xl font-black text-slate-900 mb-2">Personal Information</h2>
                                         <p className="text-slate-500 text-sm font-medium">Please provide accurate identification details.</p>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-x-8 gap-y-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 sm:gap-y-8">
                                         {[
-                                            { label: 'First Name *', key: 'firstName', placeholder: 'Enter first name' },
-                                            { label: 'Last Name *', key: 'lastName', placeholder: 'Enter last name' },
+                                            { label: 'First Name *', key: 'firstName', placeholder: 'Jack' },
+                                            { label: 'Last Name *', key: 'lastName', placeholder: 'Chain' },
                                             { label: 'Date of Birth *', key: 'dob', type: 'date' },
                                             { label: 'Gender *', key: 'gender', type: 'select', options: ['Male', 'Female', 'Other'] },
                                             { label: 'Phone Number *', key: 'phone', placeholder: '(555) 000-0000' },
                                             { label: 'Email Address', key: 'email', placeholder: 'patient@email.com' },
                                         ].map((field) => (
                                             <div key={field.key} className="col-span-1">
-                                                <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{field.label}</label>
+                                                <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 sm:mb-3">{field.label}</label>
                                                 {field.type === 'select' ? (
                                                     <select
-                                                        className="w-full bg-slate-50/50 border-2 border-transparent rounded-[20px] px-6 py-4 focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-50 transition-all font-bold text-slate-900 appearance-none outline-none"
+                                                        className="w-full bg-slate-50/50 border-2 border-transparent rounded-[20px] px-4 sm:px-6 py-3 sm:py-4 focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-50 transition-all font-bold text-slate-900 appearance-none outline-none"
                                                         value={formData[field.key as keyof typeof formData] as string}
                                                         onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
                                                     >
-                                                        <option value="">Select {field.key}</option>
+                                                        <option value="">Select</option>
                                                         {field.options?.map(opt => <option key={opt} value={opt.toLowerCase()}>{opt}</option>)}
                                                     </select>
                                                 ) : (
                                                     <input
                                                         type={field.type || 'text'}
                                                         placeholder={field.placeholder}
-                                                        className="w-full bg-slate-50/50 border-2 border-transparent rounded-[20px] px-6 py-4 focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-50 transition-all font-bold text-slate-900 outline-none"
+                                                        className="w-full bg-slate-50/50 border-2 border-transparent rounded-[20px] px-4 sm:px-6 py-3 sm:py-4 focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-50 transition-all font-bold text-slate-900 outline-none"
                                                         value={formData[field.key as keyof typeof formData] as string}
                                                         onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
                                                     />
                                                 )}
                                             </div>
                                         ))}
-                                        <div className="col-span-2">
+                                        <div className="col-span-1 md:col-span-2">
                                             <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Residential Address *</label>
                                             <textarea
                                                 placeholder="Enter full address"
@@ -284,16 +284,16 @@ const Patients = () => {
                                         <h2 className="text-2xl font-black text-slate-900 mb-2">Insurance Details</h2>
                                         <p className="text-slate-500 text-sm font-medium">Verified coverage for seamless billing.</p>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-8">
-                                        <div className="col-span-2">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                                        <div className="col-span-1 sm:col-span-2">
                                             <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Select Provider *</label>
-                                            <div className="grid grid-cols-3 gap-4">
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                                                 {['MetLife', 'Bupa', 'AXA', 'BCBS', 'Aetna', 'Cigna'].map(prov => (
                                                     <button
                                                         key={prov}
                                                         onClick={() => setFormData({ ...formData, provider: prov.toLowerCase() })}
                                                         className={cn(
-                                                            "p-4 rounded-2xl border-2 transition-all font-black text-sm",
+                                                            "p-3 sm:p-4 rounded-2xl border-2 transition-all font-black text-xs sm:text-sm",
                                                             formData.provider === prov.toLowerCase()
                                                                 ? "bg-indigo-50 border-indigo-200 text-indigo-700 shadow-lg shadow-indigo-50"
                                                                 : "bg-slate-50 border-transparent text-slate-500 hover:bg-slate-100"
@@ -308,8 +308,8 @@ const Patients = () => {
                                             <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Policy Number</label>
                                             <input
                                                 type="text"
-                                                className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 font-bold text-slate-900"
-                                                placeholder="Enter policy ID"
+                                                className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 font-bold text-slate-900 outline-none"
+                                                placeholder="ID-000"
                                                 value={formData.policyNumber}
                                                 onChange={(e) => setFormData({ ...formData, policyNumber: e.target.value })}
                                             />
@@ -318,21 +318,21 @@ const Patients = () => {
                                             <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Group Number</label>
                                             <input
                                                 type="text"
-                                                className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 font-bold text-slate-900"
-                                                placeholder="Enter group ID"
+                                                className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 font-bold text-slate-900 outline-none"
+                                                placeholder="GRP-000"
                                                 value={formData.groupNumber}
                                                 onChange={(e) => setFormData({ ...formData, groupNumber: e.target.value })}
                                             />
                                         </div>
-                                        <div className="col-span-2 pt-6">
-                                            <div className="border-2 border-dashed border-indigo-100 rounded-[40px] p-16 text-center hover:bg-indigo-50/30 transition-all group">
-                                                <div className="w-20 h-20 bg-indigo-50 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                                                    <Upload className="w-8 h-8 text-indigo-600" />
+                                        <div className="col-span-1 sm:col-span-2 pt-4 sm:pt-6">
+                                            <div className="border-2 border-dashed border-indigo-100 rounded-[32px] sm:rounded-[40px] p-8 sm:p-16 text-center hover:bg-indigo-50/30 transition-all group">
+                                                <div className="w-16 h-16 sm:w-20 h-20 bg-indigo-50 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
+                                                    <Upload className="w-6 h-6 sm:w-8 h-8 text-indigo-600" />
                                                 </div>
-                                                <h3 className="text-xl font-black text-slate-900 mb-2">Drop Insurance Card</h3>
-                                                <p className="text-slate-400 text-sm font-medium mb-8">PDF, PNG or JPG (Max 5MB)</p>
-                                                <Button variant="outline" className="rounded-2xl px-10 border-slate-200 hover:bg-white shadow-xl shadow-indigo-100/10 font-bold">
-                                                    Browse Gallery
+                                                <h3 className="text-lg sm:text-xl font-black text-slate-900 mb-2">Drop Card</h3>
+                                                <p className="text-slate-400 text-xs sm:text-sm font-medium mb-6 sm:mb-8">PDF, PNG or JPG (Max 5MB)</p>
+                                                <Button variant="outline" className="w-full sm:w-auto rounded-2xl px-10 border-slate-200 hover:bg-white shadow-xl shadow-indigo-100/10 font-bold">
+                                                    Browse Files
                                                 </Button>
                                             </div>
                                         </div>
@@ -414,8 +414,8 @@ const Patients = () => {
                                         <p className="text-slate-500 text-sm font-medium">Final confirmation of your registration data.</p>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-6 mb-10">
-                                        <div className="p-8 rounded-[40px] bg-slate-900 text-white space-y-6">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
+                                        <div className="p-6 sm:p-8 rounded-[32px] sm:rounded-[40px] bg-slate-900 text-white space-y-6">
                                             <div className="flex items-center gap-3">
                                                 <User className="w-5 h-5 text-indigo-400" />
                                                 <h4 className="font-black uppercase text-xs tracking-[0.2em]">Patient Basics</h4>
@@ -436,7 +436,7 @@ const Patients = () => {
                                             </div>
                                         </div>
 
-                                        <div className="p-8 rounded-[40px] bg-indigo-50 border border-indigo-100 space-y-6">
+                                        <div className="p-6 sm:p-8 rounded-[32px] sm:rounded-[40px] bg-indigo-50 border border-indigo-100 space-y-6">
                                             <div className="flex items-center gap-3">
                                                 <Shield className="w-5 h-5 text-indigo-600" />
                                                 <h4 className="font-black uppercase text-xs tracking-[0.2em] text-indigo-900">Medical Summary</h4>
@@ -458,9 +458,9 @@ const Patients = () => {
                                         </div>
                                     </div>
 
-                                    <div className="p-8 rounded-[32px] bg-slate-50 border border-slate-100 flex items-center justify-between">
+                                    <div className="p-6 sm:p-8 rounded-[32px] bg-slate-50 border border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-0">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                                            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm shrink-0">
                                                 <Info className="w-6 h-6 text-slate-300" />
                                             </div>
                                             <div>
@@ -468,31 +468,31 @@ const Patients = () => {
                                                 <p className="text-xs text-slate-500 font-medium">By clicking submit, I agree to the privacy policy.</p>
                                             </div>
                                         </div>
-                                        <div className="w-8 h-8 rounded-full border-4 border-slate-200" />
+                                        <div className="w-8 h-8 rounded-full border-4 border-slate-200 shrink-0" />
                                     </div>
                                 </div>
                             )}
 
                             {/* Sticky Footer Navigation inside Card */}
-                            <div className="mt-auto pt-10 flex items-center justify-between border-t border-slate-100">
+                            <div className="mt-auto pt-8 sm:pt-10 flex flex-col sm:flex-row items-center justify-between border-t border-slate-100 gap-6 sm:gap-0">
                                 <Button
                                     variant="ghost"
                                     onClick={prevStep}
-                                    className={cn("gap-2 rounded-2xl px-6", step === 1 && "invisible")}
+                                    className={cn("w-full sm:w-auto gap-2 rounded-2xl px-6", step === 1 && "invisible")}
                                 >
                                     <ChevronLeft className="w-4 h-4" />
                                     <span className="font-bold">Previous</span>
                                 </Button>
 
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-4 w-full sm:w-auto">
                                     {step < 5 ? (
-                                        <Button onClick={nextStep} className="gap-2 px-10 py-6 rounded-3xl bg-slate-900 font-black shadow-2xl shadow-slate-200">
+                                        <Button onClick={nextStep} className="w-full sm:w-auto gap-2 px-10 py-5 sm:py-6 rounded-3xl bg-slate-900 font-black shadow-2xl shadow-slate-200">
                                             <span>Next Step</span>
                                             <ChevronRight className="w-4 h-4" />
                                         </Button>
                                     ) : (
-                                        <Button className="px-14 py-6 rounded-3xl bg-indigo-600 font-black shadow-2xl shadow-indigo-100 active:scale-95 transition-transform">
-                                            Submit Registration
+                                        <Button className="w-full sm:w-auto px-10 sm:px-14 py-5 sm:py-6 rounded-3xl bg-indigo-600 font-black shadow-2xl shadow-indigo-100 active:scale-95 transition-transform">
+                                            Submit
                                         </Button>
                                     )}
                                 </div>
