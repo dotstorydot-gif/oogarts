@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
-import { Card, Button, cn } from '../components/layout/BaseUI';
+import { Card, Button, Input, cn } from '../components/layout/BaseUI';
 import {
     Users,
     ClipboardList,
@@ -16,11 +16,54 @@ import {
     FileText,
     Pill,
     Plus,
-    Search
+    Search,
+    X,
+    Check
 } from 'lucide-react';
+
+interface Prescription {
+    id: string;
+    medication: string;
+    dosage: string;
+    frequency: string;
+    duration: string;
+}
 
 const DoctorReports = () => {
     const [activeTab, setActiveTab] = useState('Examination');
+    const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
+    const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const medications = [
+        'Amoxicillin 500mg',
+        'Lisinopril 10mg',
+        'Atorvastatin 20mg',
+        'Metformin 850mg',
+        'Amlodipine 5mg',
+        'Metoprolol 25mg',
+        'Omeprazole 20mg',
+        'Simvastatin 40mg'
+    ];
+
+    const filteredMeds = medications.filter(m => m.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const addPrescription = (med: string) => {
+        const newPres: Prescription = {
+            id: Math.random().toString(36).substr(2, 9),
+            medication: med,
+            dosage: '1 tablet',
+            frequency: 'Twice daily',
+            duration: '7 days'
+        };
+        setPrescriptions([...prescriptions, newPres]);
+        setIsPrescriptionModalOpen(false);
+        setSearchQuery('');
+    };
+
+    const removePrescription = (id: string) => {
+        setPrescriptions(prescriptions.filter(p => p.id !== id));
+    };
 
     const tabs = ['Examination', 'Diagnosis', 'Treatment', 'Orders'];
 
@@ -219,7 +262,39 @@ const DoctorReports = () => {
                                                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Prescriptions & advice</p>
                                             </div>
                                         </div>
-                                        <div className="p-12 rounded-[32px] bg-slate-50/50 border-2 border-slate-100 border-dashed flex flex-col items-center justify-center group hover:border-indigo-200 transition-all cursor-pointer">
+
+                                        {prescriptions.length > 0 && (
+                                            <div className="space-y-4 mb-8">
+                                                {prescriptions.map((p) => (
+                                                    <div key={p.id} className="flex items-center justify-between p-6 bg-indigo-50/50 rounded-3xl border border-indigo-100 group animate-in slide-in-from-left-4 duration-300">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-indigo-600 shadow-sm">
+                                                                <Check className="w-5 h-5" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="font-black text-slate-900">{p.medication}</p>
+                                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                                                    {p.dosage} • {p.frequency} • {p.duration}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="w-10 h-10 p-0 rounded-xl text-rose-500 hover:bg-rose-50 opacity-0 group-hover:opacity-100 transition-all"
+                                                            onClick={() => removePrescription(p.id)}
+                                                        >
+                                                            <X size={18} />
+                                                        </Button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        <div
+                                            className="p-12 rounded-[32px] bg-slate-50/50 border-2 border-slate-100 border-dashed flex flex-col items-center justify-center group hover:border-indigo-200 transition-all cursor-pointer"
+                                            onClick={() => setIsPrescriptionModalOpen(true)}
+                                        >
                                             <div className="p-5 bg-white rounded-2xl shadow-xl shadow-slate-200 mb-6 group-hover:scale-110 transition-transform">
                                                 <Plus className="w-8 h-8 text-indigo-600" />
                                             </div>
@@ -274,6 +349,46 @@ const DoctorReports = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Prescription Selection Modal */}
+            {isPrescriptionModalOpen && (
+                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-6">
+                    <Card className="w-full max-w-lg bg-white shadow-3xl animate-in zoom-in-95 duration-200">
+                        <div className="flex items-center justify-between mb-8">
+                            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Select Medication</h2>
+                            <Button variant="ghost" className="rounded-full w-10 h-10 p-0" onClick={() => setIsPrescriptionModalOpen(false)}>
+                                <X size={20} />
+                            </Button>
+                        </div>
+
+                        <div className="relative mb-6">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                            <Input
+                                placeholder="Search inventory..."
+                                className="pl-12"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                            {filteredMeds.map((med) => (
+                                <button
+                                    key={med}
+                                    className="w-full p-4 rounded-2xl text-left font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 transition-all flex items-center justify-between group"
+                                    onClick={() => addPrescription(med)}
+                                >
+                                    <span>{med}</span>
+                                    <Plus className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all" />
+                                </button>
+                            ))}
+                            {filteredMeds.length === 0 && (
+                                <div className="p-8 text-center text-slate-400 font-bold">No results found</div>
+                            )}
+                        </div>
+                    </Card>
+                </div>
+            )}
         </Layout>
     );
 };
