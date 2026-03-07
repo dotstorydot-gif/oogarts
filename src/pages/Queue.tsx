@@ -13,13 +13,26 @@ import {
 
 const Queue = () => {
     const [activeTab, setActiveTab] = useState('active');
-
-    const patients = [
+    const [patients, setPatients] = useState([
         { id: 'Q-001', name: 'Sarah Ahmed', time: '09:00 AM', status: 'In Consultation', dept: 'General Medicine', type: 'Emergency' },
         { id: 'Q-002', name: 'James Wilson', time: '09:15 AM', status: 'Waiting', dept: 'Cardiology', type: 'Routine' },
         { id: 'Q-003', name: 'Maria Garcia', time: '09:30 AM', status: 'Waiting', dept: 'Pediatrics', type: 'Routine' },
         { id: 'Q-004', name: 'Robert Chen', time: '09:45 AM', status: 'Delayed', dept: 'Dermatology', type: 'Investigation' },
-    ];
+    ]);
+
+    const currentPatient = patients.find(p => p.status === 'In Consultation') || patients[0];
+
+    const handleNextPatient = () => {
+        const nextIndex = patients.findIndex(p => p.id === currentPatient.id) + 1;
+        if (nextIndex < patients.length) {
+            const newPatients = patients.map((p, idx) => {
+                if (idx === nextIndex - 1) return { ...p, status: 'Completed' };
+                if (idx === nextIndex) return { ...p, status: 'In Consultation' };
+                return p;
+            });
+            setPatients(newPatients);
+        }
+    };
 
     return (
         <Layout>
@@ -124,15 +137,22 @@ const Queue = () => {
                             <div className="relative z-10">
                                 <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mb-6 shadow-sm">Currently Serving</p>
                                 <div className="space-y-2 mb-10">
-                                    <h2 className="text-6xl font-black tracking-tighter">Q-001</h2>
-                                    <p className="text-xl font-black text-indigo-100">{patients[0].name}</p>
+                                    <h2 className="text-6xl font-black tracking-tighter">{currentPatient?.id}</h2>
+                                    <p className="text-xl font-black text-indigo-100">{currentPatient?.name}</p>
                                 </div>
                                 <div className="pt-8 border-t border-white/10 flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
                                         <span className="text-sm font-black uppercase tracking-widest text-white/90">Room 302</span>
                                     </div>
-                                    <Button variant="glass" size="sm" className="font-black text-[10px] border-white/20">NEXT PATIENT</Button>
+                                    <Button
+                                        variant="glass"
+                                        size="sm"
+                                        className="font-black text-[10px] border-white/20 hover:bg-white hover:text-indigo-600"
+                                        onClick={handleNextPatient}
+                                    >
+                                        NEXT PATIENT
+                                    </Button>
                                 </div>
                             </div>
                         </Card>
