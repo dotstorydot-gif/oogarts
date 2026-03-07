@@ -74,7 +74,7 @@ const Doctors = () => {
         }
     ];
 
-    const [doctors, setDoctors] = useState<Doctor[]>(initialDoctors);
+    const doctors = initialDoctors;
 
     const filteredDoctors = doctors.filter(doc =>
         doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
