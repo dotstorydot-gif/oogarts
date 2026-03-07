@@ -14,7 +14,7 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 export const Card = ({ className, glass = true, variant = 'default', ...props }: CardProps) => (
     <div
         className={cn(
-            "rounded-[32px] transition-all duration-300 p-8",
+            "rounded-[40px] transition-all duration-300 p-12",
             glass && "backdrop-blur-xl border border-white/20",
             variant === 'default' && "bg-white/80 shadow-[0_8px_32px_0_rgba(31,38,135,0.04)]",
             variant === 'flat' && "bg-slate-50 border-slate-100",

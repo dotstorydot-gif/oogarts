@@ -7,7 +7,8 @@ import {
     Play,
     CheckCircle2,
     AlertCircle,
-    MoreVertical
+    MoreVertical,
+    Plus
 } from 'lucide-react';
 
 const Queue = () => {

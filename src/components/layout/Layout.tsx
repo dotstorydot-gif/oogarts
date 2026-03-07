@@ -175,7 +175,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                 </header>
 
                 {/* Content Area */}
-                <div className="flex-1 overflow-y-auto p-12 custom-scrollbar bg-transparent">
+                <div className="flex-1 overflow-y-auto p-16 custom-scrollbar bg-transparent">
                     {children}
                 </div>
             </main>
