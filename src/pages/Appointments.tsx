@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Card, Button } from '../components/layout/BaseUI';
-import { Calendar as CalendarIcon, Clock, Plus, User, Stethoscope, ChevronRight, X, Video, MoreHorizontal } from 'lucide-react';
+import { Calendar as CalendarIcon, Plus, User, Stethoscope, ChevronRight, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Appointments = () => {

@@ -11,9 +11,7 @@ import {
     Baby,
     Bone,
     Eye,
-    ChevronRight,
-    CheckCircle2,
-    Clock
+    CheckCircle2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
