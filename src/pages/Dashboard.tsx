@@ -9,10 +9,14 @@ import {
     Plus,
     ChevronRight,
     MoreHorizontal,
-    ExternalLink,
-    Thermometer
+    Thermometer,
+    X,
+    Maximize2,
+    Play,
+    CheckCircle2
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { useNavigate } from 'react-router-dom';
 
 const data = [
     { name: 'Jan', value: 400 },
@@ -70,6 +74,8 @@ const DepartmentProgress = ({ label, value, color }: any) => (
 );
 
 const Dashboard = () => {
+    const navigate = useNavigate();
+
     return (
         <Layout>
             <div className="max-w-[1600px] mx-auto text-left">
@@ -86,11 +92,11 @@ const Dashboard = () => {
                         <p className="text-slate-500 font-medium">Real-time monitoring of clinical operations, patient flow, and specialty performance.</p>
                     </div>
                     <div className="flex items-center gap-4">
-                        <Button variant="outline" className="gap-2">
+                        <Button variant="outline" className="gap-2" onClick={() => navigate('/reports')}>
                             <FileText className="w-4 h-4" />
                             Daily Report
                         </Button>
-                        <Button variant="primary" className="gap-2 px-8">
+                        <Button variant="primary" className="gap-2 px-8" onClick={() => navigate('/patients')}>
                             <Plus className="w-5 h-5" />
                             New Record
                         </Button>
@@ -137,30 +143,89 @@ const Dashboard = () => {
                         <div className="p-6 lg:p-8 relative z-10 flex flex-col h-full text-left">
                             <div className="flex items-center justify-between mb-12">
                                 <div>
-                                    <h3 className="text-xl font-bold text-slate-900">Patient Health</h3>
-                                    <p className="text-sm text-slate-500">From Primary Diagnosis</p>
+                                    <h3 className="text-xl font-black text-slate-900 tracking-tight">Patient Health</h3>
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">From Patient</p>
                                 </div>
-                                <Button variant="outline" className="w-10 h-10 p-0 rounded-full bg-white border-0 shadow-sm">
-                                    <ExternalLink className="w-5 h-5 text-indigo-600" />
-                                </Button>
+                                <div className="flex gap-2">
+                                    <Button variant="outline" className="w-10 h-10 p-0 rounded-full bg-white border-0 shadow-sm">
+                                        <Play className="w-5 h-5 text-indigo-600 fill-indigo-600/20" />
+                                    </Button>
+                                    <Button variant="outline" className="w-10 h-10 p-0 rounded-full bg-white border-0 shadow-sm">
+                                        <CheckCircle2 className="w-5 h-5 text-indigo-600" />
+                                    </Button>
+                                    <Button variant="outline" className="w-10 h-10 p-0 rounded-full bg-white border-0 shadow-sm">
+                                        <MoreHorizontal className="w-5 h-5 text-slate-400" />
+                                    </Button>
+                                </div>
                             </div>
 
-                            <div className="relative flex-1 mb-8">
+                            <div className="relative flex-1 flex items-center justify-center mb-8">
                                 <img
-                                    src="https://images.unsplash.com/photo-1576091160550-217359f42f8c?auto=format&fit=crop&q=80&w=800"
+                                    src="/health_viz.png"
                                     alt="Medical Analysis"
-                                    className="w-full h-[280px] object-contain drop-shadow-2xl"
+                                    className="w-full h-auto max-h-[320px] object-contain drop-shadow-[0_35px_35px_rgba(79,70,229,0.1)]"
                                 />
 
-                                <div className="absolute top-10 right-0 glass-card p-3 rounded-2xl flex items-center gap-3 animate-float">
-                                    <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
-                                        <Activity className="text-white w-5 h-5" />
+                                {/* Floating Heart Rate Card */}
+                                <div className="absolute top-[20%] right-[5%] sm:right-[15%] glass-card p-4 rounded-[24px] flex items-center gap-4 animate-float shadow-xl shadow-indigo-100/50 border border-white">
+                                    <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+                                        <Activity className="text-indigo-600 w-5 h-5" />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase">Heart Rate</p>
-                                        <p className="text-sm font-bold text-slate-900">108 bpm</p>
+                                        <p className="text-lg font-black text-slate-900">108 <span className="text-[10px] text-slate-400 uppercase">bpm</span></p>
                                     </div>
                                 </div>
+
+                                {/* Patient Mini Badge */}
+                                <Card className="absolute bottom-[0%] right-[0%] p-6 rounded-[32px] w-[220px] shadow-2xl shadow-indigo-200/40 border-white/50 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-indigo-100">
+                                                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=100" className="w-full h-full object-cover" />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-black text-slate-900 truncate w-24">Jeffrey Hessel</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-1">
+                                            <X className="w-3.5 h-3.5 text-slate-300" />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-4 relative">
+                                        <div className="absolute right-0 top-0">
+                                            <Maximize2 className="w-4 h-4 text-slate-300 rotate-45" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Temperature</p>
+                                            <p className="text-lg font-black text-slate-900">45.06° C</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Heart rate</p>
+                                            <p className="text-lg font-black text-slate-900">108 bpm</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Blood</p>
+                                            <p className="text-lg font-black text-slate-900">96%</p>
+                                        </div>
+                                    </div>
+                                </Card>
+
+                                {/* Doctor Mini Badge */}
+                                <Card className="absolute bottom-[5%] left-[0%] p-5 rounded-[28px] shadow-xl border-white animate-in fade-in slide-in-from-left-4 duration-700">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full overflow-hidden">
+                                            <img src="https://images.unsplash.com/photo-1559839734-2b71f1536783?auto=format&fit=crop&q=80&w=100" className="w-full h-full object-cover" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-black text-slate-900">Dr. Ishita Datta</p>
+                                            <p className="text-[10px] font-bold text-slate-300">Pulmonary</p>
+                                        </div>
+                                    </div>
+                                    <div className="mt-6">
+                                        <p className="text-xl font-black text-slate-900">Today</p>
+                                        <p className="text-[10px] font-bold text-slate-400 mt-1">01:15 PM - 02:00 PM</p>
+                                    </div>
+                                </Card>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
@@ -241,21 +306,21 @@ const Dashboard = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8 text-left mb-10">
                     <Card className="col-span-1 p-6 lg:p-8">
-                        <div className="flex items-center justify-between mb-6">
-                            <h3 className="font-bold text-slate-900">Doctor Highlight</h3>
+                        <div className="flex items-center justify-between mb-8">
+                            <h3 className="font-black text-slate-900 tracking-tight">Doctor Highlight</h3>
                             <MoreHorizontal className="w-5 h-5 text-slate-400" />
                         </div>
-                        <div className="relative rounded-2xl overflow-hidden mb-4 group aspect-[4/3]">
-                            <img src="https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=400" className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500" />
-                            <div className="absolute top-4 right-4 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-emerald-100">Available</div>
-                            <div className="absolute bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
-                                <h4 className="text-white font-bold text-lg">Dr. Kamal Sah</h4>
-                                <p className="text-white/80 text-xs font-medium uppercase tracking-wider">Dermatology</p>
+                        <div className="relative rounded-[32px] overflow-hidden mb-8 group aspect-[4/3] shadow-2xl shadow-slate-200">
+                            <img src="/dr_kamal.png" className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-700" />
+                            <div className="absolute top-5 right-5 bg-emerald-500 text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-lg shadow-emerald-200/50">Available</div>
+                            <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 via-black/20 to-transparent">
+                                <h4 className="text-white font-black text-2xl tracking-tight mb-1">Dr. Kamal Sah</h4>
+                                <p className="text-white/70 text-[10px] font-black uppercase tracking-[0.2em]">Dermatology</p>
                             </div>
                         </div>
-                        <Button variant="ghost" className="w-full justify-between px-2 hover:bg-slate-50 group">
-                            <span className="text-sm font-bold text-slate-600 group-hover:text-indigo-600">View Full Schedule</span>
-                            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+                        <Button variant="ghost" className="w-full justify-between px-2 hover:bg-slate-50 group py-4">
+                            <span className="text-sm font-black text-slate-700 group-hover:text-indigo-600 transition-colors">View Full Schedule</span>
+                            <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
                         </Button>
                     </Card>
 
