@@ -13,15 +13,36 @@ const Login = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Default credentials: Healthcare / admin / Admin@xyz
+
+        // Admin credentials
         if (
             formData.organization === 'Healthcare' &&
             formData.username === 'admin' &&
             formData.password === 'Admin@xyz'
         ) {
+            localStorage.setItem('userRole', 'admin');
             navigate('/dashboard');
-        } else {
-            alert('Invalid credentials. Use Organization: Healthcare, Admin: admin, Password: Admin@xyz');
+        }
+        // Doctor credentials
+        else if (
+            formData.organization === 'Healthcare' &&
+            formData.username === 'doctor' &&
+            formData.password === 'Doctor@xyz'
+        ) {
+            localStorage.setItem('userRole', 'doctor');
+            navigate('/dashboard');
+        }
+        // Patient credentials
+        else if (
+            formData.organization === 'Healthcare' &&
+            formData.username === 'patient' &&
+            formData.password === 'Patient@xyz'
+        ) {
+            localStorage.setItem('userRole', 'patient');
+            navigate('/patient-dashboard');
+        }
+        else {
+            alert('Invalid credentials.\nAdmin: Healthcare / admin / Admin@xyz\nDoctor: Healthcare / doctor / Doctor@xyz\nPatient: Healthcare / patient / Patient@xyz');
         }
     };
 

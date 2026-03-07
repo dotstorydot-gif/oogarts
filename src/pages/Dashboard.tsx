@@ -75,6 +75,7 @@ const DepartmentProgress = ({ label, value, color }: any) => (
 
 const Dashboard = () => {
     const navigate = useNavigate();
+    const userRole = localStorage.getItem('userRole') || 'admin';
 
     return (
         <Layout>
@@ -139,7 +140,10 @@ const Dashboard = () => {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    <Card className="col-span-1 lg:col-span-5 p-0 overflow-hidden bg-gradient-to-br from-indigo-50/50 to-sky-50/50 relative min-h-[500px]">
+                    <Card className={cn(
+                        "col-span-1 p-0 overflow-hidden bg-gradient-to-br from-indigo-50/50 to-sky-50/50 relative min-h-[500px]",
+                        userRole === 'admin' ? "lg:col-span-5" : "lg:col-span-12"
+                    )}>
                         <div className="p-6 lg:p-8 relative z-10 flex flex-col h-full text-left">
                             <div className="flex items-center justify-between mb-12">
                                 <div>
@@ -247,61 +251,63 @@ const Dashboard = () => {
                         </div>
                     </Card>
 
-                    <Card className="col-span-1 lg:col-span-7 flex flex-col min-h-[500px] text-left">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8 p-6 lg:p-8">
-                            <div>
-                                <h3 className="text-xl font-bold text-slate-900">Revenue Analytics</h3>
-                                <p className="text-sm text-slate-500">Income vs Expenses Overview</p>
-                            </div>
-                            <div className="flex bg-slate-50 p-1 rounded-xl">
-                                <button className="px-5 py-2 bg-white text-indigo-600 rounded-lg text-xs font-bold shadow-sm">Monthly</button>
-                                <button className="px-5 py-2 text-slate-400 rounded-lg text-xs font-bold">Yearly</button>
-                            </div>
-                        </div>
-
-                        <div className="flex-1 w-full min-h-[300px] px-8">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={data}>
-                                    <defs>
-                                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.15} />
-                                            <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                                    <YAxis hide />
-                                    <Tooltip
-                                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                                    />
-                                    <Area
-                                        type="monotone"
-                                        dataKey="value"
-                                        stroke="#4f46e5"
-                                        strokeWidth={4}
-                                        fillOpacity={1}
-                                        fill="url(#colorValue)"
-                                    />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </div>
-
-                        <div className="mt-6 p-6 lg:p-8 border-t border-slate-50 grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-10">
-                            <div>
-                                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Income</p>
-                                <div className="flex items-center gap-3">
-                                    <span className="text-2xl font-black text-slate-900">$ 7,112,324</span>
-                                    <span className="text-xs font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full">+12%</span>
+                    {userRole === 'admin' && (
+                        <Card className="col-span-1 lg:col-span-7 flex flex-col min-h-[500px] text-left">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8 p-6 lg:p-8">
+                                <div>
+                                    <h3 className="text-xl font-bold text-slate-900">Revenue Analytics</h3>
+                                    <p className="text-sm text-slate-500">Income vs Expenses Overview</p>
+                                </div>
+                                <div className="flex bg-slate-50 p-1 rounded-xl">
+                                    <button className="px-5 py-2 bg-white text-indigo-600 rounded-lg text-xs font-bold shadow-sm">Monthly</button>
+                                    <button className="px-5 py-2 text-slate-400 rounded-lg text-xs font-bold">Yearly</button>
                                 </div>
                             </div>
-                            <div>
-                                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Expenses</p>
-                                <div className="flex items-center gap-3">
-                                    <span className="text-2xl font-black text-slate-900">$ 4,965,476</span>
-                                    <span className="text-xs font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full">+4%</span>
+
+                            <div className="flex-1 w-full min-h-[300px] px-8">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={data}>
+                                        <defs>
+                                            <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.15} />
+                                                <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                                        <YAxis hide />
+                                        <Tooltip
+                                            contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                        />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="value"
+                                            stroke="#4f46e5"
+                                            strokeWidth={4}
+                                            fillOpacity={1}
+                                            fill="url(#colorValue)"
+                                        />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </div>
+
+                            <div className="mt-6 p-6 lg:p-8 border-t border-slate-50 grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-10">
+                                <div>
+                                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Income</p>
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-2xl font-black text-slate-900">$ 7,112,324</span>
+                                        <span className="text-xs font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full">+12%</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Expenses</p>
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-2xl font-black text-slate-900">$ 4,965,476</span>
+                                        <span className="text-xs font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full">+4%</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </Card>
+                        </Card>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8 text-left mb-10">

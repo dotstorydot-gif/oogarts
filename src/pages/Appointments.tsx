@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Card, Button } from '../components/layout/BaseUI';
-import { Calendar as CalendarIcon, Clock, Plus, User, Stethoscope, ChevronRight, X } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Plus, User, Stethoscope, ChevronRight, X, Video, MoreHorizontal } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Appointments = () => {
     const [showForm, setShowForm] = useState(false);
@@ -12,6 +13,8 @@ const Appointments = () => {
         time: '',
         type: 'General'
     });
+
+    const navigate = useNavigate();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -128,8 +131,10 @@ const Appointments = () => {
                                         <div>
                                             <p className="text-sm font-bold text-slate-900">Dr. Sarah Johnson</p>
                                             <div className="flex items-center gap-2 mt-0.5">
-                                                <Clock className="w-3 h-3 text-slate-400" />
-                                                <span className="text-[10px] font-medium text-slate-500">10:30 AM</span>
+                                                <Button variant="outline" className="flex-1 py-3 text-slate-500">Reschedule</Button>
+                                                <Button className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-200" onClick={() => navigate('/telemedicine')}>
+                                                    Join Telemedicine
+                                                </Button>
                                             </div>
                                         </div>
                                     </div>
