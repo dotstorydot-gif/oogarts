@@ -24,7 +24,7 @@ const DoctorReports = () => {
 
     return (
         <Layout>
-            <div className="max-w-[1200px] mx-auto text-left">
+            <div className="max-w-[1600px] text-left">
                 <div className="flex items-center justify-between mb-8">
                     <div>
                         <h1 className="text-3xl font-black text-slate-900 mb-2">Doctor Interface</h1>

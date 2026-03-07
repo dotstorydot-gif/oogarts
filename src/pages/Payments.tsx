@@ -20,7 +20,7 @@ const Payments = () => {
 
     return (
         <Layout>
-            <div className="max-w-[1240px] mx-auto text-left">
+            <div className="max-w-[1600px] text-left">
                 <div className="mb-10 flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-black text-slate-900 mb-2">Insurance & Billing</h1>

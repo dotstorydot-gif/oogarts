@@ -73,7 +73,7 @@ const Patients = () => {
 
     return (
         <Layout>
-            <div className="max-w-[1000px] mx-auto text-left py-8">
+            <div className="max-w-[1400px] text-left py-8">
                 {/* Header Section */}
                 <div className="mb-12 flex items-end justify-between">
                     <div>
