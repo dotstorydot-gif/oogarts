@@ -12,6 +12,7 @@ import Payments from './pages/Payments';
 import Inventory from './pages/Inventory';
 import HelpCenter from './pages/HelpCenter';
 import Reports from './pages/Reports';
+import DoctorReports from './pages/DoctorReports';
 
 function App() {
     // Simple auth check for now
@@ -52,6 +53,10 @@ function App() {
                 <Route
                     path="/doctors"
                     element={isAuthenticated ? <Doctors /> : <Navigate to="/login" />}
+                />
+                <Route
+                    path="/doctor-reports"
+                    element={isAuthenticated ? <DoctorReports /> : <Navigate to="/login" />}
                 />
                 <Route
                     path="/payments"
