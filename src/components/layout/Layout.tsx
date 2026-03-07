@@ -70,13 +70,17 @@ const UserProfile = () => (
 export const Layout = ({ children }: { children: React.ReactNode }) => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
+    const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
 
     return (
         <div className="flex min-h-screen bg-[#f1f5f9] font-sans selection:bg-indigo-100 selection:text-indigo-900">
             {/* Sidebar */}
             <aside className="w-[300px] bg-slate-50/50 backdrop-blur-3xl border-r border-slate-200/50 flex flex-col sticky top-0 h-screen py-8 shrink-0 z-50">
                 <div className="px-10 mb-12 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center shadow-2xl shadow-slate-200 rotate-3 transition-transform hover:rotate-0 cursor-pointer">
+                    <div
+                        onClick={() => navigate('/dashboard')}
+                        className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center shadow-2xl shadow-slate-200 rotate-3 transition-transform hover:rotate-0 cursor-pointer"
+                    >
                         <Activity className="text-white w-7 h-7" />
                     </div>
                     <div>
@@ -155,7 +159,11 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                     </div>
 
                     <div className="flex items-center gap-6">
-                        <Button variant="dark" className="gap-3 shadow-2xl shadow-slate-200 group">
+                        <Button
+                            variant="dark"
+                            className="gap-3 shadow-2xl shadow-slate-200 group"
+                            onClick={() => setIsQuickActionOpen(true)}
+                        >
                             <Plus className="w-6 h-6 group-hover:rotate-90 transition-transform duration-500" />
                             <span>Quick Action</span>
                         </Button>
@@ -165,7 +173,10 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                                 <Bell className="w-5 h-5 group-hover:animate-bounce" />
                                 <span className="absolute top-3.5 right-3.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white shadow-sm font-sans"></span>
                             </button>
-                            <button className="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-white hover:shadow-xl hover:shadow-indigo-50 transition-all group">
+                            <button
+                                onClick={() => navigate('/settings')}
+                                className="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-white hover:shadow-xl hover:shadow-indigo-50 transition-all group"
+                            >
                                 <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform duration-500" />
                             </button>
                         </div>
@@ -178,6 +189,36 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                 <div className="flex-1 overflow-y-auto p-16 custom-scrollbar bg-transparent">
                     {children}
                 </div>
+
+                {/* Quick Action Modal Placeholder */}
+                {isQuickActionOpen && (
+                    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-6">
+                        <Card className="w-full max-w-lg bg-white shadow-3xl animate-in zoom-in-95 duration-200">
+                            <div className="flex items-center justify-between mb-8">
+                                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Quick Action</h2>
+                                <Button variant="ghost" className="rounded-full w-12 h-12" onClick={() => setIsQuickActionOpen(false)}>×</Button>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Button variant="outline" className="h-32 flex-col gap-4 text-slate-600" onClick={() => { navigate('/patients'); setIsQuickActionOpen(false); }}>
+                                    <Users className="w-8 h-8" />
+                                    <span>Add Patient</span>
+                                </Button>
+                                <Button variant="outline" className="h-32 flex-col gap-4 text-slate-600" onClick={() => { navigate('/appointments'); setIsQuickActionOpen(false); }}>
+                                    <Calendar className="w-8 h-8" />
+                                    <span>Schedule Visit</span>
+                                </Button>
+                                <Button variant="outline" className="h-32 flex-col gap-4 text-slate-600" onClick={() => { navigate('/queue'); setIsQuickActionOpen(false); }}>
+                                    <Clock className="w-8 h-8" />
+                                    <span>New Token</span>
+                                </Button>
+                                <Button variant="outline" className="h-32 flex-col gap-4 text-slate-600" onClick={() => { navigate('/inventory'); setIsQuickActionOpen(false); }}>
+                                    <Package className="w-8 h-8" />
+                                    <span>Add Supply</span>
+                                </Button>
+                            </div>
+                        </Card>
+                    </div>
+                )}
             </main>
         </div>
     );

@@ -1,7 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Layout } from '../components/layout/Layout';
 import { Card, Button, Input, cn } from '../components/layout/BaseUI';
-import { UserSquare2, Search, UserPlus, MoreVertical, Edit2, Trash2, Mail, Phone, Calendar as CalendarIcon, ShieldCheck } from 'lucide-react';
+import {
+    Search,
+    UserPlus,
+    Edit2,
+    Mail,
+    Phone,
+    ShieldCheck,
+    Filter,
+    X
+} from 'lucide-react';
 
 interface Doctor {
     id: string;
@@ -14,9 +24,18 @@ interface Doctor {
 }
 
 const Doctors = () => {
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const filterFromUrl = searchParams.get('filter') || '';
+
+    const [searchTerm, setSearchTerm] = useState(filterFromUrl);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null);
+
+    useEffect(() => {
+        if (filterFromUrl) {
+            setSearchTerm(filterFromUrl);
+        }
+    }, [filterFromUrl]);
 
     const initialDoctors: Doctor[] = [
         {

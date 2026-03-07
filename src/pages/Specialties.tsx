@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { Layout } from '../components/layout/Layout';
 import { Card, Button, cn } from '../components/layout/BaseUI';
 import {
@@ -10,10 +11,13 @@ import {
     Users,
     Clock,
     UserCircle2,
-    ChevronRight
+    ChevronRight,
+    TrendingUp
 } from 'lucide-react';
 
 const Specialties = () => {
+    const navigate = useNavigate();
+
     const specialties = [
         {
             name: 'Cardiology',
@@ -78,29 +82,39 @@ const Specialties = () => {
         { label: 'Avg Wait Time', value: '38 min', icon: Clock },
     ];
 
+    const handleRoutePatient = (specialty: string) => {
+        // Navigate to doctors with specialty as search term
+        navigate(`/doctors?filter=${specialty}`);
+    };
+
     return (
         <Layout>
             <div className="max-w-[1600px] text-left">
-                <div className="mb-10 flex items-center justify-between">
+                <div className="mb-12 flex items-end justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900 mb-2 font-sans">Medical Specialties</h1>
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+                                <Stethoscope className="w-6 h-6" />
+                            </div>
+                            <span className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em]">Clinical Units</span>
+                        </div>
+                        <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2 font-sans">Medical Specialties</h1>
                         <p className="text-slate-500 font-medium">Route patients to the appropriate medical department</p>
                     </div>
                 </div>
 
-                {/* Quick Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+                {/* Quick Stats Grid */}
+                <div className="grid grid-cols-4 gap-6 mb-12">
                     {stats.map((stat) => (
-                        <Card key={stat.label} className="p-6 bg-white/50 backdrop-blur-sm border-slate-100/50">
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 bg-slate-50 rounded-2xl text-slate-400">
-                                    <stat.icon className="w-5 h-5" />
+                        <Card key={stat.label} className="p-8 bg-white border-slate-100 group hover:shadow-2xl hover:shadow-slate-100 transition-all duration-500">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="p-4 bg-slate-50 rounded-2xl text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                                    <stat.icon className="w-6 h-6" />
                                 </div>
-                                <div>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1.5">{stat.label}</p>
-                                    <h3 className="text-xl font-black text-slate-900 leading-none">{stat.value}</h3>
-                                </div>
+                                <TrendingUp className="w-5 h-5 text-emerald-500" />
                             </div>
+                            <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest leading-none mb-2">{stat.label}</p>
+                            <h3 className="text-3xl font-black text-slate-900 leading-none">{stat.value}</h3>
                         </Card>
                     ))}
                 </div>
@@ -108,34 +122,38 @@ const Specialties = () => {
                 {/* Specialties Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {specialties.map((spec) => (
-                        <Card key={spec.name} className="flex flex-col group hover:shadow-2xl hover:shadow-indigo-50/50 transition-all duration-500 overflow-hidden relative">
-                            <div className="flex items-center gap-5 mb-10">
-                                <div className={cn("w-20 h-20 rounded-[28px] flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg", spec.color)}>
-                                    <spec.icon className="w-10 h-10" />
+                        <Card key={spec.name} className="flex flex-col group hover:shadow-3xl hover:shadow-indigo-100/30 transition-all duration-700 overflow-hidden relative border-slate-100 p-10">
+                            <div className="flex items-center gap-6 mb-10">
+                                <div className={cn("w-24 h-24 rounded-[32px] flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-xl", spec.color)}>
+                                    <spec.icon className="w-12 h-12" />
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="text-2xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors tracking-tight">{spec.name}</h3>
-                                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mt-1">{spec.desc}</p>
+                                    <h3 className="text-2xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors tracking-tight leading-tight">{spec.name}</h3>
+                                    <p className="text-xs font-bold text-slate-400 mt-1.5">{spec.desc}</p>
                                 </div>
                             </div>
 
                             <div className="space-y-4 mb-10">
-                                <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50/50 border border-slate-100/50">
-                                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Active Doctors</span>
-                                    <span className="text-sm font-black text-slate-900">{spec.doctors}</span>
+                                <div className="flex items-center justify-between p-5 rounded-[24px] bg-slate-50/50 border border-slate-100/50 hover:bg-white transition-all">
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Active Doctors</span>
+                                    <span className="text-base font-black text-slate-900">{spec.doctors}</span>
                                 </div>
-                                <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50/50 border border-slate-100/50">
-                                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Total Queue</span>
-                                    <span className="text-sm font-black text-slate-900">{spec.queue}</span>
+                                <div className="flex items-center justify-between p-5 rounded-[24px] bg-slate-50/50 border border-slate-100/50 hover:bg-white transition-all">
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Total Queue</span>
+                                    <span className="text-base font-black text-slate-900">{spec.queue}</span>
                                 </div>
-                                <div className="flex items-center justify-between p-4 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100">
-                                    <span className="text-xs font-black uppercase tracking-widest">Est. Wait Time</span>
-                                    <span className="text-sm font-black">{spec.waitTime}</span>
+                                <div className="flex items-center justify-between p-5 rounded-[24px] bg-indigo-50 text-indigo-600 border border-indigo-100 hover:bg-white transition-all">
+                                    <span className="text-[10px] font-black uppercase tracking-widest leading-none">Est. Wait Time</span>
+                                    <span className="text-base font-black">{spec.waitTime}</span>
                                 </div>
                             </div>
 
-                            <Button variant="dark" className="w-full gap-2 group/btn">
-                                <span>Route Patient</span>
+                            <Button
+                                variant="dark"
+                                className="w-full h-14 gap-2 group/btn"
+                                onClick={() => handleRoutePatient(spec.name)}
+                            >
+                                <span className="text-[15px] font-black">Route Patient</span>
                                 <ChevronRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
                             </Button>
                         </Card>
@@ -145,5 +163,7 @@ const Specialties = () => {
         </Layout>
     );
 };
+
+export default Specialties;
 
 export default Specialties;
