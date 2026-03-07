@@ -8,6 +8,10 @@ import Specialties from './pages/Specialties';
 import Pharmacy from './pages/Pharmacy';
 import Laboratory from './pages/Laboratory';
 import Doctors from './pages/Doctors';
+import Payments from './pages/Payments';
+import Inventory from './pages/Inventory';
+import HelpCenter from './pages/HelpCenter';
+import Reports from './pages/Reports';
 
 function App() {
     // Simple auth check for now
@@ -48,6 +52,22 @@ function App() {
                 <Route
                     path="/doctors"
                     element={isAuthenticated ? <Doctors /> : <Navigate to="/login" />}
+                />
+                <Route
+                    path="/payments"
+                    element={isAuthenticated ? <Payments /> : <Navigate to="/login" />}
+                />
+                <Route
+                    path="/inventory"
+                    element={isAuthenticated ? <Inventory /> : <Navigate to="/login" />}
+                />
+                <Route
+                    path="/help"
+                    element={isAuthenticated ? <HelpCenter /> : <Navigate to="/login" />}
+                />
+                <Route
+                    path="/reports"
+                    element={isAuthenticated ? <Reports /> : <Navigate to="/login" />}
                 />
                 <Route path="/" element={<Navigate to="/dashboard" />} />
             </Routes>
