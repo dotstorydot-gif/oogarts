@@ -24,7 +24,7 @@ interface Doctor {
 }
 
 const Doctors = () => {
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams] = useSearchParams();
     const filterFromUrl = searchParams.get('filter') || '';
 
     const [searchTerm, setSearchTerm] = useState(filterFromUrl);

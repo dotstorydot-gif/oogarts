@@ -165,5 +165,3 @@ const Specialties = () => {
 };
 
 export default Specialties;
-
-export default Specialties;
