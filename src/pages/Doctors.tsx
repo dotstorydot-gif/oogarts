@@ -8,9 +8,7 @@ import {
     Edit2,
     Mail,
     Phone,
-    ShieldCheck,
-    Filter,
-    X
+    ShieldCheck
 } from 'lucide-react';
 
 interface Doctor {
