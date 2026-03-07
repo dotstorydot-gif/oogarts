@@ -83,24 +83,24 @@ const Doctors = () => {
 
     return (
         <Layout>
-            <div className="max-w-[1600px] text-left">
-                <div className="flex items-center justify-between mb-12">
+            <div className="max-w-[1600px] mx-auto text-left">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
                     <div>
-                        <h1 className="text-4xl font-black text-slate-900 mb-2 tracking-tighter">Staff Directory</h1>
+                        <h1 className="text-2xl sm:text-4xl font-black text-slate-900 mb-2 tracking-tighter italic">Staff Directory</h1>
                         <p className="text-slate-500 font-medium">Manage clinical personnel, specializations and availability status.</p>
                     </div>
-                    <Button variant="dark" className="gap-3 shadow-2xl shadow-slate-200" onClick={() => setIsAddModalOpen(true)}>
+                    <Button variant="dark" className="w-full sm:w-auto gap-3 shadow-2xl shadow-slate-200" onClick={() => setIsAddModalOpen(true)}>
                         <UserPlus className="w-5 h-5" />
                         <span>Add New Doctor</span>
                     </Button>
                 </div>
 
-                <Card className="mb-10 bg-slate-50/50 border-slate-100 p-8">
+                <Card className="mb-10 bg-slate-50/50 border-slate-100 p-6 lg:p-8">
                     <div className="relative max-w-xl group">
                         <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-indigo-600 transition-all" />
                         <input
                             type="text"
-                            placeholder="Universal search by name, specialty, or ID..."
+                            placeholder="Search by name or specialty..."
                             className="w-full bg-white border-2 border-slate-100 rounded-2xl pl-16 pr-8 py-4 focus:ring-4 focus:ring-indigo-50 focus:border-indigo-100 transition-all outline-none font-bold text-slate-900"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -108,7 +108,7 @@ const Doctors = () => {
                     </div>
                 </Card>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
                     {filteredDoctors.map(doctor => (
                         <Card key={doctor.id} className="group hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-500 overflow-hidden relative border-slate-100">
                             <div className="flex items-start justify-between mb-8">
@@ -162,21 +162,21 @@ const Doctors = () => {
 
                 {/* Edit/Add Modal Overlay */}
                 {(isAddModalOpen || editingDoctor) && (
-                    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-6 transition-all duration-300">
-                        <Card className="w-full max-w-2xl bg-white shadow-3xl animate-in zoom-in-95 duration-200">
-                            <div className="flex items-center justify-between mb-10">
+                    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-4 sm:p-6 transition-all duration-300">
+                        <Card className="w-full max-w-2xl bg-white shadow-3xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto p-6 sm:p-10">
+                            <div className="flex items-center justify-between mb-8 sm:mb-10">
                                 <div>
-                                    <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+                                    <h2 className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight">
                                         {isAddModalOpen ? 'Register New Doctor' : 'Update Staff Profile'}
                                     </h2>
-                                    <p className="text-slate-400 font-medium mt-1">
-                                        {isAddModalOpen ? 'Create a new medical professional record.' : `Modifying profile for ${editingDoctor?.name}`}
+                                    <p className="text-slate-400 font-medium mt-1 text-xs sm:text-base">
+                                        {isAddModalOpen ? 'Create a new medical record.' : `Modifying profile for ${editingDoctor?.name}`}
                                     </p>
                                 </div>
-                                <Button variant="ghost" className="rounded-full w-12 h-12" onClick={() => { setIsAddModalOpen(false); setEditingDoctor(null); }}>×</Button>
+                                <Button variant="ghost" className="rounded-full w-10 h-10 sm:w-12 sm:h-12" onClick={() => { setIsAddModalOpen(false); setEditingDoctor(null); }}>×</Button>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                                 <div className="space-y-6">
                                     <div>
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block px-2">Full Legal Name</label>
@@ -197,17 +197,17 @@ const Doctors = () => {
                                         <Input placeholder="+1 555-0000" defaultValue={editingDoctor?.phone} />
                                     </div>
                                     <div>
-                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block px-2">Availability Status</label>
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 block px-2">Status</label>
                                         <select className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3.5 text-sm font-bold focus:bg-white focus:ring-4 focus:ring-indigo-50 focus:border-indigo-200 outline-none transition-all appearance-none cursor-pointer">
                                             <option>Active</option>
                                             <option>On Leave</option>
                                             <option>Emergency Only</option>
                                         </select>
                                     </div>
-                                    <div className="pt-8 flex gap-4">
+                                    <div className="pt-4 sm:pt-8 flex gap-4">
                                         <Button variant="ghost" className="flex-1" onClick={() => { setIsAddModalOpen(false); setEditingDoctor(null); }}>Cancel</Button>
                                         <Button variant="dark" className="flex-1" onClick={() => { setIsAddModalOpen(false); setEditingDoctor(null); }}>
-                                            {isAddModalOpen ? 'Create Record' : 'Save Changes'}
+                                            {isAddModalOpen ? 'Create' : 'Save'}
                                         </Button>
                                     </div>
                                 </div>

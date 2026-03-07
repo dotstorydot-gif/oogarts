@@ -22,9 +22,9 @@ const Laboratory = () => {
 
     return (
         <Layout>
-            <div className="max-w-[1600px] text-left">
+            <div className="max-w-[1600px] mx-auto text-left">
                 {/* Header Section */}
-                <div className="flex items-end justify-between mb-12">
+                <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
                     <div>
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
@@ -32,7 +32,7 @@ const Laboratory = () => {
                             </div>
                             <span className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em]">Clinical Diagnostics</span>
                         </div>
-                        <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2">Laboratory OS</h1>
+                        <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2 font-sans">Laboratory OS</h1>
                         <p className="text-slate-500 font-medium">Real-time specimen tracking, automated pathology results, and equipment monitoring.</p>
                     </div>
                     <div className="flex items-center gap-4">
@@ -47,14 +47,14 @@ const Laboratory = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-4 gap-6 mb-12">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                     {[
                         { label: 'Active Tests', value: '42', icon: TestTube, color: 'bg-indigo-600' },
                         { label: 'Pending Review', value: '18', icon: ClipboardCheck, color: 'bg-emerald-500' },
                         { label: 'Critical Results', value: '03', icon: ShieldAlert, color: 'bg-rose-500' },
                         { label: 'Avail. Equipment', value: '94%', icon: FlaskConical, color: 'bg-sky-500' },
                     ].map((stat) => (
-                        <Card key={stat.label} variant="flat" className="p-8 group hover:translate-y-[-4px] transition-all duration-300">
+                        <Card key={stat.label} variant="flat" className="p-6 lg:p-8 group hover:translate-y-[-4px] transition-all duration-300">
                             <div className="flex items-center justify-between mb-6">
                                 <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-slate-200", stat.color)}>
                                     <stat.icon className="w-6 h-6 text-white" />
@@ -67,8 +67,8 @@ const Laboratory = () => {
                     ))}
                 </div>
 
-                <div className="grid grid-cols-12 gap-10">
-                    <div className="col-span-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+                    <div className="col-span-1 lg:col-span-8">
                         <Card className="p-0 overflow-hidden border-slate-100">
                             <div className="p-8 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
                                 <h3 className="font-black text-slate-900 text-lg tracking-tight">Active Specimens</h3>
@@ -79,8 +79,8 @@ const Laboratory = () => {
                             </div>
                             <div className="divide-y divide-slate-50">
                                 {activeTests.map((test) => (
-                                    <div key={test.id} className="p-8 hover:bg-slate-50 transition-colors flex items-center justify-between group">
-                                        <div className="flex items-center gap-6">
+                                    <div key={test.id} className="p-8 hover:bg-slate-50 transition-colors flex flex-col lg:flex-row lg:items-center justify-between group gap-6 lg:gap-0">
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-6">
                                             <div className="w-14 h-14 bg-white border border-slate-100 rounded-2xl flex items-center justify-center text-slate-300 group-hover:text-indigo-600 group-hover:border-indigo-100 transition-all shadow-sm">
                                                 <FlaskConical className="w-6 h-6" />
                                             </div>
@@ -89,15 +89,15 @@ const Laboratory = () => {
                                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">ID: {test.id} • Assigned: {test.tech}</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-12">
-                                            <div className="text-right">
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-6 lg:gap-12">
+                                            <div className="text-left sm:text-right">
                                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
                                                 <p className={cn(
                                                     "text-xs font-black uppercase",
                                                     test.status === 'Completed' ? 'text-emerald-500' : 'text-indigo-600'
                                                 )}>{test.status}</p>
                                             </div>
-                                            <div className="w-24 text-right">
+                                            <div className="w-24 text-left sm:text-right">
                                                 <span className={cn(
                                                     "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest",
                                                     test.priority === 'Critical' ? 'bg-rose-50 text-rose-600' : 'bg-slate-100 text-slate-500'
@@ -112,7 +112,7 @@ const Laboratory = () => {
                         </Card>
                     </div>
 
-                    <div className="col-span-4">
+                    <div className="col-span-1 lg:col-span-4">
                         <Card className="p-10 bg-indigo-50 border-indigo-100/50 relative overflow-hidden">
                             <div className="relative z-10 flex flex-col items-center text-center py-10">
                                 <div className="w-24 h-24 bg-white rounded-[40px] shadow-2xl shadow-indigo-200/50 flex items-center justify-center mb-10 group cursor-pointer hover:scale-105 transition-transform duration-500">

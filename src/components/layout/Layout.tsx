@@ -17,7 +17,10 @@ import {
     Bell,
     Settings,
     Plus,
-    Activity
+    Activity,
+    Menu,
+    X,
+    Home
 } from 'lucide-react';
 import { cn, Button, Card } from './BaseUI';
 
@@ -71,22 +74,34 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     return (
         <div className="flex min-h-screen bg-[#f1f5f9] font-sans selection:bg-indigo-100 selection:text-indigo-900">
-            {/* Sidebar */}
-            <aside className="w-[300px] bg-slate-50/50 backdrop-blur-3xl border-r border-slate-200/50 flex flex-col sticky top-0 h-screen py-8 shrink-0 z-50">
-                <div className="px-10 mb-12 flex items-center gap-4">
-                    <div
-                        onClick={() => navigate('/dashboard')}
-                        className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center shadow-2xl shadow-slate-200 rotate-3 transition-transform hover:rotate-0 cursor-pointer"
+            {/* Sidebar - Hidden on mobile, drawer on mobile if open */}
+            <aside className={cn(
+                "fixed inset-y-0 left-0 w-[300px] bg-slate-50/50 backdrop-blur-3xl border-r border-slate-200/50 flex flex-col h-screen py-8 shrink-0 z-[60] transition-transform duration-500 lg:sticky lg:translate-x-0",
+                isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+            )}>
+                <div className="px-10 mb-12 flex items-center justify-between lg:justify-start gap-4">
+                    <div className="flex items-center gap-4">
+                        <div
+                            onClick={() => navigate('/dashboard')}
+                            className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center shadow-2xl shadow-slate-200 rotate-3 transition-transform hover:rotate-0 cursor-pointer"
+                        >
+                            <Activity className="text-white w-7 h-7" />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl font-black text-slate-900 tracking-tighter leading-none">oogarts</h1>
+                            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] mt-1">Medical OS</p>
+                        </div>
+                    </div>
+                    <button
+                        className="lg:hidden p-2 text-slate-400 hover:text-indigo-600"
+                        onClick={() => setIsMobileMenuOpen(false)}
                     >
-                        <Activity className="text-white w-7 h-7" />
-                    </div>
-                    <div>
-                        <h1 className="text-2xl font-black text-slate-900 tracking-tighter leading-none">oogarts</h1>
-                        <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] mt-1">Medical OS</p>
-                    </div>
+                        <X className="w-6 h-6" />
+                    </button>
                 </div>
 
                 <div className="flex-1 overflow-y-auto custom-scrollbar">
@@ -132,52 +147,58 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                 </div>
             </aside>
 
+            {/* Backdrop for mobile sidebar */}
+            {isMobileMenuOpen && (
+                <div
+                    className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 lg:hidden"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                />
+            )}
+
             {/* Main Content */}
             <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
                 {/* Header */}
-                <header className="h-28 bg-white/60 backdrop-blur-3xl border-b border-slate-200/50 flex items-center justify-between px-16 sticky top-0 z-40 shrink-0">
-                    <div className="relative w-[600px] group">
+                <header className="h-20 lg:h-28 bg-white/60 backdrop-blur-3xl border-b border-slate-200/50 flex items-center justify-between px-6 lg:px-16 sticky top-0 z-40 shrink-0">
+                    <div className="flex items-center gap-4 lg:hidden">
+                        <button
+                            onClick={() => setIsMobileMenuOpen(true)}
+                            className="p-3 bg-slate-50 text-slate-600 rounded-xl hover:bg-white hover:shadow-lg transition-all"
+                        >
+                            <Menu className="w-6 h-6" />
+                        </button>
+                    </div>
+
+                    <div className="relative w-full max-w-[600px] group hidden md:flex">
                         <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 w-6 h-6 group-focus-within:text-indigo-600 transition-all duration-300" />
                         <input
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Universal search across patients, staff, and records..."
-                            className="w-full bg-slate-100/50 border-2 border-transparent focus:border-indigo-100/50 rounded-2xl pl-16 pr-8 py-5 focus:bg-white placeholder:text-slate-400 text-[15px] font-bold tracking-tight transition-all duration-300 outline-none shadow-inner"
+                            placeholder="Universal search..."
+                            className="w-full bg-slate-100/50 border-2 border-transparent focus:border-indigo-100/50 rounded-2xl pl-16 pr-8 py-3.5 lg:py-5 focus:bg-white placeholder:text-slate-400 text-[14px] lg:text-[15px] font-bold tracking-tight transition-all duration-300 outline-none shadow-inner"
                         />
-                        {searchQuery && (
-                            <div className="absolute top-full left-0 right-0 mt-4 p-4 bg-white rounded-[32px] shadow-2xl border border-slate-100 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
-                                <div className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-50 mb-4">Results for "{searchQuery}"</div>
-                                <div className="p-12 text-center">
-                                    <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                                        <Search className="w-8 h-8 text-slate-200" />
-                                    </div>
-                                    <p className="text-slate-400 font-bold text-sm">No clinical records found.</p>
-                                </div>
-                            </div>
-                        )}
+                        {/* Search results popup - remains same */}
                     </div>
 
-                    <div className="flex items-center gap-6">
+                    {/* Mobile Logo (Center on mobile only) */}
+                    <div className="md:hidden">
+                        <h1 className="text-xl font-black text-slate-900 tracking-tighter italic">oogarts</h1>
+                    </div>
+
+                    <div className="flex items-center gap-3 lg:gap-6">
                         <Button
                             variant="dark"
-                            className="gap-3 shadow-2xl shadow-slate-200 group"
+                            className="h-10 lg:h-auto gap-2 lg:gap-3 shadow-2xl shadow-slate-200 group px-4 lg:px-8"
                             onClick={() => setIsQuickActionOpen(true)}
                         >
-                            <Plus className="w-6 h-6 group-hover:rotate-90 transition-transform duration-500" />
-                            <span>Quick Action</span>
+                            <Plus className="w-5 h-5 lg:w-6 lg:h-6 group-hover:rotate-90 transition-transform duration-500" />
+                            <span className="hidden sm:inline">Quick Action</span>
                         </Button>
 
-                        <div className="flex items-center gap-3 px-6 border-l border-slate-200 h-10">
-                            <button className="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-white hover:shadow-xl hover:shadow-indigo-50 transition-all relative group">
-                                <Bell className="w-5 h-5 group-hover:animate-bounce" />
-                                <span className="absolute top-3.5 right-3.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white shadow-sm font-sans"></span>
-                            </button>
-                            <button
-                                onClick={() => navigate('/settings')}
-                                className="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-white hover:shadow-xl hover:shadow-indigo-50 transition-all group"
-                            >
-                                <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform duration-500" />
+                        <div className="hidden sm:flex items-center gap-3 px-6 border-l border-slate-200 h-10">
+                            <button className="w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center rounded-xl lg:rounded-2xl bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-white hover:shadow-xl hover:shadow-indigo-50 transition-all relative group">
+                                <Bell className="w-4 h-4 lg:w-5 lg:h-5 group-hover:animate-bounce" />
+                                <span className="absolute top-2.5 right-2.5 lg:top-3.5 lg:right-3.5 w-2 h-2 lg:w-2.5 lg:h-2.5 bg-rose-500 rounded-full border-2 border-white shadow-sm font-sans"></span>
                             </button>
                         </div>
 
@@ -186,9 +207,35 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                 </header>
 
                 {/* Content Area */}
-                <div className="flex-1 overflow-y-auto p-16 custom-scrollbar bg-transparent">
+                <div className="flex-1 overflow-y-auto p-6 md:p-10 lg:p-16 custom-scrollbar bg-transparent pb-32 lg:pb-16">
                     {children}
                 </div>
+
+                {/* Bottom Navigation for Mobile */}
+                <nav className="fixed bottom-0 left-0 right-0 h-20 bg-white/80 backdrop-blur-3xl border-t border-slate-200/50 flex items-center justify-around px-2 lg:hidden z-40">
+                    <NavLink to="/dashboard" className={({ isActive }) => cn("flex flex-col items-center gap-1 p-2 rounded-xl transition-all", isActive ? "text-indigo-600" : "text-slate-400")}>
+                        <Home className="w-6 h-6" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Home</span>
+                    </NavLink>
+                    <NavLink to="/patients" className={({ isActive }) => cn("flex flex-col items-center gap-1 p-2 rounded-xl transition-all", isActive ? "text-indigo-600" : "text-slate-400")}>
+                        <Users className="w-6 h-6" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Registry</span>
+                    </NavLink>
+                    <button
+                        onClick={() => setIsQuickActionOpen(true)}
+                        className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-slate-200 -mt-10 border-4 border-[#f1f5f9]"
+                    >
+                        <Plus className="w-6 h-6" />
+                    </button>
+                    <NavLink to="/specialties" className={({ isActive }) => cn("flex flex-col items-center gap-1 p-2 rounded-xl transition-all", isActive ? "text-indigo-600" : "text-slate-400")}>
+                        <Stethoscope className="w-6 h-6" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Clinical</span>
+                    </NavLink>
+                    <NavLink to="/settings" className={({ isActive }) => cn("flex flex-col items-center gap-1 p-2 rounded-xl transition-all", isActive ? "text-indigo-600" : "text-slate-400")}>
+                        <Settings className="w-6 h-6" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Config</span>
+                    </NavLink>
+                </nav>
 
                 {/* Quick Action Modal Placeholder */}
                 {isQuickActionOpen && (

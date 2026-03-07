@@ -72,9 +72,9 @@ const DepartmentProgress = ({ label, value, color }: any) => (
 const Dashboard = () => {
     return (
         <Layout>
-            <div className="max-w-[1600px] text-left">
+            <div className="max-w-[1600px] mx-auto text-left">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-12">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12">
                     <div>
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
@@ -97,7 +97,7 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-12">
                     <StatCard
                         icon={Users}
                         label="Total Patients"
@@ -132,9 +132,9 @@ const Dashboard = () => {
                     />
                 </div>
 
-                <div className="grid grid-cols-12 gap-8">
-                    <Card className="col-span-5 p-0 overflow-hidden bg-gradient-to-br from-indigo-50/50 to-sky-50/50 relative min-h-[500px]">
-                        <div className="p-8 relative z-10 flex flex-col h-full text-left">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    <Card className="col-span-1 lg:col-span-5 p-0 overflow-hidden bg-gradient-to-br from-indigo-50/50 to-sky-50/50 relative min-h-[500px]">
+                        <div className="p-6 lg:p-8 relative z-10 flex flex-col h-full text-left">
                             <div className="flex items-center justify-between mb-12">
                                 <div>
                                     <h3 className="text-xl font-bold text-slate-900">Patient Health</h3>
@@ -182,8 +182,8 @@ const Dashboard = () => {
                         </div>
                     </Card>
 
-                    <Card className="col-span-7 flex flex-col min-h-[500px] text-left">
-                        <div className="flex items-center justify-between mb-8 p-8">
+                    <Card className="col-span-1 lg:col-span-7 flex flex-col min-h-[500px] text-left">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8 p-6 lg:p-8">
                             <div>
                                 <h3 className="text-xl font-bold text-slate-900">Revenue Analytics</h3>
                                 <p className="text-sm text-slate-500">Income vs Expenses Overview</p>
@@ -220,7 +220,7 @@ const Dashboard = () => {
                             </ResponsiveContainer>
                         </div>
 
-                        <div className="mt-6 p-8 border-t border-slate-50 grid grid-cols-2 gap-10">
+                        <div className="mt-6 p-6 lg:p-8 border-t border-slate-50 grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-10">
                             <div>
                                 <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Income</p>
                                 <div className="flex items-center gap-3">
@@ -239,8 +239,8 @@ const Dashboard = () => {
                     </Card>
                 </div>
 
-                <div className="grid grid-cols-3 gap-8 mt-8 text-left mb-10">
-                    <Card className="col-span-1 p-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8 text-left mb-10">
+                    <Card className="col-span-1 p-6 lg:p-8">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="font-bold text-slate-900">Doctor Highlight</h3>
                             <MoreHorizontal className="w-5 h-5 text-slate-400" />
@@ -259,18 +259,18 @@ const Dashboard = () => {
                         </Button>
                     </Card>
 
-                    <Card className="col-span-2 p-8">
-                        <div className="flex items-center justify-between mb-8">
+                    <Card className="col-span-1 lg:col-span-2 p-6 lg:p-8">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
                             <div>
                                 <h3 className="font-bold text-slate-900 text-lg">Patient Flow Today</h3>
                                 <p className="text-sm text-slate-400 font-medium">Department distribution</p>
                             </div>
-                            <div className="flex bg-slate-50 p-1 rounded-xl">
+                            <div className="flex bg-slate-50 p-1 rounded-xl self-start sm:self-auto">
                                 <button className="px-4 py-1.5 bg-white shadow-sm rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-900">Weekly</button>
                                 <button className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">Monthly</button>
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-12 items-center">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-12 items-center">
                             <div className="h-[220px]">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <LineChart data={data}>

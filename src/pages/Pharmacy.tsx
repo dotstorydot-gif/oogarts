@@ -23,9 +23,9 @@ const Pharmacy = () => {
 
     return (
         <Layout>
-            <div className="max-w-[1600px] text-left">
+            <div className="max-w-[1600px] mx-auto text-left">
                 {/* Header Section */}
-                <div className="flex items-end justify-between mb-12">
+                <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
                     <div>
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
@@ -48,9 +48,9 @@ const Pharmacy = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-4 gap-6 mb-12">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                     {categories.map((cat) => (
-                        <Card key={cat.name} className="p-8 group hover:shadow-2xl hover:shadow-slate-100 transition-all duration-500 border-slate-100">
+                        <Card key={cat.name} className="p-6 lg:p-8 group hover:shadow-2xl hover:shadow-slate-100 transition-all duration-500 border-slate-100">
                             <div className="flex items-center justify-between mb-6">
                                 <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", cat.color)}>
                                     <Package className="w-6 h-6" />
@@ -66,25 +66,25 @@ const Pharmacy = () => {
                     ))}
                 </div>
 
-                <div className="grid grid-cols-12 gap-10">
-                    <div className="col-span-8 space-y-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+                    <div className="col-span-1 lg:col-span-8 space-y-8">
                         <Card className="p-6 bg-indigo-50 border-indigo-100/50">
-                            <div className="flex items-center gap-4">
-                                <div className="relative flex-1 group">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                <div className="relative flex-1 group w-full">
                                     <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 w-5 h-5 transition-colors" />
                                     <input
                                         placeholder="Search by NDC, brand name, generic or batch code..."
                                         className="w-full h-14 pl-16 bg-white border-2 border-transparent focus:border-indigo-100 rounded-2xl font-bold text-sm outline-none transition-all shadow-sm"
                                     />
                                 </div>
-                                <Button variant="outline" className="h-14 px-8 rounded-2xl gap-2 border-slate-200">
+                                <Button variant="outline" className="h-14 w-full sm:w-auto px-8 rounded-2xl gap-2 border-slate-200">
                                     <Filter className="w-5 h-5" />
                                     Filter
                                 </Button>
                             </div>
                         </Card>
 
-                        <Card className="min-h-[500px] flex flex-col items-center justify-center text-center p-20 bg-white/40 border-slate-100/50">
+                        <Card className="min-h-[400px] lg:min-h-[500px] flex flex-col items-center justify-center text-center p-8 lg:p-20 bg-white/40 border-slate-100/50">
                             <div className="w-24 h-24 bg-slate-50 rounded-[32px] flex items-center justify-center mb-8 animate-pulse">
                                 <Activity className="w-10 h-10 text-slate-200" />
                             </div>
@@ -97,8 +97,8 @@ const Pharmacy = () => {
                         </Card>
                     </div>
 
-                    <div className="col-span-4 space-y-8">
-                        <Card className="p-10 bg-slate-900 text-white relative overflow-hidden">
+                    <div className="col-span-1 lg:col-span-4 space-y-8">
+                        <Card className="p-6 lg:p-10 bg-slate-900 text-white relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -mr-16 -mt-16" />
                             <h3 className="text-xl font-bold mb-8 flex items-center gap-3">
                                 <AlertCircle className="w-6 h-6 text-indigo-400" />
@@ -124,7 +124,7 @@ const Pharmacy = () => {
                             </div>
                         </Card>
 
-                        <Card className="p-10 border-slate-100">
+                        <Card className="p-6 lg:p-10 border-slate-100">
                             <h3 className="text-lg font-bold text-slate-900 mb-8">External Connections</h3>
                             <div className="space-y-4">
                                 <Button variant="outline" className="w-full justify-between h-14 px-6 border-slate-100 hover:bg-slate-50">

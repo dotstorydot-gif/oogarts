@@ -89,8 +89,8 @@ const Specialties = () => {
 
     return (
         <Layout>
-            <div className="max-w-[1600px] text-left">
-                <div className="mb-12 flex items-end justify-between">
+            <div className="max-w-[1600px] mx-auto text-left">
+                <div className="mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-6">
                     <div>
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
@@ -98,13 +98,13 @@ const Specialties = () => {
                             </div>
                             <span className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em]">Clinical Units</span>
                         </div>
-                        <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2 font-sans">Medical Specialties</h1>
+                        <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tighter mb-2 font-sans">Medical Specialties</h1>
                         <p className="text-slate-500 font-medium">Route patients to the appropriate medical department</p>
                     </div>
                 </div>
 
                 {/* Quick Stats Grid */}
-                <div className="grid grid-cols-4 gap-6 mb-12">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                     {stats.map((stat) => (
                         <Card key={stat.label} className="p-8 bg-white border-slate-100 group hover:shadow-2xl hover:shadow-slate-100 transition-all duration-500">
                             <div className="flex items-center justify-between mb-6">
@@ -120,9 +120,9 @@ const Specialties = () => {
                 </div>
 
                 {/* Specialties Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
                     {specialties.map((spec) => (
-                        <Card key={spec.name} className="flex flex-col group hover:shadow-3xl hover:shadow-indigo-100/30 transition-all duration-700 overflow-hidden relative border-slate-100 p-10">
+                        <Card key={spec.name} className="flex flex-col group hover:shadow-3xl hover:shadow-indigo-100/30 transition-all duration-700 overflow-hidden relative border-slate-100 p-6 lg:p-10">
                             <div className="flex items-center gap-6 mb-10">
                                 <div className={cn("w-24 h-24 rounded-[32px] flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-xl", spec.color)}>
                                     <spec.icon className="w-12 h-12" />
