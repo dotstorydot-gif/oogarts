@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Card, Button, cn } from '../components/layout/BaseUI';
 import {
@@ -11,10 +12,16 @@ import {
     Save,
     Printer,
     Send,
-    CircleDot
+    CircleDot,
+    FileText,
+    Pill
 } from 'lucide-react';
 
 const DoctorReports = () => {
+    const [activeTab, setActiveTab] = useState('Examination');
+
+    const tabs = ['Examination', 'Diagnosis', 'Treatment', 'Orders'];
+
     return (
         <Layout>
             <div className="max-w-[1200px] mx-auto text-left">
@@ -112,48 +119,115 @@ const DoctorReports = () => {
                     {/* Right Column: Medical Report Modules */}
                     <div className="col-span-8 space-y-6">
                         <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-2xl w-fit mb-4">
-                            {['Examination', 'Diagnosis', 'Treatment', 'Orders'].map((tab) => (
-                                <button key={tab} className={cn(
-                                    "px-6 py-2.5 rounded-xl text-sm font-bold transition-all",
-                                    tab === 'Examination' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
-                                )}>
+                            {tabs.map((tab) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
+                                    className={cn(
+                                        "px-6 py-2.5 rounded-xl text-sm font-bold transition-all",
+                                        activeTab === tab ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                                    )}
+                                >
                                     {tab}
                                 </button>
                             ))}
                         </div>
 
-                        <Card className="p-10 space-y-10">
-                            <div>
-                                <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-3">
-                                    <Stethoscope className="w-6 h-6 text-indigo-600" />
-                                    <span>Clinical Examination</span>
-                                </h3>
-                                <textarea
-                                    className="w-full bg-slate-50 border-none rounded-[32px] p-8 min-h-[200px] text-lg font-medium text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
-                                    placeholder="Enter physical examination details..."
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-8 pt-10 border-t border-slate-100">
-                                <div>
-                                    <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Diagnosis</h4>
-                                    <input
-                                        type="text"
-                                        className="w-full bg-slate-50 border-none rounded-2xl p-4 font-bold text-slate-900"
-                                        placeholder="Add ICD-10 code or description"
-                                    />
-                                </div>
-                                <div>
-                                    <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Lab Orders</h4>
-                                    <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <CircleDot className="w-4 h-4 text-indigo-600" />
-                                            <span className="text-sm font-bold text-indigo-900">Comprehensive Metabolic Panel</span>
-                                        </div>
-                                        <Button variant="ghost" className="h-8 p-1 text-slate-400">Add</Button>
+                        <Card className="p-10 min-h-[500px]">
+                            {activeTab === 'Examination' && (
+                                <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2">
+                                    <div>
+                                        <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-3">
+                                            <Stethoscope className="w-6 h-6 text-indigo-600" />
+                                            <span>Clinical Examination</span>
+                                        </h3>
+                                        <textarea
+                                            className="w-full bg-slate-50 border-none rounded-[32px] p-8 min-h-[300px] text-lg font-medium text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+                                            placeholder="Enter physical examination details..."
+                                        />
                                     </div>
                                 </div>
-                            </div>
+                            )}
+
+                            {activeTab === 'Diagnosis' && (
+                                <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2">
+                                    <div>
+                                        <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-3">
+                                            <FileText className="w-6 h-6 text-indigo-600" />
+                                            <span>Diagnosis & ICD-10 Coding</span>
+                                        </h3>
+                                        <div className="space-y-4">
+                                            <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                                                <input
+                                                    type="text"
+                                                    className="w-full bg-transparent border-none p-0 font-bold text-lg text-slate-900 focus:ring-0 outline-none"
+                                                    placeholder="Search ICD-10 code (e.g. I10 for Hypertension)..."
+                                                />
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                <span className="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl text-sm font-bold flex items-center gap-2">
+                                                    I10 - Essential Hypertension
+                                                    <CircleDot className="w-3 h-3" />
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Doctor's Impression</h4>
+                                        <textarea
+                                            className="w-full bg-slate-50 border-none rounded-3xl p-6 min-h-[150px] font-medium text-slate-700 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+                                            placeholder="Enter clinical impression..."
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'Treatment' && (
+                                <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2">
+                                    <div>
+                                        <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-3">
+                                            <Pill className="w-6 h-6 text-indigo-600" />
+                                            <span>Treatment Plan & Prescriptions</span>
+                                        </h3>
+                                        <div className="p-6 bg-indigo-50/50 rounded-3xl border border-indigo-100/50 border-dashed text-center">
+                                            <Button className="bg-white text-indigo-600 border border-indigo-100 hover:bg-slate-50 font-bold rounded-2xl">
+                                                + Add New Prescription
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Patient Education/Advice</h4>
+                                        <textarea
+                                            className="w-full bg-slate-50 border-none rounded-3xl p-6 min-h-[150px] font-medium text-slate-700 focus:ring-4 focus:ring-indigo-100 transition-all outline-none"
+                                            placeholder="Instructions for the patient..."
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'Orders' && (
+                                <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2">
+                                    <div>
+                                        <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-3">
+                                            <CircleDot className="w-6 h-6 text-indigo-600" />
+                                            <span>Laboratory & Radiology Orders</span>
+                                        </h3>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            {[
+                                                'Complete Blood Count',
+                                                'Lipid Profile',
+                                                'Chest X-Ray',
+                                                'ECG/EKG'
+                                            ].map((test) => (
+                                                <div key={test} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between hover:border-indigo-200 transition-colors cursor-pointer group">
+                                                    <span className="text-sm font-bold text-slate-700">{test}</span>
+                                                    <Button variant="ghost" className="h-8 p-1 text-slate-400 group-hover:text-indigo-600">Add</Button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </Card>
 
                         <div className="flex justify-end gap-3 mt-8">
