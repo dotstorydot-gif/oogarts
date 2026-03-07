@@ -14,7 +14,9 @@ import {
     Send,
     CircleDot,
     FileText,
-    Pill
+    Pill,
+    Plus,
+    Search
 } from 'lucide-react';
 
 const DoctorReports = () => {

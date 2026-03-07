@@ -19,7 +19,7 @@ import {
     Plus,
     Activity
 } from 'lucide-react';
-import { cn } from './BaseUI';
+import { cn, Button } from './BaseUI';
 
 const SidebarItem = ({ to, icon: Icon, label, hasSubmenu = false }: any) => {
     const location = useLocation();

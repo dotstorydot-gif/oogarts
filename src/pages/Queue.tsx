@@ -22,88 +22,90 @@ const Queue = () => {
 
     return (
         <Layout>
-            <div className="max-w-[1200px] mx-auto text-left">
-                <div className="flex items-center justify-between mb-10">
+            <div className="max-w-[1400px] mx-auto">
+                <div className="flex items-center justify-between mb-12">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900 mb-2">Queue Management</h1>
-                        <p className="text-slate-500">Real-time patient flow and ticket status.</p>
+                        <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Queue Management</h1>
+                        <p className="text-slate-500 font-bold text-sm">Real-time patient flow and automated ticket status tracking.</p>
                     </div>
-                    <div className="flex gap-3">
-                        <Button variant="outline" size="sm">Print All Tickets</Button>
-                        <Button size="sm">Generate New Ticket</Button>
+                    <div className="flex gap-4">
+                        <Button variant="outline" className="gap-2">
+                            <span className="text-sm">Print All Tickets</span>
+                        </Button>
+                        <Button variant="dark" className="gap-2 shadow-2xl shadow-slate-200">
+                            <Plus size={20} />
+                            <span>Generate New Ticket</span>
+                        </Button>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-12 gap-8">
+                <div className="grid grid-cols-12 gap-10">
                     {/* Main Queue List */}
-                    <div className="col-span-8 space-y-6">
-                        <div className="flex items-center gap-4 bg-slate-100 p-1.5 rounded-2xl w-fit mb-6">
-                            <button
-                                onClick={() => setActiveTab('active')}
-                                className={cn(
-                                    "px-6 py-2 rounded-xl text-sm font-bold transition-all",
-                                    activeTab === 'active' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500"
-                                )}
-                            >
-                                Active Queue (12)
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('completed')}
-                                className={cn(
-                                    "px-6 py-2 rounded-xl text-sm font-bold transition-all",
-                                    activeTab === 'completed' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500"
-                                )}
-                            >
-                                Completed (45)
-                            </button>
+                    <div className="col-span-8 space-y-8">
+                        <div className="flex items-center gap-2 bg-slate-200/50 p-1.5 rounded-2xl w-fit">
+                            {[
+                                { id: 'active', label: 'Active Queue', count: 12 },
+                                { id: 'completed', label: 'Completed', count: 45 }
+                            ].map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={cn(
+                                        "px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300",
+                                        activeTab === tab.id ? "bg-white text-indigo-600 shadow-xl shadow-slate-200" : "text-slate-500 hover:text-slate-700"
+                                    )}
+                                >
+                                    {tab.label} ({tab.count})
+                                </button>
+                            ))}
                         </div>
 
-                        <Card className="p-0 overflow-hidden">
+                        <Card className="p-0 overflow-hidden border-slate-100 shadow-2xl shadow-slate-100/50">
                             <div className="overflow-x-auto">
-                                <table className="w-full text-left font-sans">
+                                <table className="w-full text-left font-sans border-collapse">
                                     <thead>
                                         <tr className="bg-slate-50/50 border-b border-slate-100">
-                                            <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Token ID</th>
-                                            <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Patient Name</th>
-                                            <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Time</th>
-                                            <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
-                                            <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Actions</th>
+                                            <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Token ID</th>
+                                            <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Patient Name</th>
+                                            <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Time</th>
+                                            <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Status</th>
+                                            <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-slate-100">
+                                    <tbody className="divide-y divide-slate-50">
                                         {patients.map((p) => (
-                                            <tr key={p.id} className="hover:bg-slate-50/50 transition-colors group">
-                                                <td className="px-6 py-5">
-                                                    <span className="font-bold text-slate-900">{p.id}</span>
+                                            <tr key={p.id} className="hover:bg-indigo-50/30 transition-colors group">
+                                                <td className="px-8 py-6">
+                                                    <span className="font-black text-slate-900 text-base tracking-tight">{p.id}</span>
                                                 </td>
-                                                <td className="px-6 py-5">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs">
+                                                <td className="px-8 py-6">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center font-black text-sm group-hover:bg-white group-hover:shadow-md transition-all">
                                                             {p.name.charAt(0)}
                                                         </div>
                                                         <div>
-                                                            <p className="font-bold text-slate-900 text-sm">{p.name}</p>
-                                                            <p className="text-[10px] text-slate-500 font-medium">{p.dept}</p>
+                                                            <p className="font-black text-slate-900 text-[15px] tracking-tight">{p.name}</p>
+                                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5">{p.dept}</p>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-5">
-                                                    <span className="text-sm font-medium text-slate-600">{p.time}</span>
+                                                <td className="px-8 py-6">
+                                                    <span className="text-sm font-bold text-slate-500">{p.time}</span>
                                                 </td>
-                                                <td className="px-6 py-5">
+                                                <td className="px-8 py-6">
                                                     <span className={cn(
-                                                        "px-3 py-1 rounded-full text-[10px] font-bold uppercase",
-                                                        p.status === 'In Consultation' ? "bg-indigo-50 text-indigo-600" :
-                                                            p.status === 'Waiting' ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"
+                                                        "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border",
+                                                        p.status === 'In Consultation' ? "bg-indigo-50 text-indigo-600 border-indigo-100" :
+                                                            p.status === 'Waiting' ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-rose-50 text-rose-600 border-rose-100"
                                                     )}>
                                                         {p.status}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-5">
-                                                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <Button variant="ghost" className="w-8 h-8 p-0 min-h-0"><Play className="w-4 h-4" /></Button>
-                                                        <Button variant="ghost" className="w-8 h-8 p-0 min-h-0"><CheckCircle2 className="w-4 h-4" /></Button>
-                                                        <Button variant="ghost" className="w-8 h-8 p-0 min-h-0"><MoreVertical className="w-4 h-4" /></Button>
+                                                <td className="px-8 py-6">
+                                                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
+                                                        <Button variant="ghost" size="sm" className="w-10 h-10 p-0 rounded-xl"><Play size={18} /></Button>
+                                                        <Button variant="ghost" size="sm" className="w-10 h-10 p-0 rounded-xl"><CheckCircle2 size={18} /></Button>
+                                                        <Button variant="ghost" size="sm" className="w-10 h-10 p-0 rounded-xl"><MoreVertical size={18} /></Button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -116,45 +118,62 @@ const Queue = () => {
 
                     {/* Side Info */}
                     <div className="col-span-4 space-y-8">
-                        <Card className="bg-indigo-600 border-0 relative overflow-hidden text-white">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
+                        <Card className="bg-indigo-600 border-0 relative overflow-hidden text-white shadow-2xl shadow-indigo-100/50 p-10">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl animate-pulse" />
                             <div className="relative z-10">
-                                <p className="text-white/70 text-sm font-bold uppercase tracking-widest mb-2">Currently Serving</p>
-                                <h2 className="text-4xl font-black mb-1">Q-001</h2>
-                                <p className="text-lg font-bold">Sarah Ahmed</p>
-                                <div className="mt-6 pt-6 border-t border-white/10 flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                                        <span className="text-sm font-medium">Room 302</span>
+                                <p className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mb-6 shadow-sm">Currently Serving</p>
+                                <div className="space-y-2 mb-10">
+                                    <h2 className="text-6xl font-black tracking-tighter">Q-001</h2>
+                                    <p className="text-xl font-black text-indigo-100">{patients[0].name}</p>
+                                </div>
+                                <div className="pt-8 border-t border-white/10 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
+                                        <span className="text-sm font-black uppercase tracking-widest text-white/90">Room 302</span>
                                     </div>
-                                    <Button variant="outline" size="sm" className="text-white border-white/20 hover:bg-white/10">Next Patient</Button>
+                                    <Button variant="glass" size="sm" className="font-black text-[10px] border-white/20">NEXT PATIENT</Button>
                                 </div>
                             </div>
                         </Card>
 
                         <Card>
-                            <h3 className="font-bold text-slate-900 mb-6">Queue Insights</h3>
-                            <div className="space-y-6">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-slate-50 rounded-xl text-slate-400"><Clock className="w-5 h-5" /></div>
-                                        <span className="text-sm font-medium text-slate-600">Avg. Wait Time</span>
-                                    </div>
-                                    <span className="font-bold text-slate-900">12 min</span>
+                            <div className="flex items-center gap-3 mb-10">
+                                <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center">
+                                    <Users className="w-5 h-5 text-slate-400" />
                                 </div>
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-slate-50 rounded-xl text-slate-400"><Users className="w-5 h-5" /></div>
-                                        <span className="text-sm font-medium text-slate-600">Patients Waiting</span>
+                                <h3 className="font-black text-slate-900 tracking-tight">Queue Insights</h3>
+                            </div>
+
+                            <div className="space-y-8">
+                                <div className="flex items-center justify-between group">
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-3 bg-slate-50 rounded-2xl text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors"><Clock className="w-5 h-5" /></div>
+                                        <div>
+                                            <p className="text-sm font-black text-slate-900 tracking-tight">Avg. Wait Time</p>
+                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Global average</p>
+                                        </div>
                                     </div>
-                                    <span className="font-bold text-slate-900">08</span>
+                                    <span className="text-lg font-black text-slate-900">12m</span>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-slate-50 rounded-xl text-slate-400"><AlertCircle className="w-5 h-5" /></div>
-                                        <span className="text-sm font-medium text-slate-600">Emergency Case</span>
+                                <div className="flex items-center justify-between group">
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-3 bg-slate-50 rounded-2xl text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors"><Users className="w-5 h-5" /></div>
+                                        <div>
+                                            <p className="text-sm font-black text-slate-900 tracking-tight">Patients Waiting</p>
+                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">In registry</p>
+                                        </div>
                                     </div>
-                                    <span className="font-bold text-rose-500">01</span>
+                                    <span className="text-lg font-black text-slate-900">08</span>
+                                </div>
+                                <div className="flex items-center justify-between group">
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-3 bg-slate-50 rounded-2xl text-slate-400 group-hover:bg-rose-50 group-hover:text-rose-600 transition-colors"><AlertCircle className="w-5 h-5" /></div>
+                                        <div>
+                                            <p className="text-sm font-black text-slate-900 tracking-tight">Critical Case</p>
+                                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Immediate priority</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-lg font-black text-rose-500">01</span>
                                 </div>
                             </div>
                         </Card>
