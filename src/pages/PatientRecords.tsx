@@ -221,7 +221,9 @@ const PatientRecords = () => {
                                 ))}
                             </Card>
                         </div>
-                        </div>
+                    </div>
+                </div>
+            </div>
                     </>
                 )}
             </div>
