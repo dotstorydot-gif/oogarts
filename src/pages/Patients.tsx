@@ -1,514 +1,280 @@
 import { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Card, Button, cn } from '../components/layout/BaseUI';
-import {
-    User,
-    Users,
-    Stethoscope,
-    FileText,
-    Shield,
-    CheckCircle2,
-    Trash2,
-    Upload,
-    ChevronRight,
-    ChevronLeft,
-    Heart,
-    Activity,
-    Info
-} from 'lucide-react';
+import { Users, Search, Plus, FileText, Activity, Clock, ChevronRight, Pill, Calendar, Mail, Phone, MapPin, X, Loader2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { Patient } from '../lib/mockData';
+import { useEffect } from 'react';
 
 const Patients = () => {
-    const [step, setStep] = useState(1);
-    const [formData, setFormData] = useState({
-        // Step 1: Personal
-        firstName: '',
-        lastName: '',
-        dob: '',
-        gender: '',
-        phone: '',
-        email: '',
-        address: '',
-        emergencyName: '',
-        emergencyPhone: '',
-        // Step 2: Medical
-        allergies: [] as string[],
-        medications: [] as string[],
-        conditions: [] as string[],
-        surgeries: [] as string[],
-        familyHistory: '',
-        // Step 3: Insurance
-        provider: '',
-        policyNumber: '',
-        groupNumber: '',
-        // Step 4: Visit
-        reason: '',
-        symptoms: '',
-        urgency: 'routine',
-        specialty: ''
-    });
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+    const [patients, setPatients] = useState<Patient[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const [tempItem, setTempItem] = useState({ type: '', value: '' });
+    useEffect(() => {
+        const fetchPatients = async () => {
+            setIsLoading(true);
+            try {
+                // Fetch patients
+                const { data: patientsData, error: pError } = await supabase.from('patients').select('*');
+                if (pError) throw pError;
 
-    const addItem = (type: 'allergies' | 'medications' | 'conditions' | 'surgeries') => {
-        if (!tempItem.value) return;
-        setFormData({ ...formData, [type]: [...formData[type], tempItem.value] });
-        setTempItem({ type: '', value: '' });
-    };
+                // For a real app we'd fetch relations on demand, but for syncing with our old UI:
+                const { data: rxData } = await supabase.from('prescriptions').select('*');
+                const { data: histData } = await supabase.from('medical_history').select('*');
+                const { data: labData } = await supabase.from('lab_results').select('*');
 
-    const removeItem = (type: 'allergies' | 'medications' | 'conditions' | 'surgeries', index: number) => {
-        const newList = [...formData[type]];
-        newList.splice(index, 1);
-        setFormData({ ...formData, [type]: newList });
-    };
+                const mappedPatients: Patient[] = (patientsData || []).map((p: any) => ({
+                    id: p.id,
+                    name: p.name,
+                    email: p.email,
+                    phone: p.phone,
+                    dob: p.dob,
+                    gender: p.gender,
+                    bloodType: p.blood_type,
+                    image: p.image,
+                    lastVisit: p.last_visit,
+                    status: p.status,
+                    allergies: p.allergies || [],
+                    history: (histData || []).filter((h: any) => h.patient_id === p.id),
+                    prescriptions: (rxData || []).filter((rx: any) => rx.patient_id === p.id).map((rx: any) => ({...rx, daysLeft: rx.days_left})),
+                    labs: (labData || []).filter((l: any) => l.patient_id === p.id)
+                }));
 
-    const nextStep = () => setStep(s => Math.min(s + 1, 5));
-    const prevStep = () => setStep(s => Math.max(s - 1, 1));
+                setPatients(mappedPatients);
+            } catch (error) {
+                console.error("Error fetching patients:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
-    const steps = [
-        { id: 1, label: 'Personal Information', icon: User, desc: 'Contact & ID' },
-        { id: 2, label: 'Medical History', icon: Stethoscope, desc: 'Past & Present' },
-        { id: 3, label: 'Insurance Details', icon: Shield, desc: 'Coverage Info' },
-        { id: 4, label: 'Visit Information', icon: FileText, desc: 'Triage Details' },
-        { id: 5, label: 'Review & Submit', icon: CheckCircle2, desc: 'Final Check' },
-    ];
+        fetchPatients();
+    }, []);
+
+    const filteredPatients = patients.filter(p => 
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.id.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     return (
         <Layout>
-            <div className="max-w-[1600px] mx-auto text-left">
+            <div className="max-w-[1400px] mx-auto text-left">
                 {/* Header Section */}
-                <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8">
                     <div>
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
-                                <Users className="w-6 h-6" />
-                            </div>
-                            <span className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em]">Patient Records</span>
-                        </div>
-                        <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tighter mb-2 italic">Onboarding Registry</h1>
-                        <p className="text-slate-500 font-medium">Digital intake and clinical registry for new patient enrollment.</p>
+                        <h1 className="text-3xl font-black text-slate-900 tracking-tighter mb-2">Patient Directory</h1>
+                        <p className="text-slate-500 font-medium">Search and manage patient health records.</p>
                     </div>
-                    <div className="text-left lg:text-right pb-1">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Onboarding Progress</p>
-                        <div className="flex items-center gap-4">
-                            <span className="text-2xl sm:text-3xl font-black text-indigo-600 tracking-tighter">{Math.round((step / 5) * 100)}%</span>
-                            <div className="w-24 sm:w-32 h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                                <div
-                                    className="h-full bg-indigo-600 transition-all duration-700 ease-out"
-                                    style={{ width: `${(step / 5) * 100}%` }}
-                                />
-                            </div>
+                    <div className="flex items-center gap-4">
+                        <div className="relative w-full sm:w-80">
+                            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <input
+                                type="text"
+                                placeholder="Search patients by name or ID..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full bg-white border-2 border-slate-100 rounded-xl pl-12 pr-4 py-3 text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                            />
                         </div>
+                        <Button className="bg-slate-900 hover:bg-slate-800 text-white shrink-0">
+                            <Plus className="w-4 h-4 mr-2" /> New Patient
+                        </Button>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
-                    {/* Sidebar Steps Navigation */}
-                    <div className="col-span-1 lg:col-span-3 space-y-4">
-                        {steps.map((s) => (
-                            <div
-                                key={s.id}
-                                className={cn(
-                                    "p-5 rounded-[24px] border transition-all duration-300 relative overflow-hidden group",
-                                    s.id === step
-                                        ? "bg-white border-indigo-100 shadow-xl shadow-indigo-50"
-                                        : s.id < step
-                                            ? "bg-slate-50/50 border-transparent opacity-60"
-                                            : "bg-white/40 border-slate-100 cursor-not-allowed"
-                                )}
-                            >
-                                {s.id === step && (
-                                    <div className="absolute left-0 top-0 w-1 h-full bg-indigo-600" />
-                                )}
-                                <div className="flex items-center gap-4">
-                                    <div className={cn(
-                                        "w-10 h-10 rounded-xl flex items-center justify-center transition-colors shrink-0",
-                                        s.id === step ? "bg-indigo-50 text-indigo-600" : "bg-slate-100 text-slate-400"
-                                    )}>
-                                        <s.icon className="w-5 h-5" />
-                                    </div>
-                                    <div className="min-w-0">
-                                        <p className={cn(
-                                            "text-[10px] font-black uppercase tracking-[0.1em]",
-                                            s.id === step ? "text-indigo-600" : "text-slate-400"
-                                        )}>Step {s.id}</p>
-                                        <p className={cn(
-                                            "text-xs font-bold truncate",
-                                            s.id === step ? "text-slate-900" : "text-slate-400"
-                                        )}>{s.label}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-
-                        <div className="p-6 bg-indigo-900 rounded-[32px] text-white mt-8 lg:mt-12 relative overflow-hidden hidden lg:block">
-                            <Activity className="absolute -right-4 -bottom-4 w-24 h-24 text-white/10" />
-                            <Info className="w-5 h-5 text-indigo-300 mb-4" />
-                            <p className="text-xs font-bold leading-relaxed mb-4">Complete all required fields marked with an asterisk (*)</p>
-                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-[10px] font-black">
-                                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-                                AUTOSAVING
-                            </div>
-                        </div>
+                {isLoading ? (
+                    <div className="flex flex-col items-center justify-center py-20">
+                        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin mb-4" />
+                        <p className="text-slate-500 font-medium">Loading patients securely...</p>
                     </div>
+                ) : selectedPatient ? (
+                    /* Detail View */
+                    <div className="animate-in slide-in-from-right-4 duration-300">
+                        <div className="mb-6 flex items-center justify-between">
+                            <Button variant="ghost" onClick={() => setSelectedPatient(null)} className="text-slate-500 hover:text-slate-900">
+                                ← Back to Directory
+                            </Button>
+                            <span className={cn("px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest", selectedPatient.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600')}>
+                                {selectedPatient.status} Status
+                            </span>
+                        </div>
 
-                    {/* Main Form Content */}
-                    <div className="col-span-1 lg:col-span-9 flex flex-col gap-8">
-                        <Card className="p-6 sm:p-10 md:p-14 bg-white/70 backdrop-blur-xl border-white shadow-2xl shadow-indigo-100/20 min-h-[500px] lg:min-h-[600px] flex flex-col">
-                            {step === 1 && (
-                                <div className="animate-in fade-in slide-in-from-right-4 duration-500 flex-1">
-                                    <div className="mb-10">
-                                        <h2 className="text-2xl font-black text-slate-900 mb-2">Personal Information</h2>
-                                        <p className="text-slate-500 text-sm font-medium">Please provide accurate identification details.</p>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 sm:gap-y-8">
-                                        {[
-                                            { label: 'First Name *', key: 'firstName', placeholder: 'Jack' },
-                                            { label: 'Last Name *', key: 'lastName', placeholder: 'Chain' },
-                                            { label: 'Date of Birth *', key: 'dob', type: 'date' },
-                                            { label: 'Gender *', key: 'gender', type: 'select', options: ['Male', 'Female', 'Other'] },
-                                            { label: 'Phone Number *', key: 'phone', placeholder: '(555) 000-0000' },
-                                            { label: 'Email Address', key: 'email', placeholder: 'patient@email.com' },
-                                        ].map((field) => (
-                                            <div key={field.key} className="col-span-1">
-                                                <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 sm:mb-3">{field.label}</label>
-                                                {field.type === 'select' ? (
-                                                    <select
-                                                        className="w-full bg-slate-50/50 border-2 border-transparent rounded-[20px] px-4 sm:px-6 py-3 sm:py-4 focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-50 transition-all font-bold text-slate-900 appearance-none outline-none"
-                                                        value={formData[field.key as keyof typeof formData] as string}
-                                                        onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
-                                                    >
-                                                        <option value="">Select</option>
-                                                        {field.options?.map(opt => <option key={opt} value={opt.toLowerCase()}>{opt}</option>)}
-                                                    </select>
-                                                ) : (
-                                                    <input
-                                                        type={field.type || 'text'}
-                                                        placeholder={field.placeholder}
-                                                        className="w-full bg-slate-50/50 border-2 border-transparent rounded-[20px] px-4 sm:px-6 py-3 sm:py-4 focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-50 transition-all font-bold text-slate-900 outline-none"
-                                                        value={formData[field.key as keyof typeof formData] as string}
-                                                        onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
-                                                    />
-                                                )}
-                                            </div>
-                                        ))}
-                                        <div className="col-span-1 md:col-span-2">
-                                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Residential Address *</label>
-                                            <textarea
-                                                placeholder="Enter full address"
-                                                className="w-full bg-slate-50/50 border-2 border-transparent rounded-[24px] px-6 py-5 focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-50 transition-all font-bold text-slate-900 outline-none h-28 resize-none"
-                                                value={formData.address}
-                                                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                                            />
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                            {/* Left Column - Profile & Quick Stats */}
+                            <div className="lg:col-span-4 space-y-6">
+                                <Card className="p-6 border-slate-100 text-center shadow-sm">
+                                    <img src={selectedPatient.image} alt={selectedPatient.name} className="w-24 h-24 rounded-full mx-auto object-cover border-4 border-white shadow-lg mb-4" />
+                                    <h2 className="text-xl font-black text-slate-900">{selectedPatient.name}</h2>
+                                    <p className="text-sm font-medium text-slate-500 mb-6">{selectedPatient.id}</p>
+                                    
+                                    <div className="space-y-3 text-left">
+                                        <div className="flex items-center gap-3 text-sm font-medium text-slate-600 p-3 bg-slate-50 rounded-xl">
+                                            <Phone className="w-4 h-4 text-indigo-500" /> {selectedPatient.phone}
                                         </div>
-                                        <div className="col-span-1">
-                                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Emergency Contact *</label>
-                                            <input
-                                                type="text"
-                                                placeholder="Contact person name"
-                                                className="w-full bg-slate-50/50 border-2 border-transparent rounded-[20px] px-6 py-4 focus:bg-white focus:border-indigo-100 transition-all font-bold text-slate-900 outline-none"
-                                                value={formData.emergencyName}
-                                                onChange={(e) => setFormData({ ...formData, emergencyName: e.target.value })}
-                                            />
+                                        <div className="flex items-center gap-3 text-sm font-medium text-slate-600 p-3 bg-slate-50 rounded-xl">
+                                            <Mail className="w-4 h-4 text-indigo-500" /> {selectedPatient.email}
                                         </div>
-                                        <div className="col-span-1">
-                                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Emergency Phone *</label>
-                                            <input
-                                                type="tel"
-                                                placeholder="(555) 000-0000"
-                                                className="w-full bg-slate-50/50 border-2 border-transparent rounded-[20px] px-6 py-4 focus:bg-white focus:border-indigo-100 transition-all font-bold text-slate-900 outline-none"
-                                                value={formData.emergencyPhone}
-                                                onChange={(e) => setFormData({ ...formData, emergencyPhone: e.target.value })}
-                                            />
+                                        <div className="flex items-center gap-3 text-sm font-medium text-slate-600 p-3 bg-slate-50 rounded-xl">
+                                            <Calendar className="w-4 h-4 text-indigo-500" /> {selectedPatient.dob} ({selectedPatient.gender})
                                         </div>
                                     </div>
-                                </div>
-                            )}
+                                </Card>
 
-                            {step === 2 && (
-                                <div className="animate-in fade-in slide-in-from-right-4 duration-500 flex-1">
-                                    <div className="mb-10">
-                                        <h2 className="text-2xl font-black text-slate-900 mb-2">Medical History</h2>
-                                        <p className="text-slate-500 text-sm font-medium">Important clinical background for better care.</p>
-                                    </div>
-                                    <div className="space-y-10">
-                                        {[
-                                            { key: 'allergies', label: 'Allergies', color: 'bg-rose-50 text-rose-600', icon: Heart },
-                                            { key: 'medications', label: 'Current Medications', color: 'bg-sky-50 text-sky-600', icon: Activity },
-                                            { key: 'conditions', label: 'Chronic Conditions', color: 'bg-amber-50 text-amber-600', icon: Info },
-                                        ].map((item) => (
-                                            <div key={item.key} className="p-8 rounded-[32px] bg-slate-50/50 border border-slate-100">
-                                                <div className="flex items-center justify-between mb-6">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center", item.color)}>
-                                                            <item.icon className="w-4 h-4" />
-                                                        </div>
-                                                        <label className="text-sm font-black text-slate-900">{item.label}</label>
-                                                    </div>
-                                                </div>
-                                                <div className="flex flex-col sm:flex-row gap-3 mb-6">
-                                                    <input
-                                                        type="text"
-                                                        placeholder={`Add ${item.key.slice(0, -1)}...`}
-                                                        className="flex-1 bg-white border-2 border-slate-100 rounded-2xl px-5 py-3.5 focus:border-indigo-100 transition-all font-bold text-sm outline-none"
-                                                        value={tempItem.type === item.key ? tempItem.value : ''}
-                                                        onChange={(e) => setTempItem({ type: item.key, value: e.target.value })}
-                                                        onKeyPress={(e) => e.key === 'Enter' && addItem(item.key as any)}
-                                                    />
-                                                    <Button
-                                                        onClick={() => addItem(item.key as any)}
-                                                        className="rounded-2xl px-6 py-3.5 bg-slate-900 hover:bg-black w-full sm:w-auto"
-                                                    >Add</Button>
-                                                </div>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {(formData[item.key as keyof typeof formData] as string[]).map((val, idx) => (
-                                                        <div key={idx} className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl text-xs font-black shadow-sm border border-slate-100 group animate-in zoom-in-50">
-                                                            <span className="text-slate-700">{val}</span>
-                                                            <button
-                                                                onClick={() => removeItem(item.key as any, idx)}
-                                                                className="text-slate-300 hover:text-rose-600 transition-colors"
-                                                            >
-                                                                <Trash2 className="w-3.5 h-3.5" />
-                                                            </button>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {step === 3 && (
-                                <div className="animate-in fade-in slide-in-from-right-4 duration-500 flex-1">
-                                    <div className="mb-10">
-                                        <h2 className="text-2xl font-black text-slate-900 mb-2">Insurance Details</h2>
-                                        <p className="text-slate-500 text-sm font-medium">Verified coverage for seamless billing.</p>
-                                    </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                                        <div className="col-span-1 sm:col-span-2">
-                                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Select Provider *</label>
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-                                                {['MetLife', 'Bupa', 'AXA', 'BCBS', 'Aetna', 'Cigna'].map(prov => (
-                                                    <button
-                                                        key={prov}
-                                                        onClick={() => setFormData({ ...formData, provider: prov.toLowerCase() })}
-                                                        className={cn(
-                                                            "p-3 sm:p-4 rounded-2xl border-2 transition-all font-black text-xs sm:text-sm",
-                                                            formData.provider === prov.toLowerCase()
-                                                                ? "bg-indigo-50 border-indigo-200 text-indigo-700 shadow-lg shadow-indigo-50"
-                                                                : "bg-slate-50 border-transparent text-slate-500 hover:bg-slate-100"
-                                                        )}
-                                                    >
-                                                        {prov}
-                                                    </button>
-                                                ))}
-                                            </div>
+                                <Card className="p-6 border-slate-100 shadow-sm">
+                                    <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                        <Activity className="w-4 h-4 text-indigo-500" /> Vitals & Alerts
+                                    </h3>
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center pb-4 border-b border-slate-50">
+                                            <span className="text-sm text-slate-500 font-medium">Blood Type</span>
+                                            <span className="font-black text-rose-500">{selectedPatient.bloodType}</span>
                                         </div>
-                                        <div className="col-span-1">
-                                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Policy Number</label>
-                                            <input
-                                                type="text"
-                                                className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 font-bold text-slate-900 outline-none"
-                                                placeholder="ID-000"
-                                                value={formData.policyNumber}
-                                                onChange={(e) => setFormData({ ...formData, policyNumber: e.target.value })}
-                                            />
-                                        </div>
-                                        <div className="col-span-1">
-                                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Group Number</label>
-                                            <input
-                                                type="text"
-                                                className="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 font-bold text-slate-900 outline-none"
-                                                placeholder="GRP-000"
-                                                value={formData.groupNumber}
-                                                onChange={(e) => setFormData({ ...formData, groupNumber: e.target.value })}
-                                            />
-                                        </div>
-                                        <div className="col-span-1 sm:col-span-2 pt-4 sm:pt-6">
-                                            <div className="border-2 border-dashed border-indigo-100 rounded-[32px] sm:rounded-[40px] p-8 sm:p-16 text-center hover:bg-indigo-50/30 transition-all group">
-                                                <div className="w-16 h-16 sm:w-20 h-20 bg-indigo-50 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
-                                                    <Upload className="w-6 h-6 sm:w-8 h-8 text-indigo-600" />
-                                                </div>
-                                                <h3 className="text-lg sm:text-xl font-black text-slate-900 mb-2">Drop Card</h3>
-                                                <p className="text-slate-400 text-xs sm:text-sm font-medium mb-6 sm:mb-8">PDF, PNG or JPG (Max 5MB)</p>
-                                                <Button variant="outline" className="w-full sm:w-auto rounded-2xl px-10 border-slate-200 hover:bg-white shadow-xl shadow-indigo-100/10 font-bold">
-                                                    Browse Files
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {step === 4 && (
-                                <div className="animate-in fade-in slide-in-from-right-4 duration-500 flex-1">
-                                    <div className="mb-10 text-center">
-                                        <h2 className="text-2xl font-black text-slate-900 mb-2">Visit Information</h2>
-                                        <p className="text-slate-500 text-sm font-medium">Set your medical preferences for today.</p>
-                                    </div>
-                                    <div className="space-y-8 max-w-[600px] mx-auto">
                                         <div>
-                                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 text-center">Primary Reason *</label>
-                                            <input
-                                                type="text"
-                                                className="w-full bg-slate-50/80 border-none rounded-[32px] px-8 py-5 text-lg font-bold text-slate-900 text-center shadow-inner"
-                                                placeholder="Why are you visiting today?"
-                                                value={formData.reason}
-                                                onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                                            />
+                                            <span className="text-sm text-slate-500 font-medium block mb-2">Allergies</span>
+                                            <div className="flex flex-wrap gap-2">
+                                                {selectedPatient.allergies.length > 0 ? selectedPatient.allergies.map((allergy, idx) => (
+                                                    <span key={idx} className="px-2.5 py-1 bg-rose-50 text-rose-600 rounded-md text-[10px] font-black uppercase tracking-widest">{allergy}</span>
+                                                )) : <span className="text-sm text-slate-400">No known allergies</span>}
+                                            </div>
                                         </div>
+                                    </div>
+                                </Card>
+                            </div>
 
-                                        <div className="grid grid-cols-3 gap-4">
-                                            {['Routine', 'Urgent', 'Emergency'].map(level => (
-                                                <button
-                                                    key={level}
-                                                    onClick={() => setFormData({ ...formData, urgency: level.toLowerCase() })}
-                                                    className={cn(
-                                                        "p-4 rounded-3xl border-2 transition-all font-black text-xs uppercase tracking-widest",
-                                                        formData.urgency === level.toLowerCase()
-                                                            ? level === 'Emergency' ? "bg-rose-50 border-rose-200 text-rose-600" : "bg-indigo-50 border-indigo-200 text-indigo-700"
-                                                            : "bg-slate-50 border-transparent text-slate-400"
+                            {/* Right Column - Medical History, Labs, Prescriptions */}
+                            <div className="lg:col-span-8 space-y-6">
+                                <Card className="p-6 border-slate-100 shadow-sm">
+                                    <h3 className="font-bold text-slate-900 mb-6 flex items-center gap-2">
+                                        <Clock className="w-5 h-5 text-indigo-500" /> Clinical History
+                                    </h3>
+                                    <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
+                                        {selectedPatient.history.map(item => (
+                                            <div key={item.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                                                <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-indigo-600 text-slate-50 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+                                                    <Activity className="w-4 h-4" />
+                                                </div>
+                                                <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border border-slate-100 bg-white shadow-sm">
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <h4 className="font-bold text-slate-900 text-sm">{item.title}</h4>
+                                                        <time className="text-xs font-medium text-slate-400">{item.date}</time>
+                                                    </div>
+                                                    <p className="text-sm text-slate-500">{item.doctor}</p>
+                                                    {item.notes && (
+                                                        <div className="mt-3 inline-flex items-center gap-2 bg-slate-50 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-100">
+                                                            <FileText className="w-3 h-3 text-indigo-500" /> {item.notes}
+                                                        </div>
                                                     )}
-                                                >
-                                                    {level}
-                                                </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </Card>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <Card className="p-6 border-slate-100 shadow-sm">
+                                        <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                            <Pill className="w-5 h-5 text-indigo-500" /> Prescriptions
+                                        </h3>
+                                        <div className="space-y-3">
+                                            {selectedPatient.prescriptions.map(rx => (
+                                                <div key={rx.id} className="p-3 bg-slate-50 rounded-xl flex items-center justify-between">
+                                                    <div>
+                                                        <p className="font-bold text-sm text-slate-900">{rx.name}</p>
+                                                        <p className="text-xs text-slate-500">{rx.dosage}</p>
+                                                    </div>
+                                                    <span className={cn("px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-widest", rx.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700')}>
+                                                        {rx.status}
+                                                    </span>
+                                                </div>
                                             ))}
                                         </div>
+                                    </Card>
 
-                                        <div>
-                                            <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 text-center">Specialty Channel</label>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                {[
-                                                    { label: 'Cardiology', icon: Heart },
-                                                    { label: 'Neurology', icon: Activity },
-                                                    { label: 'Pediatrics', icon: User },
-                                                    { label: 'General Medicine', icon: Stethoscope },
-                                                ].map(spec => (
-                                                    <button
-                                                        key={spec.label}
-                                                        onClick={() => setFormData({ ...formData, specialty: spec.label.toLowerCase() })}
-                                                        className={cn(
-                                                            "p-5 rounded-3xl border-2 transition-all flex items-center gap-4",
-                                                            formData.specialty === spec.label.toLowerCase()
-                                                                ? "bg-white border-indigo-600 text-indigo-600 shadow-xl shadow-indigo-100"
-                                                                : "bg-slate-50 border-transparent text-slate-500 hover:bg-slate-100"
-                                                        )}
-                                                    >
-                                                        <spec.icon className="w-5 h-5 shrink-0" />
-                                                        <span className="text-sm font-black truncate">{spec.label}</span>
-                                                    </button>
-                                                ))}
-                                            </div>
+                                    <Card className="p-6 border-slate-100 shadow-sm">
+                                        <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                            <FileText className="w-5 h-5 text-indigo-500" /> Lab Results
+                                        </h3>
+                                        <div className="space-y-3">
+                                            {selectedPatient.labs.map(lab => (
+                                                <div key={lab.id} className="p-3 bg-slate-50 rounded-xl flex items-center justify-between">
+                                                    <div>
+                                                        <p className="font-bold text-sm text-slate-900">{lab.name}</p>
+                                                        <p className="text-xs text-slate-500">{lab.date}</p>
+                                                    </div>
+                                                    <span className={cn("px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-widest", lab.status === 'Normal' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700')}>
+                                                        {lab.status}
+                                                    </span>
+                                                </div>
+                                            ))}
                                         </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {step === 5 && (
-                                <div className="animate-in fade-in slide-in-from-right-4 duration-500 flex-1">
-                                    <div className="mb-10 text-center">
-                                        <div className="w-20 h-20 bg-emerald-50 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                                            <CheckCircle2 className="w-10 h-10" />
-                                        </div>
-                                        <h2 className="text-2xl font-black text-slate-900 mb-2">Review & Submit</h2>
-                                        <p className="text-slate-500 text-sm font-medium">Final confirmation of your registration data.</p>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
-                                        <div className="p-6 sm:p-8 rounded-[32px] sm:rounded-[40px] bg-slate-900 text-white space-y-6">
-                                            <div className="flex items-center gap-3">
-                                                <User className="w-5 h-5 text-indigo-400" />
-                                                <h4 className="font-black uppercase text-xs tracking-[0.2em]">Patient Basics</h4>
-                                            </div>
-                                            <div className="space-y-4">
-                                                <div className="flex justify-between items-center text-sm">
-                                                    <span className="text-slate-400">FullName</span>
-                                                    <span className="font-bold">{formData.firstName} {formData.lastName}</span>
-                                                </div>
-                                                <div className="flex justify-between items-center text-sm">
-                                                    <span className="text-slate-400">Born</span>
-                                                    <span className="font-bold">{formData.dob}</span>
-                                                </div>
-                                                <div className="flex justify-between items-center text-sm">
-                                                    <span className="text-slate-400">Gender</span>
-                                                    <span className="font-bold capitalize">{formData.gender || '-'}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="p-6 sm:p-8 rounded-[32px] sm:rounded-[40px] bg-indigo-50 border border-indigo-100 space-y-6">
-                                            <div className="flex items-center gap-3">
-                                                <Shield className="w-5 h-5 text-indigo-600" />
-                                                <h4 className="font-black uppercase text-xs tracking-[0.2em] text-indigo-900">Medical Summary</h4>
-                                            </div>
-                                            <div className="space-y-4">
-                                                <div className="flex justify-between items-center text-sm">
-                                                    <span className="text-indigo-400">Allergies</span>
-                                                    <span className="font-black text-indigo-900">{formData.allergies.length} Items</span>
-                                                </div>
-                                                <div className="flex justify-between items-center text-sm">
-                                                    <span className="text-indigo-400">Insurance</span>
-                                                    <span className="font-black text-indigo-900 uppercase">{formData.provider || '-'}</span>
-                                                </div>
-                                                <div className="flex justify-between items-center text-sm">
-                                                    <span className="text-indigo-400">Priority</span>
-                                                    <span className="font-black text-indigo-600 uppercase italic">{formData.urgency}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="p-6 sm:p-8 rounded-[32px] bg-slate-50 border border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-0">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm shrink-0">
-                                                <Info className="w-6 h-6 text-slate-300" />
-                                            </div>
-                                            <div>
-                                                <p className="font-black text-slate-900">Legal Agreement</p>
-                                                <p className="text-xs text-slate-500 font-medium">By clicking submit, I agree to the privacy policy.</p>
-                                            </div>
-                                        </div>
-                                        <div className="w-8 h-8 rounded-full border-4 border-slate-200 shrink-0" />
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Sticky Footer Navigation inside Card */}
-                            <div className="mt-auto pt-8 sm:pt-10 flex flex-col sm:flex-row items-center justify-between border-t border-slate-100 gap-6 sm:gap-0">
-                                <Button
-                                    variant="ghost"
-                                    onClick={prevStep}
-                                    className={cn("w-full sm:w-auto gap-2 rounded-2xl px-6", step === 1 && "invisible")}
-                                >
-                                    <ChevronLeft className="w-4 h-4" />
-                                    <span className="font-bold">Previous</span>
-                                </Button>
-
-                                <div className="flex items-center gap-4 w-full sm:w-auto">
-                                    {step < 5 ? (
-                                        <Button onClick={nextStep} className="w-full sm:w-auto gap-2 px-10 py-5 sm:py-6 rounded-3xl bg-slate-900 font-black shadow-2xl shadow-slate-200">
-                                            <span>Next Step</span>
-                                            <ChevronRight className="w-4 h-4" />
-                                        </Button>
-                                    ) : (
-                                        <Button className="w-full sm:w-auto px-10 sm:px-14 py-5 sm:py-6 rounded-3xl bg-indigo-600 font-black shadow-2xl shadow-indigo-100 active:scale-95 transition-transform">
-                                            Submit
-                                        </Button>
-                                    )}
+                                    </Card>
                                 </div>
                             </div>
-                        </Card>
-
-                        <div className="flex justify-center">
-                            <button
-                                onClick={() => window.location.href = '/dashboard'}
-                                className="text-slate-300 hover:text-slate-900 font-black text-xs uppercase tracking-[0.4em] transition-all"
-                            >
-                                Cancel & return
-                            </button>
                         </div>
                     </div>
-                </div>
+                ) : (
+                    /* List View */
+                    <Card className="p-0 border-slate-100 overflow-hidden shadow-sm">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-slate-50/50 border-b border-slate-100">
+                                        <th className="py-4 px-6 text-xs font-black text-slate-400 uppercase tracking-widest">Patient</th>
+                                        <th className="py-4 px-6 text-xs font-black text-slate-400 uppercase tracking-widest">Contact</th>
+                                        <th className="py-4 px-6 text-xs font-black text-slate-400 uppercase tracking-widest">Last Visit</th>
+                                        <th className="py-4 px-6 text-xs font-black text-slate-400 uppercase tracking-widest">Status</th>
+                                        <th className="py-4 px-6 text-xs font-black text-slate-400 uppercase tracking-widest text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {filteredPatients.map((patient) => (
+                                        <tr key={patient.id} className="hover:bg-slate-50/50 transition-colors group cursor-pointer" onClick={() => setSelectedPatient(patient)}>
+                                            <td className="py-4 px-6">
+                                                <div className="flex items-center gap-4">
+                                                    <img src={patient.image} alt={patient.name} className="w-10 h-10 rounded-full object-cover shadow-sm" />
+                                                    <div>
+                                                        <p className="font-bold text-slate-900 text-sm">{patient.name}</p>
+                                                        <p className="text-xs font-medium text-slate-500">{patient.id}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="py-4 px-6">
+                                                <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
+                                                    <Phone className="w-3 h-3 text-slate-400" /> {patient.phone}
+                                                </div>
+                                                <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+                                                    <Mail className="w-3 h-3 text-slate-400" /> {patient.email}
+                                                </div>
+                                            </td>
+                                            <td className="py-4 px-6 text-sm font-medium text-slate-600">
+                                                {patient.lastVisit}
+                                            </td>
+                                            <td className="py-4 px-6">
+                                                <span className={cn("px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest", patient.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600')}>
+                                                    {patient.status}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 px-6 text-right">
+                                                <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <ChevronRight className="w-5 h-5 text-indigo-600" />
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {filteredPatients.length === 0 && (
+                                        <tr>
+                                            <td colSpan={5} className="py-12 text-center text-slate-500 font-medium">
+                                                No patients found matching "{searchQuery}"
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </Card>
+                )}
             </div>
         </Layout>
     );

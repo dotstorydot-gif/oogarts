@@ -6,12 +6,74 @@ import {
     Pill,
     Clock,
     ChevronRight,
-    AlertCircle
+    AlertCircle,
+    Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
+import { useEffect, useState } from 'react';
+import { Patient } from '../lib/mockData';
 
 const PatientDashboard = () => {
     const navigate = useNavigate();
+    const [patientData, setPatientData] = useState<Patient | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            setIsLoading(true);
+            try {
+                // Fetch the specific patient (Sophia Martinez for demo)
+                const patientId = 'PAT-1001';
+                const { data: patient, error: pError } = await supabase
+                    .from('patients')
+                    .select('*')
+                    .eq('id', patientId)
+                    .single();
+
+                if (pError) throw pError;
+
+                const { data: prescriptions } = await supabase
+                    .from('prescriptions')
+                    .select('*')
+                    .eq('patient_id', patientId);
+
+                const { data: labs } = await supabase
+                    .from('lab_results')
+                    .select('*')
+                    .eq('patient_id', patientId);
+
+                setPatientData({
+                    ...patient,
+                    bloodType: patient.blood_type,
+                    lastVisit: patient.last_visit,
+                    prescriptions: (prescriptions || []).map((rx: any) => ({ ...rx, daysLeft: rx.days_left })),
+                    labs: labs || [],
+                    history: [], // We fetch history on the records page
+                    allergies: patient.allergies || []
+                });
+            } catch (error) {
+                console.error("Error fetching dashboard data:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, []);
+
+    if (isLoading) {
+        return (
+            <Layout>
+                <div className="flex flex-col items-center justify-center min-h-[60vh]">
+                    <Loader2 className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
+                    <p className="text-slate-500 font-bold">Connecting to your health records...</p>
+                </div>
+            </Layout>
+        );
+    }
+
+    if (!patientData) return null;
 
     return (
         <Layout>
@@ -80,35 +142,22 @@ const PatientDashboard = () => {
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <Card className="p-6 border-slate-100 hover:border-sky-200 transition-colors">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="w-10 h-10 bg-sky-50 text-sky-600 flex items-center justify-center rounded-xl">
-                                        <Pill className="w-5 h-5" />
+                            {patientData.prescriptions.map(rx => (
+                                <Card key={rx.id} className={cn("p-6 border-slate-100 transition-colors", rx.status === 'Active' ? 'hover:border-sky-200' : 'hover:border-amber-200')}>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className={cn("w-10 h-10 flex items-center justify-center rounded-xl", rx.status === 'Active' ? 'bg-sky-50 text-sky-600' : 'bg-amber-50 text-amber-600')}>
+                                            <Pill className="w-5 h-5" />
+                                        </div>
+                                        <span className={cn("px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest", rx.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600')}>{rx.status}</span>
                                     </div>
-                                    <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest">Active</span>
-                                </div>
-                                <h4 className="font-black text-slate-900 text-lg mb-1">Amoxicillin</h4>
-                                <p className="text-slate-500 font-medium text-sm mb-4">500mg • 2x daily after meals</p>
-                                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                    <div className="bg-sky-500 h-full w-[60%]" />
-                                </div>
-                                <p className="text-xs font-black text-slate-400 mt-2 text-right">14 days left</p>
-                            </Card>
-
-                            <Card className="p-6 border-slate-100 hover:border-amber-200 transition-colors">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="w-10 h-10 bg-amber-50 text-amber-600 flex items-center justify-center rounded-xl">
-                                        <Pill className="w-5 h-5" />
+                                    <h4 className="font-black text-slate-900 text-lg mb-1">{rx.name}</h4>
+                                    <p className="text-slate-500 font-medium text-sm mb-4">{rx.dosage} • {rx.frequency}</p>
+                                    <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                        <div className={cn("h-full", rx.status === 'Active' ? 'bg-sky-500 w-[60%]' : 'bg-rose-500 w-[10%]')} />
                                     </div>
-                                    <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-full text-[10px] font-black uppercase tracking-widest">Refill Soon</span>
-                                </div>
-                                <h4 className="font-black text-slate-900 text-lg mb-1">Lisinopril</h4>
-                                <p className="text-slate-500 font-medium text-sm mb-4">10mg • 1x daily morning</p>
-                                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                    <div className="bg-rose-500 h-full w-[10%]" />
-                                </div>
-                                <p className="text-xs font-black text-rose-500 mt-2 text-right">3 days left</p>
-                            </Card>
+                                    <p className={cn("text-xs font-black mt-2 text-right", rx.status === 'Active' ? 'text-slate-400' : 'text-rose-500')}>{rx.daysLeft} days left</p>
+                                </Card>
+                            ))}
                         </div>
                     </div>
 
@@ -119,12 +168,8 @@ const PatientDashboard = () => {
                         </div>
 
                         <Card className="p-0 border-slate-100 overflow-hidden divide-y divide-slate-50">
-                            {[
-                                { name: 'Comprehensive Metabolic Panel', date: 'Oct 15, 2024', status: 'Normal', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                                { name: 'Lipid Panel', date: 'Oct 15, 2024', status: 'Review', color: 'text-amber-600', bg: 'bg-amber-50' },
-                                { name: 'CBC with Differential', date: 'Oct 15, 2024', status: 'Normal', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                            ].map((lab, i) => (
-                                <div key={i} className="p-5 flex items-center justify-between hover:bg-slate-50 group transition-colors cursor-pointer">
+                            {patientData.labs.map((lab) => (
+                                <div key={lab.id} className="p-5 flex items-center justify-between hover:bg-slate-50 group transition-colors cursor-pointer">
                                     <div className="flex items-center gap-4">
                                         <div className="w-10 h-10 bg-slate-100 text-slate-500 rounded-xl flex items-center justify-center group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
                                             <FileText className="w-5 h-5" />
@@ -137,7 +182,7 @@ const PatientDashboard = () => {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-4">
-                                        <span className={cn("px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest", lab.bg, lab.color)}>
+                                        <span className={cn("px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest", lab.status === 'Normal' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600')}>
                                             {lab.status}
                                         </span>
                                         <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-indigo-600" />
