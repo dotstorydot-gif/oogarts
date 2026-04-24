@@ -51,41 +51,61 @@ const SidebarItem = ({ to, icon: Icon, label, hasSubmenu = false }: any) => {
     );
 };
 
-const UserProfile = ({ userRole }: { userRole: string }) => (
-    <div className="flex items-center gap-3 pl-6 ml-6 border-l border-slate-100 py-2 group cursor-pointer">
-        <div className="relative">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-indigo-500 to-sky-400 p-[2px] shadow-lg">
-                <img
-                    src={
-                        userRole === 'doctor' ? "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200" :
-                            userRole === 'patient' ? "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200" :
-                                "/avatars/jack_chain.png"
-                    }
-                    alt="User"
-                    className="w-full h-full rounded-[10px] object-cover border-2 border-white"
-                />
-            </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></div>
-        </div>
-        <div className="hidden xl:block">
-            <h4 className="font-black text-slate-900 text-sm leading-tight group-hover:text-indigo-600 transition-colors">
-                {userRole === 'doctor' ? 'Dr. Michael Chen' : userRole === 'patient' ? 'Sophia Martinez' : 'Jack Chain'}
-            </h4>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">
-                {userRole === 'doctor' ? 'Neurology' : userRole === 'patient' ? 'Premium Care' : 'Super Admin'}
-            </p>
-        </div>
-        <ChevronDown className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 transition-all" />
-    </div>
-);
-
 export const Layout = ({ children }: { children: React.ReactNode }) => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [userData, setUserData] = useState<any>(null);
 
     const userRole = localStorage.getItem('userRole') || 'admin';
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                if (userRole === 'patient') {
+                    const patientId = 'PAT-1001';
+                    const { data } = await supabase
+                        .from('patients')
+                        .select('*')
+                        .eq('id', patientId)
+                        .single();
+                    setUserData(data);
+                } else if (userRole === 'doctor') {
+                    setUserData({ name: 'Dr. Michael Chen', title: 'Neurology', image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200' });
+                } else {
+                    setUserData({ name: 'Jack Chain', title: 'Super Admin', image: '/avatars/jack_chain.png' });
+                }
+            } catch (error) {
+                console.error("Error fetching layout user data:", error);
+            }
+        };
+        fetchUserData();
+    }, [userRole]);
+
+    const UserProfile = () => (
+        <div className="flex items-center gap-3 pl-6 ml-6 border-l border-slate-100 py-2 group cursor-pointer" onClick={() => navigate('/settings')}>
+            <div className="relative">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-indigo-500 to-sky-400 p-[2px] shadow-lg">
+                    <img
+                        src={userData?.image || userData?.image_url || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200'}
+                        alt="User"
+                        className="w-full h-full rounded-[10px] object-cover border-2 border-white"
+                    />
+                </div>
+                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></div>
+            </div>
+            <div className="hidden xl:block">
+                <h4 className="font-black text-slate-900 text-sm leading-tight group-hover:text-indigo-600 transition-colors">
+                    {userData?.name || 'Loading...'}
+                </h4>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">
+                    {userData?.title || (userRole === 'patient' ? 'Premium Care' : 'Management')}
+                </p>
+            </div>
+            <ChevronDown className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 transition-all" />
+        </div>
+    );
 
     return (
         <div className="flex min-h-screen bg-[#f1f5f9] font-sans selection:bg-indigo-100 selection:text-indigo-900">
@@ -240,7 +260,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                             </button>
                         </div>
 
-                        <UserProfile userRole={userRole} />
+                        <UserProfile />
                     </div>
                 </header>
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Card, Button, Input, cn } from '../components/layout/BaseUI';
 import {
@@ -12,28 +12,83 @@ import {
     Lock,
     Save,
     ShieldCheck,
-    Box
+    Box,
+    Loader2,
+    Camera
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 const Settings = () => {
     const [activeTab, setActiveTab] = useState('Account Profile');
+    const [userData, setUserData] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const userRole = localStorage.getItem('userRole') || 'admin';
 
-    const tabs = [
-        { icon: User, label: 'Account Profile' },
-        { icon: Bell, label: 'Notifications' },
-        { icon: Shield, label: 'Security & Access' },
-        { icon: Globe, label: 'Localization' },
-        { icon: Smartphone, label: 'Connected Apps' },
-        { icon: Database, label: 'Data Management' },
-        { icon: Key, label: 'API Keys' },
+    useEffect(() => {
+        const fetchUserData = async () => {
+            setIsLoading(true);
+            try {
+                if (userRole === 'patient') {
+                    const patientId = 'PAT-1001';
+                    const { data, error } = await supabase
+                        .from('patients')
+                        .select('*')
+                        .eq('id', patientId)
+                        .single();
+                    if (error) throw error;
+                    setUserData(data);
+                } else {
+                    // Mock Admin Data
+                    setUserData({
+                        name: 'Jack Chain',
+                        title: 'Super Admin / Chief of Operations',
+                        email: 'jack.chain@oogarts.io',
+                        image: '/avatars/jack_chain.png'
+                    });
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchUserData();
+    }, [userRole]);
+
+    const allTabs = [
+        { icon: User, label: 'Account Profile', roles: ['admin', 'doctor', 'patient'] },
+        { icon: Bell, label: 'Notifications', roles: ['admin', 'doctor', 'patient'] },
+        { icon: Shield, label: 'Security & Access', roles: ['admin', 'doctor', 'patient'] },
+        { icon: Globe, label: 'Localization', roles: ['admin'] },
+        { icon: Smartphone, label: 'Connected Apps', roles: ['admin', 'doctor'] },
+        { icon: Database, label: 'Data Management', roles: ['admin'] },
+        { icon: Key, label: 'API Keys', roles: ['admin'] },
     ];
+
+    const tabs = allTabs.filter(tab => tab.roles.includes(userRole));
+
+    if (isLoading) {
+        return (
+            <Layout>
+                <div className="flex flex-col items-center justify-center min-h-[60vh]">
+                    <Loader2 className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
+                    <p className="text-slate-500 font-bold text-center">Loading your preferences...</p>
+                </div>
+            </Layout>
+        );
+    }
 
     return (
         <Layout>
             <div className="max-w-[1400px] mx-auto text-left">
                 <div className="mb-12">
-                    <h1 className="text-2xl sm:text-4xl font-black text-slate-900 mb-3 tracking-tighter italic">System Configuration</h1>
-                    <p className="text-slate-500 font-medium">Manage your workspace, security, and integration preferences.</p>
+                    <h1 className="text-2xl sm:text-4xl font-black text-slate-900 mb-3 tracking-tighter italic">
+                        {userRole === 'patient' ? 'Profile Settings' : 'System Configuration'}
+                    </h1>
+                    <p className="text-slate-500 font-medium">
+                        {userRole === 'patient' ? 'Manage your personal information, security, and notifications.' : 'Manage your workspace, security, and integration preferences.'}
+                    </p>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
@@ -69,26 +124,43 @@ const Settings = () => {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-start">
                                         <div className="space-y-6 order-2 md:order-1 text-left">
                                             <div>
-                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">Display Name</label>
-                                                <Input placeholder="Jack Chain" />
+                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">Full Name</label>
+                                                <Input value={userData?.name || ''} onChange={(e) => setUserData({...userData, name: e.target.value})} />
                                             </div>
                                             <div>
-                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">Professional Title</label>
-                                                <Input placeholder="Super Admin / Chief of Operations" />
-                                            </div>
-                                            <div>
-                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">Contact Email</label>
-                                                <Input placeholder="jack.chain@oogarts.io" />
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-col items-center justify-center p-6 sm:p-8 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 order-1 md:order-2">
-                                            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-white shadow-xl p-1 mb-6">
-                                                <img
-                                                    src="/avatars/jack_chain.png"
-                                                    className="w-full h-full rounded-full object-cover"
+                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">
+                                                    {userRole === 'patient' ? 'Emergency Contact' : 'Professional Title'}
+                                                </label>
+                                                <Input 
+                                                    value={userRole === 'patient' ? (userData?.emergency_contact || '+1 (555) 902-1122') : (userData?.title || '')} 
+                                                    onChange={(e) => setUserData({...userData, title: e.target.value})} 
                                                 />
                                             </div>
-                                            <Button variant="outline" size="sm">Change Photo</Button>
+                                            <div>
+                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">Email Address</label>
+                                                <Input value={userData?.email || ''} onChange={(e) => setUserData({...userData, email: e.target.value})} />
+                                            </div>
+                                            {userRole === 'patient' && (
+                                                <div>
+                                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 block px-1">Phone Number</label>
+                                                    <Input value={userData?.phone || ''} onChange={(e) => setUserData({...userData, phone: e.target.value})} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex flex-col items-center justify-center p-6 sm:p-8 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 order-1 md:order-2">
+                                            <div className="relative group">
+                                                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-white shadow-xl p-1 mb-6 overflow-hidden">
+                                                    <img
+                                                        src={userData?.image || userData?.image_url || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200'}
+                                                        className="w-full h-full rounded-full object-cover"
+                                                    />
+                                                </div>
+                                                <label className="absolute inset-0 flex items-center justify-center bg-black/40 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer mb-6">
+                                                    <Camera className="w-8 h-8" />
+                                                    <input type="file" className="hidden" onChange={() => alert("Photo upload feature coming soon!")} />
+                                                </label>
+                                            </div>
+                                            <Button variant="outline" size="sm" onClick={() => alert("Select a file to upload.")}>Change Photo</Button>
                                             <p className="text-[10px] text-slate-400 mt-4 font-bold uppercase">JPG, PNG or GIF. Max 5MB.</p>
                                         </div>
                                     </div>
