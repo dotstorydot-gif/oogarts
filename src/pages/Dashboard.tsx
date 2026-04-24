@@ -1,417 +1,210 @@
+import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
-import { Card, Button, cn } from '../components/layout/BaseUI';
-import {
-    Users,
-    Calendar,
-    Stethoscope,
-    Activity,
-    FileText,
-    Plus,
+import { Card, Button } from '../components/layout/BaseUI';
+import { 
+    Users, 
+    Calendar, 
+    DollarSign, 
+    Activity, 
+    ArrowDownRight, 
+    Plus, 
     ChevronRight,
-    MoreHorizontal,
-    Thermometer,
-    X,
-    Maximize2,
-    Play,
-    CheckCircle2
+    Loader2,
+    TrendingUp,
+    ShieldCheck
 } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { ResponsiveContainer, XAxis, YAxis, Tooltip, AreaChart, Area } from 'recharts';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 
 const data = [
-    { name: 'Jan', value: 400 },
-    { name: 'Feb', value: 300 },
-    { name: 'Mar', value: 600 },
-    { name: 'Apr', value: 800 },
-    { name: 'May', value: 500 },
-    { name: 'Jun', value: 900 },
-    { name: 'Jul', value: 700 },
-    { name: 'Aug', value: 1000 },
+    { name: 'Mon', value: 40, disease: 12 },
+    { name: 'Tue', value: 30, disease: 15 },
+    { name: 'Wed', value: 60, disease: 10 },
+    { name: 'Thu', value: 45, disease: 18 },
+    { name: 'Fri', value: 70, disease: 25 },
+    { name: 'Sat', value: 50, disease: 20 },
+    { name: 'Sun', value: 30, disease: 8 },
 ];
 
-const StatCard = ({ icon: Icon, label, value, trend, trendUp, color }: any) => (
-    <Card variant="default" className="p-8">
-        <div className="flex items-start justify-between mb-8">
-            <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg shadow-slate-100", color)}>
-                <Icon className="w-7 h-7 text-white" />
+const StatCard = ({ title, value, icon: Icon, trend, trendValue, color }: any) => (
+    <Card className="p-8 group hover:shadow-2xl transition-all duration-500 cursor-pointer border-slate-100 overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-[100px] -mr-16 -mt-16 transition-all group-hover:scale-150 duration-700"></div>
+        <div className="relative z-10 text-left">
+            <div className={`w-14 h-14 ${color} rounded-2xl flex items-center justify-center mb-8 shadow-lg shadow-indigo-100`}>
+                <Icon className="text-white w-7 h-7" />
             </div>
-            {trend && (
-                <div className={cn("px-4 py-2 rounded-xl text-xs font-black tracking-tight", trendUp ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
-                    {trend}
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">{title}</p>
+            <div className="flex items-end justify-between">
+                <h2 className="text-4xl font-black text-slate-900 tracking-tight italic">{value}</h2>
+                <div className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-widest ${trend === 'up' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                    {trend === 'up' ? <TrendingUp size={14} /> : <ArrowDownRight size={14} />}
+                    {trendValue}
                 </div>
-            )}
+            </div>
         </div>
-        <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">{label}</p>
-        <h3 className="text-4xl font-black text-slate-900 tracking-tighter">{value}</h3>
     </Card>
 );
 
-const HealthMetric = ({ icon: Icon, label, value, unit, color }: any) => (
-    <div className="bg-white/50 border border-white/50 p-4 rounded-2xl flex items-center justify-between">
-        <div className="flex items-center gap-3">
-            <div className={cn("p-2 rounded-xl", color)}>
-                <Icon className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-sm font-medium text-slate-600">{label}</span>
-        </div>
-        <div className="text-right">
-            <span className="text-base font-bold text-slate-900">{value}</span>
-            <span className="text-[10px] font-semibold text-slate-400 ml-1">{unit}</span>
-        </div>
-    </div>
-);
-
 const DepartmentProgress = ({ label, value, color }: any) => (
-    <div className="space-y-2">
-        <div className="flex justify-between items-end">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{label}</span>
-            <span className="text-sm font-black text-slate-900">{value}%</span>
+    <div className="space-y-3">
+        <div className="flex justify-between text-xs font-black uppercase tracking-widest italic">
+            <span className="text-slate-500">{label}</span>
+            <span className="text-slate-900">{value}%</span>
         </div>
-        <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
-            <div className={cn("h-full rounded-full transition-all duration-1000", color)} style={{ width: `${value}%` }} />
+        <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden p-[2px]">
+            <div 
+                className={`h-full ${color} rounded-full transition-all duration-1000 shadow-sm`} 
+                style={{ width: `${value}%` }}
+            />
         </div>
     </div>
 );
-
-import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
-import { Loader2 } from 'lucide-react';
 
 const Dashboard = () => {
     const navigate = useNavigate();
-    const userRole = localStorage.getItem('userRole') || 'admin';
-    const [stats, setStats] = useState({
-        totalPatients: '0',
-        appointmentsToday: '0',
-        surgeryQueue: '0',
-        capacity: '0%'
-    });
     const [isLoading, setIsLoading] = useState(true);
+    const [stats, setStats] = useState({
+        totalPatients: 0,
+        todayConsultations: 0,
+        monthlyRevenue: 0,
+        activeDoctors: 0
+    });
+
+    const fetchData = async () => {
+        setIsLoading(true);
+        try {
+            const { count: pts } = await supabase.from('patients').select('*', { count: 'exact', head: true });
+            const { count: appts } = await supabase.from('appointments').select('*', { count: 'exact', head: true }).eq('date', new Date().toISOString().split('T')[0]);
+            const { data: bills } = await supabase.from('bills').select('amount').eq('status', 'Paid');
+            const { count: docs } = await supabase.from('doctors').select('*', { count: 'exact', head: true });
+
+            const revenue = (bills || []).reduce((acc, b) => acc + Number(b.amount), 0);
+
+            setStats({
+                totalPatients: pts || 0,
+                todayConsultations: appts || 0,
+                monthlyRevenue: revenue,
+                activeDoctors: docs || 0
+            });
+        } catch (error) {
+            console.error("Error fetching dashboard stats:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchStats = async () => {
-            setIsLoading(true);
-            try {
-                // Fetch Total Patients
-                const { count: patientCount } = await supabase
-                    .from('patients')
-                    .select('*', { count: 'exact', head: true });
-
-                // Fetch Today's Appointments
-                const today = new Date().toISOString().split('T')[0];
-                const { count: apptCount } = await supabase
-                    .from('appointments')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('date', today);
-
-                const surgeryCount = 12; 
-
-                setStats({
-                    totalPatients: (patientCount || 2845).toLocaleString(),
-                    appointmentsToday: (apptCount || 48).toString(),
-                    surgeryQueue: surgeryCount.toString(),
-                    capacity: '94%'
-                });
-            } catch (error) {
-                console.error("Error fetching admin stats:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchStats();
+        fetchData();
     }, []);
 
     return (
         <Layout>
-            <div className="max-w-[1600px] mx-auto text-left py-2">
-                {/* Header */}
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12">
+            <div className="max-w-[1600px] mx-auto">
+                <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
                     <div>
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
                                 <Activity className="w-6 h-6" />
                             </div>
-                            <span className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em]">Operational Overview</span>
+                            <span className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em]">Operations Command</span>
                         </div>
-                        <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2 italic">Health Systems Command Center</h1>
-                        <p className="text-slate-500 font-medium">Real-time monitoring of clinical operations, patient flow, and specialty performance.</p>
+                        <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2 italic">Super Admin Dashboard</h1>
+                        <p className="text-slate-500 font-medium">Global hospital intelligence and resource orchestration platform.</p>
                     </div>
                     <div className="flex items-center gap-4">
-                        <Button variant="outline" className="gap-2" onClick={() => navigate('/reports')}>
-                            <FileText className="w-4 h-4" />
-                            Daily Report
+                        <Button variant="outline" className="gap-2" onClick={fetchData}>
+                            <Loader2 size={16} className={isLoading ? 'animate-spin' : ''} />
+                            Sync Live Data
                         </Button>
-                        <Button variant="primary" className="gap-2 px-8" onClick={() => navigate('/patients')}>
-                            <Plus className="w-5 h-5" />
-                            New Record
+                        <Button variant="dark" className="gap-2 px-8 active:scale-95 shadow-xl shadow-slate-200" onClick={() => navigate('/appointments')}>
+                            <Plus size={20} />
+                            Schedule Service
                         </Button>
                     </div>
                 </div>
 
                 {isLoading ? (
-                    <div className="flex flex-col items-center justify-center min-h-[50vh]">
-                        <Loader2 className="w-12 h-12 text-indigo-600 animate-spin mb-4" />
-                        <p className="text-slate-500 font-bold">Synchronizing administrative data...</p>
+                    <div className="flex flex-col items-center justify-center py-40">
+                        <Loader2 className="w-16 h-16 text-indigo-600 animate-spin mb-6" />
+                        <h2 className="text-xl font-black text-slate-900 tracking-tight italic">Aggregating Global Metrics...</h2>
                     </div>
                 ) : (
                     <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-12">
-                            <StatCard
-                                icon={Users}
-                                label="Total Patients"
-                                value={stats.totalPatients}
-                                trend="+12%"
-                                trendUp
-                                color="bg-indigo-600 shadow-indigo-200"
-                            />
-                            <StatCard
-                                icon={Calendar}
-                                label="Appointments"
-                                value={stats.appointmentsToday}
-                                trend="+4%"
-                                trendUp
-                                color="bg-sky-500 shadow-sky-100"
-                            />
-                            <StatCard
-                                icon={Stethoscope}
-                                label="Surgery Queue"
-                                value={stats.surgeryQueue}
-                                trend="-2"
-                                trendUp={false}
-                                color="bg-rose-500 shadow-rose-100"
-                            />
-                            <StatCard
-                                icon={Activity}
-                                label="Capacity"
-                                value={stats.capacity}
-                                trend="+3%"
-                                trendUp
-                                color="bg-emerald-500 shadow-emerald-100"
-                            />
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                            <StatCard title="Global Patients" value={stats.totalPatients} icon={Users} trend="up" trendValue="+12%" color="bg-indigo-600" />
+                            <StatCard title="Daily Consults" value={stats.todayConsultations} icon={Calendar} trend="up" trendValue="+8%" color="bg-emerald-500" />
+                            <StatCard title="Revenue (MTD)" value={`$${stats.monthlyRevenue.toLocaleString()}`} icon={DollarSign} trend="up" trendValue="+15%" color="bg-slate-900" />
+                            <StatCard title="Staff Active" value={stats.activeDoctors} icon={Activity} trend="down" trendValue="-2%" color="bg-amber-500" />
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                            <Card className={cn(
-                                "col-span-1 p-0 overflow-hidden bg-gradient-to-br from-indigo-50/50 to-sky-50/50 relative min-h-[500px]",
-                                userRole === 'admin' ? "lg:col-span-5" : "lg:col-span-12"
-                            )}>
-                                <div className="p-6 lg:p-8 relative z-10 flex flex-col h-full text-left">
-                                    <div className="flex items-center justify-between mb-12">
-                                        <div>
-                                            <h3 className="text-xl font-black text-slate-900 tracking-tight">Patient Health</h3>
-                                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">From Patient</p>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <Button variant="outline" className="w-10 h-10 p-0 rounded-full bg-white border-0 shadow-sm">
-                                                <Play className="w-5 h-5 text-indigo-600 fill-indigo-600/20" />
-                                            </Button>
-                                            <Button variant="outline" className="w-10 h-10 p-0 rounded-full bg-white border-0 shadow-sm">
-                                                <CheckCircle2 className="w-5 h-5 text-indigo-600" />
-                                            </Button>
-                                            <Button variant="outline" className="w-10 h-10 p-0 rounded-full bg-white border-0 shadow-sm">
-                                                <MoreHorizontal className="w-5 h-5 text-slate-400" />
-                                            </Button>
-                                        </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+                            <Card className="col-span-1 lg:col-span-8 p-10 text-left border-slate-100">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-8 mb-12">
+                                    <div>
+                                        <h3 className="font-black text-slate-900 text-2xl tracking-tight mb-2 italic">Patient Flow & Disease Rate</h3>
+                                        <p className="text-sm text-slate-500 font-medium">Real-time epidemiological tracking and volume trends.</p>
                                     </div>
-
-                                    <div className="relative flex-1 flex items-center justify-center mb-8">
-                                        <img
-                                            src="/health_viz.png"
-                                            alt="Medical Analysis"
-                                            className="w-full h-auto max-h-[320px] object-contain drop-shadow-[0_35px_35px_rgba(79,70,229,0.1)]"
-                                        />
-
-                                        {/* Floating Heart Rate Card */}
-                                        <div className="absolute top-[20%] right-[5%] sm:right-[15%] glass-card p-4 rounded-[24px] flex items-center gap-4 animate-float shadow-xl shadow-indigo-100/50 border border-white">
-                                            <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
-                                                <Activity className="text-indigo-600 w-5 h-5" />
-                                            </div>
-                                            <div>
-                                                <p className="text-lg font-black text-slate-900">108 <span className="text-[10px] text-slate-400 uppercase">bpm</span></p>
-                                            </div>
-                                        </div>
-
-                                        {/* Patient Mini Badge */}
-                                        <Card className="absolute bottom-[0%] right-[0%] p-6 rounded-[32px] w-[220px] shadow-2xl shadow-indigo-200/40 border-white/50 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-                                            <div className="flex items-center justify-between mb-6">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-indigo-100">
-                                                        <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=100" className="w-full h-full object-cover" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-xs font-black text-slate-900 truncate w-24">Jeffrey Hessel</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex gap-1">
-                                                    <X className="w-3.5 h-3.5 text-slate-300" />
-                                                </div>
-                                            </div>
-                                            <div className="space-y-4 relative">
-                                                <div className="absolute right-0 top-0">
-                                                    <Maximize2 className="w-4 h-4 text-slate-300 rotate-45" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Temperature</p>
-                                                    <p className="text-lg font-black text-slate-900">45.06° C</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Heart rate</p>
-                                                    <p className="text-lg font-black text-slate-900">108 bpm</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Blood</p>
-                                                    <p className="text-lg font-black text-slate-900">96%</p>
-                                                </div>
-                                            </div>
-                                        </Card>
-
-                                        {/* Doctor Mini Badge */}
-                                        <Card className="absolute bottom-[5%] left-[0%] p-5 rounded-[28px] shadow-xl border-white animate-in fade-in slide-in-from-left-4 duration-700">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full overflow-hidden">
-                                                    <img src="https://images.unsplash.com/photo-1559839734-2b71f1536783?auto=format&fit=crop&q=80&w=100" className="w-full h-full object-cover" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs font-black text-slate-900">Dr. Ishita Datta</p>
-                                                    <p className="text-[10px] font-bold text-slate-300">Pulmonary</p>
-                                                </div>
-                                            </div>
-                                            <div className="mt-6">
-                                                <p className="text-xl font-black text-slate-900">Today</p>
-                                                <p className="text-[10px] font-bold text-slate-400 mt-1">01:15 PM - 02:00 PM</p>
-                                            </div>
-                                        </Card>
+                                    <div className="flex bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
+                                        <button className="px-6 py-2 bg-white shadow-xl shadow-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-900 transition-all">Weekly</button>
+                                        <button className="px-6 py-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-all">Monthly</button>
                                     </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <HealthMetric
-                                            icon={Thermometer}
-                                            label="Temperature"
-                                            value="36.6"
-                                            unit="°C"
-                                            color="bg-amber-500"
-                                        />
-                                        <HealthMetric
-                                            icon={Activity}
-                                            label="Blood Pressure"
-                                            value="120/80"
-                                            unit="mmHg"
-                                            color="bg-indigo-600"
-                                        />
-                                    </div>
+                                </div>
+                                <div className="h-[400px] w-full">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={data}>
+                                            <defs>
+                                                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.3}/>
+                                                    <stop offset="95%" stopColor="#4f46e5" stopOpacity={0}/>
+                                                </linearGradient>
+                                                <linearGradient id="colorDisease" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3}/>
+                                                    <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
+                                                </linearGradient>
+                                            </defs>
+                                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} />
+                                            <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 700}} />
+                                            <Tooltip 
+                                                contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', padding: '20px'}}
+                                                itemStyle={{fontWeight: 900, textTransform: 'uppercase', fontSize: '10px'}}
+                                            />
+                                            <Area type="monotone" dataKey="value" stroke="#4f46e5" strokeWidth={4} fillOpacity={1} fill="url(#colorValue)" name="Patient Volume" />
+                                            <Area type="monotone" dataKey="disease" stroke="#f43f5e" strokeWidth={4} fillOpacity={1} fill="url(#colorDisease)" name="Disease Rate" />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
                                 </div>
                             </Card>
 
-                            {userRole === 'admin' && (
-                                <Card className="col-span-1 lg:col-span-7 flex flex-col min-h-[500px] text-left">
-                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8 p-6 lg:p-8">
-                                        <div>
-                                            <h3 className="text-xl font-bold text-slate-900">Revenue Analytics</h3>
-                                            <p className="text-sm text-slate-500">Income vs Expenses Overview</p>
-                                        </div>
-                                        <div className="flex bg-slate-50 p-1 rounded-xl">
-                                            <button className="px-5 py-2 bg-white text-indigo-600 rounded-lg text-xs font-bold shadow-sm">Monthly</button>
-                                            <button className="px-5 py-2 text-slate-400 rounded-lg text-xs font-bold">Yearly</button>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex-1 w-full min-h-[300px] px-8">
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <AreaChart data={data}>
-                                                <defs>
-                                                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.15} />
-                                                        <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
-                                                    </linearGradient>
-                                                </defs>
-                                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                                                <YAxis hide />
-                                                <Tooltip
-                                                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                                                />
-                                                <Area
-                                                    type="monotone"
-                                                    dataKey="value"
-                                                    stroke="#4f46e5"
-                                                    strokeWidth={4}
-                                                    fillOpacity={1}
-                                                    fill="url(#colorValue)"
-                                                />
-                                            </AreaChart>
-                                        </ResponsiveContainer>
-                                    </div>
-
-                                    <div className="mt-6 p-6 lg:p-8 border-t border-slate-50 grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-10">
-                                        <div>
-                                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Income</p>
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-2xl font-black text-slate-900">$ 7,112,324</span>
-                                                <span className="text-xs font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full">+12%</span>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Expenses</p>
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-2xl font-black text-slate-900">$ 4,965,476</span>
-                                                <span className="text-xs font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full">+4%</span>
-                                            </div>
+                            <div className="col-span-1 lg:col-span-4 space-y-8">
+                                <Card className="p-8 border-slate-100 text-left relative overflow-hidden">
+                                    <div className="relative z-10">
+                                        <h3 className="font-black text-slate-900 text-xl mb-8 italic">Department Load</h3>
+                                        <div className="space-y-8">
+                                            <DepartmentProgress label="Emergency Medicine" value={65} color="bg-indigo-600" />
+                                            <DepartmentProgress label="Internal Medicine" value={25} color="bg-emerald-500" />
+                                            <DepartmentProgress label="Radiology & Diagnostics" value={10} color="bg-amber-500" />
+                                            <DepartmentProgress label="Surgical Services" value={45} color="bg-slate-900" />
                                         </div>
                                     </div>
                                 </Card>
-                            )}
-                        </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8 text-left mb-10">
-                            <Card className="col-span-1 p-6 lg:p-8">
-                                <div className="flex items-center justify-between mb-8">
-                                    <h3 className="font-black text-slate-900 tracking-tight">Doctor Highlight</h3>
-                                    <MoreHorizontal className="w-5 h-5 text-slate-400" />
-                                </div>
-                                <div className="relative rounded-[32px] overflow-hidden mb-8 group aspect-[4/3] shadow-2xl shadow-slate-200">
-                                    <img src="/dr_kamal.png" className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-700" />
-                                    <div className="absolute top-5 right-5 bg-emerald-500 text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-[0.2em] shadow-lg shadow-emerald-200/50">Available</div>
-                                    <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 via-black/20 to-transparent">
-                                        <h4 className="text-white font-black text-2xl tracking-tight mb-1">Dr. Kamal Sah</h4>
-                                        <p className="text-white/70 text-[10px] font-black uppercase tracking-[0.2em]">Dermatology</p>
+                                <Card className="p-8 bg-indigo-600 text-white text-left relative overflow-hidden group hover:scale-[1.02] transition-transform duration-500 cursor-pointer">
+                                    <div className="relative z-10">
+                                        <div className="flex items-center gap-3 text-indigo-200 mb-6 font-black uppercase tracking-[0.2em] text-[10px]">
+                                            <ShieldCheck size={18} />
+                                            System Integrity
+                                        </div>
+                                        <h4 className="text-2xl font-black mb-4 leading-tight">All clinical nodes operational.</h4>
+                                        <p className="text-indigo-100 text-sm font-medium mb-8 leading-relaxed opacity-80">Last cross-sync completed 4 minutes ago. Database health optimal.</p>
+                                        <Button variant="dark" className="w-full bg-white/20 hover:bg-white/30 text-white border-white/20 font-black py-4 rounded-2xl group/btn">
+                                            <span>Full System Audit</span>
+                                            <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                                        </Button>
                                     </div>
-                                </div>
-                                <Button
-                                    variant="ghost"
-                                    className="w-full justify-between px-2 hover:bg-slate-50 group py-4"
-                                    onClick={() => navigate('/doctors?filter=Kamal')}
-                                >
-                                    <span className="text-sm font-black text-slate-700 group-hover:text-indigo-600 transition-colors">View Full Schedule</span>
-                                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
-                                </Button>
-                            </Card>
-
-                            <Card className="col-span-1 lg:col-span-2 p-6 lg:p-8">
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
-                                    <div>
-                                        <h3 className="font-bold text-slate-900 text-lg">Patient Flow Today</h3>
-                                        <p className="text-sm text-slate-400 font-medium">Department distribution</p>
-                                    </div>
-                                    <div className="flex bg-slate-50 p-1 rounded-xl self-start sm:self-auto">
-                                        <button className="px-4 py-1.5 bg-white shadow-sm rounded-lg text-[10px] font-bold uppercase tracking-wider text-slate-900">Weekly</button>
-                                        <button className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">Monthly</button>
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-12 items-center">
-                                    <div className="h-[220px]">
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <LineChart data={data}>
-                                                <Line type="monotone" dataKey="value" stroke="#0ea5e9" strokeWidth={4} dot={false} />
-                                            </LineChart>
-                                        </ResponsiveContainer>
-                                    </div>
-                                    <div className="space-y-6">
-                                        <DepartmentProgress label="Emergency Medicine" value={65} color="bg-indigo-600" />
-                                        <DepartmentProgress label="General Medicine" value={25} color="bg-sky-500" />
-                                        <DepartmentProgress label="Internal Medicine" value={10} color="bg-amber-500" />
-                                    </div>
-                                </div>
-                            </Card>
+                                    <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000"></div>
+                                </Card>
+                            </div>
                         </div>
                     </>
                 )}

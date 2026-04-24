@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Card, Button, cn } from '../components/layout/BaseUI';
-import { Search, Plus, FileText, Activity, Clock, ChevronRight, Pill, Calendar, Mail, Phone, Loader2, X } from 'lucide-react';
+import { Search, Plus, FileText, Activity, Clock, ChevronRight, Pill, Loader2, X, Phone, Mail, Calendar } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Patient } from '../lib/mockData';
 

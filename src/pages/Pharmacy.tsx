@@ -6,14 +6,10 @@ import {
     Search,
     Filter,
     Plus,
-    Download,
-    TrendingUp,
     AlertCircle,
     Activity,
-    Clock,
     ChevronRight,
     X,
-    Database,
     ShieldCheck,
     Pill,
     Loader2
@@ -24,6 +20,14 @@ const Pharmacy = () => {
     const [showEntryForm, setShowEntryForm] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [prescriptions, setPrescriptions] = useState<any[]>([]);
+    const [patients, setPatients] = useState<any[]>([]);
+    const [newMed, setNewMed] = useState({
+        patient_id: '',
+        name: '',
+        dosage: '',
+        frequency: '',
+        days_left: 30
+    });
     
     const categories = [
         { name: 'Antibiotics', items: 124, status: 'Stable', color: 'bg-indigo-50 text-indigo-600' },
@@ -32,30 +36,52 @@ const Pharmacy = () => {
         { name: 'Vaccines', items: 156, status: 'Restocking', color: 'bg-sky-50 text-sky-600' },
     ];
 
-    const fetchPrescriptions = async () => {
+    const fetchData = async () => {
         setIsLoading(true);
         try {
-            const { data, error } = await supabase
+            const { data: rxData } = await supabase
                 .from('prescriptions')
-                .select('*')
-                .order('created_at', { ascending: false });
-            if (error) throw error;
-            setPrescriptions(data || []);
+                .select('*, patients(name)')
+                .order('id', { ascending: false });
+            
+            const { data: pts } = await supabase.from('patients').select('id, name').order('name');
+            
+            setPrescriptions(rxData || []);
+            setPatients(pts || []);
         } catch (error) {
-            console.error("Error fetching prescriptions:", error);
+            console.error("Error fetching pharmacy data:", error);
         } finally {
             setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchPrescriptions();
+        fetchData();
     }, []);
+
+    const handleIntake = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const id = `RX-${Math.floor(1000 + Math.random() * 9000)}`;
+            const { error } = await supabase.from('prescriptions').insert([{
+                id,
+                ...newMed,
+                status: 'Active'
+            }]);
+            if (error) throw error;
+            alert('Medication Entry Synchronized!');
+            setShowEntryForm(false);
+            setNewMed({ patient_id: '', name: '', dosage: '', frequency: '', days_left: 30 });
+            fetchData();
+        } catch (error) {
+            console.error("Error adding medication:", error);
+            alert("Failed to add medication.");
+        }
+    };
 
     return (
         <Layout>
             <div className="max-w-[1600px] mx-auto text-left">
-                {/* Header Section */}
                 <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
                     <div>
                         <div className="flex items-center gap-3 mb-4">
@@ -64,13 +90,13 @@ const Pharmacy = () => {
                             </div>
                             <span className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em]">Medical Supplies</span>
                         </div>
-                        <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2">Pharmacy Command</h1>
+                        <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2 italic">Pharmacy Command</h1>
                         <p className="text-slate-500 font-medium">Global medication dispensing, inventory tracking, and warehouse management.</p>
                     </div>
                     <div className="flex items-center gap-4">
-                        <Button variant="outline" className="gap-2">
-                            <Download className="w-4 h-4" />
-                            Report
+                        <Button variant="outline" className="gap-2" onClick={fetchData}>
+                            <Loader2 size={16} className={isLoading ? 'animate-spin' : ''} />
+                            Sync
                         </Button>
                         <Button variant="dark" className="gap-2 px-8 active:scale-95" onClick={() => setShowEntryForm(true)}>
                             <Plus className="w-5 h-5" />
@@ -90,163 +116,191 @@ const Pharmacy = () => {
                             <h2 className="text-2xl font-bold tracking-tight">Medication Intake</h2>
                             <p className="text-indigo-300/60 font-medium">Provision new pharmaceutical assets to global decentralized registry.</p>
                         </div>
-                        <form onSubmit={(e) => { e.preventDefault(); alert('Medication Intake Synchronized!'); setShowEntryForm(false); }} className="grid grid-cols-2 gap-8 text-left">
-                            <div className="col-span-2 sm:col-span-1">
-                                <label className="block text-[10px] font-black text-indigo-300/40 uppercase tracking-widest mb-3">Medication Name</label>
-                                <div className="relative">
-                                    <Database className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-500/50" />
-                                    <input type="text" placeholder="e.g. Amoxicillin" className="w-full pl-14 pr-6 py-4 bg-white/5 border-2 border-transparent focus:border-indigo-500/50 rounded-2xl font-bold outline-none transition-all placeholder:text-indigo-300/20" required />
-                                </div>
-                            </div>
-                            <div className="col-span-2 sm:col-span-1">
-                                <label className="block text-[10px] font-black text-indigo-300/40 uppercase tracking-widest mb-3">System Category</label>
-                                <select className="w-full px-6 py-4 bg-white/5 border-2 border-transparent focus:border-indigo-500/50 rounded-2xl font-bold outline-none transition-all appearance-none cursor-pointer">
-                                    <option className="bg-slate-900">Antibiotics</option>
-                                    <option className="bg-slate-900">Pain Relief</option>
-                                    <option className="bg-slate-900">Cardiology</option>
-                                    <option className="bg-slate-900">Vaccines</option>
+                        <form onSubmit={handleIntake} className="grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
+                            <div className="col-span-1 md:col-span-2">
+                                <label className="block text-[10px] font-black text-indigo-300/40 uppercase tracking-widest mb-3">Patient</label>
+                                <select 
+                                    className="w-full px-6 py-4 bg-white/5 border-2 border-transparent focus:border-indigo-500/50 rounded-2xl font-bold outline-none transition-all appearance-none text-white"
+                                    value={newMed.patient_id}
+                                    onChange={(e) => setNewMed({...newMed, patient_id: e.target.value})}
+                                    required
+                                >
+                                    <option value="" className="text-slate-900">Select Patient</option>
+                                    {patients.map(p => <option key={p.id} value={p.id} className="text-slate-900">{p.name}</option>)}
                                 </select>
                             </div>
-                            <div className="col-span-2">
-                                <Button type="submit" className="w-full h-16 rounded-[24px] bg-indigo-600 hover:bg-indigo-500 text-white font-black flex items-center justify-center gap-3 shadow-xl shadow-indigo-900/40 group">
-                                    <ShieldCheck className="w-5 h-5" />
-                                    <span>Synchronize Registry Entry</span>
-                                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform opacity-40 ml-auto" />
+                            <div className="col-span-1 md:col-span-2">
+                                <label className="block text-[10px] font-black text-indigo-300/40 uppercase tracking-widest mb-3">Medication Name</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="e.g. Amoxicillin" 
+                                    className="w-full px-6 py-4 bg-white/5 border-2 border-transparent focus:border-indigo-500/50 rounded-2xl font-bold outline-none transition-all text-white" 
+                                    value={newMed.name}
+                                    onChange={(e) => setNewMed({...newMed, name: e.target.value})}
+                                    required 
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-indigo-300/40 uppercase tracking-widest mb-3">Dosage</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="500mg" 
+                                    className="w-full px-6 py-4 bg-white/5 border-2 border-transparent focus:border-indigo-500/50 rounded-2xl font-bold outline-none transition-all text-white" 
+                                    value={newMed.dosage}
+                                    onChange={(e) => setNewMed({...newMed, dosage: e.target.value})}
+                                    required 
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-indigo-300/40 uppercase tracking-widest mb-3">Frequency</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="2x daily" 
+                                    className="w-full px-6 py-4 bg-white/5 border-2 border-transparent focus:border-indigo-500/50 rounded-2xl font-bold outline-none transition-all text-white" 
+                                    value={newMed.frequency}
+                                    onChange={(e) => setNewMed({...newMed, frequency: e.target.value})}
+                                    required 
+                                />
+                            </div>
+                            <div className="col-span-1 md:col-span-2">
+                                <Button type="submit" className="w-full h-16 rounded-[24px] bg-indigo-500 hover:bg-indigo-400 font-black text-white flex items-center justify-center gap-3 transition-all mt-6">
+                                    Finalize Entry
                                 </Button>
                             </div>
                         </form>
                     </Card>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                    {categories.map((cat) => (
-                        <Card key={cat.name} className="p-6 lg:p-8 group hover:shadow-2xl hover:shadow-slate-100 transition-all duration-500 border-slate-100">
-                            <div className="flex items-center justify-between mb-6">
-                                <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", cat.color)}>
-                                    <Package className="w-6 h-6" />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                    {categories.map((cat, idx) => (
+                        <Card key={idx} className="p-8 group hover:shadow-2xl transition-all duration-500 cursor-pointer border-slate-100">
+                            <div className="flex items-center justify-between mb-8">
+                                <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg", cat.color)}>
+                                    <Pill className="w-7 h-7" />
                                 </div>
-                                <TrendingUp className="w-5 h-5 text-emerald-500" />
+                                <div className="text-right">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                                    <span className={cn("text-xs font-black uppercase tracking-widest", cat.status === 'Low Stock' ? 'text-rose-500' : 'text-emerald-500')}>{cat.status}</span>
+                                </div>
                             </div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{cat.name}</p>
+                            <h3 className="font-black text-slate-900 text-xl mb-2">{cat.name}</h3>
                             <div className="flex items-end justify-between">
-                                <h3 className="text-3xl font-black text-slate-900 tracking-tighter">{cat.items}</h3>
-                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-full">{cat.status}</span>
+                                <p className="text-4xl font-black text-slate-900 tracking-tighter italic">{cat.items}</p>
+                                <span className="text-sm font-bold text-slate-400 italic mb-1">SKU Types</span>
                             </div>
                         </Card>
                     ))}
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
-                    <div className="col-span-1 lg:col-span-8 space-y-8">
-                        <Card className="p-6 bg-indigo-50 border-indigo-100/50">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                <div className="relative flex-1 group w-full">
-                                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 w-5 h-5 transition-colors" />
-                                    <input
-                                        placeholder="Search by NDC, brand name, generic or batch code..."
-                                        className="w-full h-14 pl-16 bg-white border-2 border-transparent focus:border-indigo-100 rounded-2xl font-bold text-sm outline-none transition-all shadow-sm"
-                                    />
-                                </div>
-                                <Button variant="outline" className="h-14 w-full sm:w-auto px-8 rounded-2xl gap-2 border-slate-200">
-                                    <Filter className="w-5 h-5" />
-                                    Filter
-                                </Button>
-                            </div>
-                        </Card>
-
-                        <Card className="p-8 border-indigo-100 bg-white shadow-sm">
-                            <div className="flex items-center justify-between mb-8">
-                                <h3 className="text-xl font-black text-slate-900 tracking-tight">Pending Prescriptions</h3>
-                                <div className="flex gap-2">
-                                    <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-widest">
-                                        {prescriptions.filter(p => p.status === 'Active').length} New
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="space-y-4">
-                                {isLoading ? (
-                                    <div className="flex justify-center py-12">
-                                        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+                    <div className="lg:col-span-8">
+                        <Card className="p-0 overflow-hidden border-slate-100">
+                            <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+                                <h3 className="font-black text-slate-900 text-xl italic">Active Dispensations</h3>
+                                <div className="flex gap-4">
+                                    <div className="relative">
+                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                        <input type="text" placeholder="Search prescriptions..." className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:border-indigo-500 transition-all" />
                                     </div>
-                                ) : prescriptions.length === 0 ? (
-                                    <p className="text-center py-10 text-slate-400 font-bold italic">No pending prescriptions.</p>
-                                ) : (
-                                    prescriptions.slice(0, 5).map((rx, i) => (
-                                        <div key={i} className="p-4 bg-slate-50 rounded-2xl flex items-center justify-between group hover:bg-indigo-50 transition-colors cursor-pointer">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-slate-300 group-hover:text-indigo-600 transition-colors shadow-sm">
-                                                    <Pill className="w-6 h-6" />
-                                                </div>
-                                                <div>
-                                                    <p className="font-bold text-slate-900 text-sm">{rx.name} {rx.dosage}</p>
-                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Patient ID: {rx.patient_id} • {rx.frequency}</p>
-                                                </div>
+                                    <Button variant="outline" className="p-2 rounded-xl">
+                                        <Filter className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            </div>
+                            
+                            <div className="divide-y divide-slate-50">
+                                {isLoading ? (
+                                    <div className="flex flex-col items-center justify-center py-20">
+                                        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin mb-4" />
+                                        <p className="text-slate-400 font-bold italic">Synchronizing prescription registry...</p>
+                                    </div>
+                                ) : prescriptions.map((rx) => (
+                                    <div key={rx.id} className="p-8 flex items-center justify-between hover:bg-slate-50/50 transition-colors group">
+                                        <div className="flex items-center gap-6">
+                                            <div className="w-12 h-12 bg-white border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-all">
+                                                <Activity className="w-6 h-6" />
                                             </div>
-                                            <div className="flex items-center gap-4">
-                                                <span className="text-xs font-bold text-slate-400">{new Date(rx.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                                <Button variant="ghost" size="sm" className="text-indigo-600 font-black text-[10px] uppercase tracking-widest px-4">Dispense</Button>
+                                            <div className="text-left">
+                                                <h4 className="font-black text-slate-900 text-lg group-hover:text-indigo-600 transition-colors">{rx.patients?.name || 'Unknown Patient'}</h4>
+                                                <div className="flex items-center gap-4 mt-1">
+                                                    <span className="text-xs font-bold text-slate-400 italic">ID: {rx.id}</span>
+                                                    <span className="text-xs font-bold text-indigo-500 uppercase tracking-widest">{rx.name} • {rx.dosage}</span>
+                                                </div>
                                             </div>
                                         </div>
-                                    ))
-                                )}
-                            </div>
-                        </Card>
-
-                        <Card className="min-h-[400px] flex flex-col items-center justify-center text-center p-8 lg:p-20 bg-white/40 border-slate-100/50">
-                            <div className="w-24 h-24 bg-indigo-600/10 rounded-[32px] flex items-center justify-center mb-8">
-                                <Activity className="w-10 h-10 text-indigo-600 animate-pulse" />
-                            </div>
-                            <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">Active Pharmacy Systems</h3>
-                            <p className="text-slate-500 font-medium max-w-sm mb-10 leading-relaxed">External medication database synchronized. All dispensing protocols active and secure.</p>
-                            <Button variant="ghost" className="gap-2 font-black text-indigo-600 hover:bg-white" onClick={() => alert('Fetching Recent Dispensing history...')}>
-                                <Clock className="w-4 h-4" />
-                                View Recent Dispensing
-                            </Button>
-                        </Card>
-                    </div>
-
-                    <div className="col-span-1 lg:col-span-4 space-y-8">
-                        <Card className="p-6 lg:p-10 bg-slate-900 text-white relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -mr-16 -mt-16" />
-                            <h3 className="text-xl font-bold mb-8 flex items-center gap-3">
-                                <AlertCircle className="w-6 h-6 text-indigo-400" />
-                                Critical Alerts
-                            </h3>
-                            <div className="space-y-6">
-                                {[
-                                    { item: 'Amoxicillin 500mg', issue: 'Expiring in 3 days', priority: 'High' },
-                                    { item: 'Insulin Glargine', issue: 'Cold chain warning', priority: 'Critical' },
-                                    { item: 'Paracetamol Syrup', issue: 'Stock < 10 units', priority: 'Medium' },
-                                ].map((alert, i) => (
-                                    <div key={i} className="flex gap-4 p-5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer group">
-                                        <div className={cn(
-                                            "w-1.5 h-1.5 rounded-full mt-2 shrink-0",
-                                            alert.priority === 'Critical' ? 'bg-rose-500 animate-pulse' : 'bg-amber-400'
-                                        )} />
-                                        <div>
-                                            <p className="text-sm font-bold text-white group-hover:text-indigo-400 transition-colors">{alert.item}</p>
-                                            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-1">{alert.issue}</p>
+                                        <div className="flex items-center gap-12">
+                                            <div className="text-right">
+                                                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Cycle Left</p>
+                                                <div className="flex items-baseline gap-1">
+                                                    <span className="text-lg font-black text-slate-900">{rx.days_left}</span>
+                                                    <span className="text-[10px] font-bold text-slate-400 italic">Days</span>
+                                                </div>
+                                            </div>
+                                            <div className={cn(
+                                                "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest",
+                                                rx.status === 'Active' ? "bg-emerald-50 text-emerald-600" : "bg-slate-50 text-slate-400"
+                                            )}>
+                                                {rx.status}
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         </Card>
+                    </div>
 
-                        <Card className="p-6 lg:p-10 border-slate-100">
-                            <h3 className="text-lg font-bold text-slate-900 mb-8">External Connections</h3>
-                            <div className="space-y-4">
-                                <Button variant="outline" className="w-full justify-between h-14 px-6 border-slate-100 hover:bg-slate-50">
-                                    <span className="text-sm font-bold text-slate-600">WHO Database</span>
-                                    <ChevronRight className="w-4 h-4 text-slate-300" />
+                    <div className="lg:col-span-4 space-y-8">
+                        <Card className="p-8 bg-slate-900 text-white relative overflow-hidden text-left">
+                            <div className="relative z-10">
+                                <h3 className="font-black text-xl mb-6 italic">Warehouse Health</h3>
+                                <div className="space-y-6">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs font-black text-indigo-400 uppercase tracking-widest">Cold Chain</span>
+                                        <span className="text-emerald-400 text-xs font-black uppercase tracking-widest">Optimal</span>
+                                    </div>
+                                    <div className="h-1 bg-white/10 rounded-full">
+                                        <div className="h-full w-full bg-emerald-500 rounded-full"></div>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs font-black text-indigo-400 uppercase tracking-widest">Oxygen Reserve</span>
+                                        <span className="text-emerald-400 text-xs font-black uppercase tracking-widest">94% Capacity</span>
+                                    </div>
+                                    <div className="h-1 bg-white/10 rounded-full">
+                                        <div className="h-full w-[94%] bg-sky-400 rounded-full"></div>
+                                    </div>
+                                </div>
+                                <Button variant="dark" className="w-full mt-10 bg-white/10 hover:bg-white/20 text-white border-white/10 py-4 rounded-2xl gap-2 font-black">
+                                    <ShieldCheck size={18} />
+                                    Security Audit
                                 </Button>
-                                <Button variant="outline" className="w-full justify-between h-14 px-6 border-slate-100 hover:bg-slate-50">
-                                    <span className="text-sm font-bold text-slate-600">Local Suppliers</span>
-                                    <ChevronRight className="w-4 h-4 text-slate-300" />
-                                </Button>
-                                <Button variant="outline" className="w-full justify-between h-14 px-6 border-slate-100 hover:bg-slate-50">
-                                    <span className="text-sm font-bold text-slate-600">Regulatory Filings</span>
-                                    <ChevronRight className="w-4 h-4 text-slate-300" />
-                                </Button>
+                            </div>
+                            <div className="absolute -right-20 -top-20 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl"></div>
+                        </Card>
+
+                        <Card className="p-8 border-slate-100 text-left">
+                            <h3 className="font-black text-slate-900 text-xl mb-8 italic">Restock Alerts</h3>
+                            <div className="space-y-6">
+                                {[
+                                    { item: 'Paracetamol', qty: '450 units', priority: 'Low' },
+                                    { item: 'Insulin (Lantus)', qty: '12 units', priority: 'Critical' },
+                                    { item: 'Vitamin C 1000mg', qty: '200 units', priority: 'Normal' },
+                                ].map((alert, idx) => (
+                                    <div key={idx} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl group hover:bg-white hover:shadow-lg transition-all duration-300">
+                                        <div className="flex items-center gap-4">
+                                            <div className={cn(
+                                                "w-10 h-10 rounded-xl flex items-center justify-center",
+                                                alert.priority === 'Critical' ? 'bg-rose-50 text-rose-600' : 'bg-slate-100 text-slate-400'
+                                            )}>
+                                                <AlertCircle size={18} />
+                                            </div>
+                                            <div>
+                                                <p className="font-black text-slate-900 text-sm leading-none mb-1">{alert.item}</p>
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{alert.qty}</p>
+                                            </div>
+                                        </div>
+                                        <ChevronRight size={16} className="text-slate-300 group-hover:translate-x-1 transition-transform" />
+                                    </div>
+                                ))}
                             </div>
                         </Card>
                     </div>

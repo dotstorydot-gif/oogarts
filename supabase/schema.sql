@@ -144,6 +144,23 @@ CREATE TABLE IF NOT EXISTS vitals (
   recorded_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Inventory table
+CREATE TABLE IF NOT EXISTS inventory (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  category TEXT NOT NULL,
+  status TEXT DEFAULT 'normal',
+  stock INTEGER DEFAULT 0,
+  unit TEXT NOT NULL,
+  trend TEXT DEFAULT '0%',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Ensure RLS is enabled
+ALTER TABLE inventory ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public Read Access" ON inventory FOR SELECT USING (true);
+CREATE POLICY "Full Access" ON inventory FOR ALL USING (true); -- Demo mode
+
 -- RLS Policies
 ALTER TABLE patients ENABLE ROW LEVEL SECURITY;
 ALTER TABLE medical_history ENABLE ROW LEVEL SECURITY;
@@ -202,4 +219,47 @@ DROP POLICY IF EXISTS "Full Access for Authenticated" ON doctor_time_off;
 CREATE POLICY "Full Access for Authenticated" ON doctor_time_off FOR ALL USING (true) WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Full Access for Authenticated" ON lab_requests;
-CREATE POLICY "Full Access for Authenticated" ON lab_requests FOR ALL USING (true) WITH CHECK (true);
+
+-- Specialties table
+CREATE TABLE IF NOT EXISTS specialties (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL UNIQUE,
+  description TEXT,
+  icon TEXT,
+  doctor_count INTEGER DEFAULT 0
+);
+
+-- Bills table
+CREATE TABLE IF NOT EXISTS bills (
+  id TEXT PRIMARY KEY,
+  patient_id TEXT REFERENCES patients(id) ON DELETE CASCADE,
+  amount DECIMAL NOT NULL,
+  status TEXT DEFAULT 'Unpaid' CHECK (status IN ('Paid', 'Unpaid', 'Overdue')),
+  due_date DATE,
+  items JSONB,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Claims table
+CREATE TABLE IF NOT EXISTS claims (
+  id TEXT PRIMARY KEY,
+  patient_id TEXT REFERENCES patients(id) ON DELETE CASCADE,
+  insurance_provider TEXT NOT NULL,
+  amount DECIMAL NOT NULL,
+  status TEXT DEFAULT 'Pending' CHECK (status IN ('Pending', 'Approved', 'Rejected')),
+  submission_date DATE DEFAULT CURRENT_DATE,
+  details TEXT
+);
+
+-- RLS for new tables
+ALTER TABLE specialties ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public Read Access Specialties" ON specialties FOR SELECT USING (true);
+CREATE POLICY "Full Access Specialties" ON specialties FOR ALL USING (true);
+
+ALTER TABLE bills ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public Read Access Bills" ON bills FOR SELECT USING (true);
+CREATE POLICY "Full Access Bills" ON bills FOR ALL USING (true);
+
+ALTER TABLE claims ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public Read Access Claims" ON claims FOR SELECT USING (true);
+CREATE POLICY "Full Access Claims" ON claims FOR ALL USING (true);
