@@ -52,27 +52,6 @@ const Laboratory = () => {
         }
     };
 
-    const fetchPrescriptions = async () => {
-        setIsLoading(true);
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            const role = localStorage.getItem('userRole') || 'admin';
-
-            let query = supabase.from('prescriptions').select('*').order('created_at', { ascending: false });
-            
-            if (role === 'doctor' && user) {
-                query = query.eq('doctor_id', user.id);
-            }
-            
-            const { data, error } = await query;
-            if (error) throw error;
-            setPrescriptions(data || []);
-        } catch (error) {
-            console.error("Error fetching prescriptions:", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     useEffect(() => {
         fetchLabRequests();
