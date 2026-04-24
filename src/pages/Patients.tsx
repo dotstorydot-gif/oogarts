@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Card, Button, cn } from '../components/layout/BaseUI';
-import { Search, Plus, FileText, Activity, Clock, ChevronRight, Pill, Calendar, Mail, Phone, Loader2 } from 'lucide-react';
+import { Search, Plus, FileText, Activity, Clock, ChevronRight, Pill, Calendar, Mail, Phone, Loader2, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Patient } from '../lib/mockData';
 
@@ -10,6 +10,15 @@ const Patients = () => {
     const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
     const [patients, setPatients] = useState<Patient[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+    const [newPatientData, setNewPatientData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        dob: '',
+        gender: 'Male',
+        bloodType: 'O+'
+    });
 
     const fetchData = async () => {
         setIsLoading(true);
@@ -66,9 +75,25 @@ const Patients = () => {
         }
     };
 
-    useEffect(() => {
-        fetchData();
-    }, []);
+    const registerPatient = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const newId = `PAT-${Math.floor(1000 + Math.random() * 9000)}`;
+            const { error } = await supabase.from('patients').insert([{
+                id: newId,
+                ...newPatientData,
+                status: 'Active',
+                image: `https://ui-avatars.com/api/?name=${encodeURIComponent(newPatientData.name)}&background=random`
+            }]);
+            if (error) throw error;
+            alert("Patient registered successfully!");
+            setShowRegistrationModal(false);
+            fetchData();
+        } catch (error) {
+            console.error("Error registering patient:", error);
+            alert("Failed to register patient.");
+        }
+    };
 
     const filteredPatients = patients.filter(p => 
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -95,7 +120,10 @@ const Patients = () => {
                                 className="w-full bg-white border-2 border-slate-100 rounded-xl pl-12 pr-4 py-3 text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
                             />
                         </div>
-                        <Button className="bg-slate-900 hover:bg-slate-800 text-white shrink-0">
+                        <Button 
+                            className="bg-slate-900 hover:bg-slate-800 text-white shrink-0"
+                            onClick={() => setShowRegistrationModal(true)}
+                        >
                             <Plus className="w-4 h-4 mr-2" /> New Patient
                         </Button>
                     </div>
@@ -293,6 +321,79 @@ const Patients = () => {
                     </Card>
                 )}
             </div>
+            {/* Registration Modal */}
+            {showRegistrationModal && (
+                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-6">
+                    <Card className="w-full max-w-xl bg-white shadow-3xl animate-in zoom-in-95 duration-200 p-8">
+                        <div className="flex items-center justify-between mb-8">
+                            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Register New Patient</h2>
+                            <Button variant="ghost" className="rounded-full w-10 h-10 p-0" onClick={() => setShowRegistrationModal(false)}>
+                                <X size={20} />
+                            </Button>
+                        </div>
+
+                        <form onSubmit={registerPatient} className="grid grid-cols-2 gap-6">
+                            <div className="col-span-2">
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Full Name</label>
+                                <input 
+                                    type="text" 
+                                    className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-100 rounded-2xl font-bold outline-none"
+                                    value={newPatientData.name}
+                                    onChange={(e) => setNewPatientData({...newPatientData, name: e.target.value})}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Email Address</label>
+                                <input 
+                                    type="email" 
+                                    className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-100 rounded-2xl font-bold outline-none"
+                                    value={newPatientData.email}
+                                    onChange={(e) => setNewPatientData({...newPatientData, email: e.target.value})}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Phone Number</label>
+                                <input 
+                                    type="tel" 
+                                    className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-100 rounded-2xl font-bold outline-none"
+                                    value={newPatientData.phone}
+                                    onChange={(e) => setNewPatientData({...newPatientData, phone: e.target.value})}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Date of Birth</label>
+                                <input 
+                                    type="date" 
+                                    className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-100 rounded-2xl font-bold outline-none"
+                                    value={newPatientData.dob}
+                                    onChange={(e) => setNewPatientData({...newPatientData, dob: e.target.value})}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Gender</label>
+                                <select 
+                                    className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-100 rounded-2xl font-bold outline-none appearance-none"
+                                    value={newPatientData.gender}
+                                    onChange={(e) => setNewPatientData({...newPatientData, gender: e.target.value})}
+                                >
+                                    <option>Male</option>
+                                    <option>Female</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div className="col-span-2 pt-4">
+                                <Button type="submit" className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-lg shadow-xl shadow-slate-200">
+                                    Register Patient
+                                </Button>
+                            </div>
+                        </form>
+                    </Card>
+                </div>
+            )}
         </Layout>
     );
 };

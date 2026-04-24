@@ -7,15 +7,14 @@ import {
     TestTube,
     FlaskConical,
     ClipboardCheck,
-    Plus,
-    Download,
     ArrowUpRight,
     ShieldAlert,
     X,
     ChevronRight,
     User,
     Syringe,
-    Loader2
+    Loader2,
+    Search
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -53,6 +52,69 @@ const Laboratory = () => {
     };
 
 
+    const [searchQuery, setSearchQuery] = useState('');
+    const [foundPatient, setFoundPatient] = useState<any>(null);
+    const [isOrdering, setIsOrdering] = useState(false);
+    const [newOrder, setNewOrder] = useState({
+        test_name: 'Full Blood Count',
+        priority: 'Normal'
+    });
+
+    const searchPatient = async () => {
+        if (!searchQuery) return;
+        setIsLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('patients')
+                .select('*')
+                .or(`name.ilike.%${searchQuery}%,id.eq.${searchQuery},phone.ilike.%${searchQuery}%`)
+                .maybeSingle();
+            
+            if (error) throw error;
+            if (!data) {
+                alert("Patient not found.");
+            } else {
+                setFoundPatient(data);
+            }
+        } catch (error) {
+            console.error("Error searching patient:", error);
+            alert("Error retrieving patient data.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const submitOrder = async () => {
+        if (!foundPatient) return;
+        setIsOrdering(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error("Not authenticated");
+
+            const { error } = await supabase.from('lab_requests').insert([{
+                id: `LAB-${Math.floor(1000 + Math.random() * 9000)}`,
+                patient_id: foundPatient.id,
+                patient_name: foundPatient.name,
+                doctor_id: user.id,
+                test_name: newOrder.test_name,
+                priority: newOrder.priority,
+                status: 'Pending',
+                request_date: new Date().toISOString()
+            }]);
+
+            if (error) throw error;
+            alert("Lab request submitted!");
+            setFoundPatient(null);
+            setSearchQuery('');
+            fetchLabRequests();
+        } catch (error) {
+            console.error("Error submitting lab request:", error);
+            alert("Failed to submit request.");
+        } finally {
+            setIsOrdering(false);
+        }
+    };
+
     useEffect(() => {
         fetchLabRequests();
     }, []);
@@ -73,16 +135,80 @@ const Laboratory = () => {
                         <p className="text-slate-500 font-medium">Real-time specimen tracking, automated pathology results, and equipment monitoring.</p>
                     </div>
                     <div className="flex items-center gap-4">
-                        <Button variant="outline" className="gap-2">
-                            <Download className="w-4 h-4" />
-                            Log
-                        </Button>
-                        <Button variant="dark" className="gap-2 px-8 active:scale-95" onClick={() => setShowOrderForm(true)}>
-                            <Plus className="w-5 h-5" />
-                            New Test Order
+                        <div className="relative w-full sm:w-80">
+                            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <input
+                                type="text"
+                                placeholder="Patient Name / ID / Phone..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full bg-white border-2 border-slate-100 rounded-xl pl-12 pr-4 py-3 text-sm font-medium text-slate-900 focus:border-indigo-500 outline-none transition-all"
+                                onKeyDown={(e) => e.key === 'Enter' && searchPatient()}
+                            />
+                        </div>
+                        <Button variant="dark" onClick={searchPatient} disabled={isLoading}>
+                            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Search"}
                         </Button>
                     </div>
                 </div>
+
+                {foundPatient && (
+                    <Card className="mb-12 p-8 border-indigo-200 bg-indigo-50/30 animate-in slide-in-from-top-4 duration-300">
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+                            <div className="flex items-center gap-4">
+                                <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center text-indigo-600 shadow-sm border border-indigo-100">
+                                    <User className="w-8 h-8" />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-black text-slate-900">{foundPatient.name}</h2>
+                                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">{foundPatient.id} • {foundPatient.phone}</p>
+                                </div>
+                            </div>
+                            
+                            <div className="flex flex-wrap items-center gap-4 flex-1 max-w-2xl">
+                                <div className="flex-1 min-w-[200px]">
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Diagnostic Test</label>
+                                    <select 
+                                        className="w-full bg-white border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-indigo-500"
+                                        value={newOrder.test_name}
+                                        onChange={(e) => setNewOrder({...newOrder, test_name: e.target.value})}
+                                    >
+                                        <option>Full Blood Count</option>
+                                        <option>Lipid Profile</option>
+                                        <option>Blood Glucose</option>
+                                        <option>Thyroid Panel</option>
+                                        <option>Liver Function Test</option>
+                                        <option>Renal Profile</option>
+                                    </select>
+                                </div>
+                                <div className="w-40">
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Priority</label>
+                                    <select 
+                                        className="w-full bg-white border-2 border-slate-100 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-indigo-500"
+                                        value={newOrder.priority}
+                                        onChange={(e) => setNewOrder({...newOrder, priority: e.target.value})}
+                                    >
+                                        <option>Normal</option>
+                                        <option>Urgent</option>
+                                        <option>Critical</option>
+                                    </select>
+                                </div>
+                                <div className="pt-6">
+                                    <Button 
+                                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl shadow-lg shadow-indigo-200"
+                                        onClick={submitOrder}
+                                        disabled={isOrdering}
+                                    >
+                                        {isOrdering ? <Loader2 className="w-5 h-5 animate-spin" /> : "Request Test"}
+                                    </Button>
+                                </div>
+                            </div>
+                            <Button variant="ghost" onClick={() => setFoundPatient(null)} className="text-slate-400 hover:text-slate-600">
+                                <X className="w-5 h-5" />
+                            </Button>
+                        </div>
+                    </Card>
+                )}
 
                 {showOrderForm && (
                     <Card className="mb-12 p-10 animate-in fade-in slide-in-from-top-4 duration-500 bg-white/80 backdrop-blur-xl border-white shadow-2xl relative overflow-hidden">

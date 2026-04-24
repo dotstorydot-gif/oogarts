@@ -49,18 +49,30 @@ const DoctorReports = () => {
         icdCode: 'I10',
         instructions: ''
     });
+    const [patientsList, setPatientsList] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchPatients = async () => {
+            const { data } = await supabase.from('patients').select('id, name').order('name');
+            setPatientsList(data || []);
+        };
+        fetchPatients();
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
             if (!patientId) {
+                setPatient(null);
+                setVitals(null);
                 setIsLoading(false);
                 return;
             }
+            setIsLoading(true);
             try {
                 const { data: pt } = await supabase.from('patients').select('*').eq('id', patientId).single();
                 setPatient(pt);
 
-                const { data: vt } = await supabase.from('vitals').select('*').eq('patient_id', patientId).order('recorded_at', { ascending: false }).limit(1).single();
+                const { data: vt } = await supabase.from('vitals').select('*').eq('patient_id', patientId).order('recorded_at', { ascending: false }).limit(1).maybeSingle();
                 setVitals(vt);
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -149,7 +161,19 @@ const DoctorReports = () => {
                 <div className="flex items-center justify-between mb-8">
                     <div>
                         <h1 className="text-3xl font-black text-slate-900 mb-2">Doctor Interface</h1>
-                        <p className="text-slate-500 font-medium">Patient consultation and medical reporting system</p>
+                        <div className="flex items-center gap-3">
+                            <p className="text-slate-500 font-medium">Patient consultation system |</p>
+                            <select 
+                                className="bg-slate-100 border-none rounded-lg px-3 py-1 text-sm font-bold text-indigo-600 outline-none cursor-pointer"
+                                value={patientId || ''}
+                                onChange={(e) => navigate(`/doctor-reports?id=${e.target.value}`)}
+                            >
+                                <option value="">Switch Patient</option>
+                                {patientsList.map(p => (
+                                    <option key={p.id} value={p.id}>{p.name}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
                     <div className="flex gap-3">
                         <Button variant="outline" className="gap-2 rounded-xl">

@@ -109,16 +109,29 @@ const DoctorDashboard = () => {
         fetchDoctorData();
     }, []);
 
-    const searchPatient = async () => {
-        if (!searchQuery) return;
+    const searchPatient = async (pid?: string) => {
+        const query = pid || searchQuery;
+        if (!query) return;
+        setIsLoading(true);
         try {
-            const { data: patient, error } = await supabase
-                .from('patients')
-                .select('*')
-                .or(`name.ilike.%${searchQuery}%,id.eq.${searchQuery}`)
-                .single();
+            // Search by name, id, or phone
+            let patientQuery = supabase.from('patients').select('*');
+            
+            if (pid) {
+                patientQuery = patientQuery.eq('id', pid);
+            } else {
+                patientQuery = patientQuery.or(`name.ilike.%${query}%,id.eq.${query},phone.ilike.%${query}%`);
+            }
+
+            const { data: patient, error } = await patientQuery.maybeSingle();
             
             if (error) throw error;
+            if (!patient) {
+                alert("Patient not found.");
+                setIsLoading(false);
+                return;
+            }
+
             setFoundPatient(patient);
 
             // Fetch Vitals
@@ -128,13 +141,15 @@ const DoctorDashboard = () => {
                 .eq('patient_id', patient.id)
                 .order('recorded_at', { ascending: false })
                 .limit(1)
-                .single();
+                .maybeSingle();
             
             setPatientVitals(vitals);
-            setShowVitalsModal(true);
+            // setShowVitalsModal(true); // Don't auto-show modal, just load data in dashboard
         } catch (error) {
             console.error("Error searching patient:", error);
-            alert("Patient not found.");
+            alert("Error retrieving patient data.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -279,8 +294,7 @@ const DoctorDashboard = () => {
                                                 </p>
                                                 <div className="flex flex-wrap gap-3 justify-center md:justify-start">
                                                     <Button className="bg-slate-900 text-white gap-2" onClick={() => {
-                                                        setFoundPatient({ id: nextPatient.patient_id, name: nextPatient.patient_name, image: nextPatient.patient_image });
-                                                        searchPatient(); // To load vitals
+                                                        searchPatient(nextPatient.patient_id);
                                                     }}>Start Exam</Button>
                                                     <Button variant="outline" className="gap-2" onClick={() => navigate(`/patients?id=${nextPatient.patient_id}`)}>View History</Button>
                                                     <Button variant="outline" className="gap-2 text-indigo-600 border-indigo-100" onClick={() => setShowRxModal(true)}>Add Prescription</Button>
