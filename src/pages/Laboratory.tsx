@@ -33,14 +33,42 @@ const Laboratory = () => {
     const fetchLabRequests = async () => {
         setIsLoading(true);
         try {
-            const { data, error } = await supabase
-                .from('lab_requests')
-                .select('*')
-                .order('request_date', { ascending: false });
+            const { data: { user } } = await supabase.auth.getUser();
+            const role = localStorage.getItem('userRole') || 'admin';
+
+            let query = supabase.from('lab_requests').select('*').order('request_date', { ascending: false });
+            
+            if (role === 'doctor' && user) {
+                query = query.eq('doctor_id', user.id);
+            }
+
+            const { data, error } = await query;
             if (error) throw error;
             setLabRequests(data || []);
         } catch (error) {
             console.error("Error fetching lab requests:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const fetchPrescriptions = async () => {
+        setIsLoading(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            const role = localStorage.getItem('userRole') || 'admin';
+
+            let query = supabase.from('prescriptions').select('*').order('created_at', { ascending: false });
+            
+            if (role === 'doctor' && user) {
+                query = query.eq('doctor_id', user.id);
+            }
+            
+            const { data, error } = await query;
+            if (error) throw error;
+            setPrescriptions(data || []);
+        } catch (error) {
+            console.error("Error fetching prescriptions:", error);
         } finally {
             setIsLoading(false);
         }

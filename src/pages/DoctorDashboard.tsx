@@ -23,9 +23,12 @@ import { Appointment, LabRequest } from '../lib/mockData';
 const DoctorDashboard = () => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
+    const [doctorProfile, setDoctorProfile] = useState<any>(null);
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [labRequests, setLabRequests] = useState<LabRequest[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [foundPatient, setFoundPatient] = useState<any>(null);
+    const [patientVitals, setPatientVitals] = useState<any>(null);
     const [stats, setStats] = useState({
         todayConsultations: 0,
         pendingLabs: 0,
@@ -35,6 +38,7 @@ const DoctorDashboard = () => {
 
     const [showLabModal, setShowLabModal] = useState(false);
     const [showRxModal, setShowRxModal] = useState(false);
+    const [showVitalsModal, setShowVitalsModal] = useState(false);
     const [newLabRequest, setNewLabRequest] = useState({ testName: '', priority: 'Normal' });
     const [newRx, setNewRx] = useState({ name: '', dosage: '', frequency: '' });
 
@@ -42,22 +46,46 @@ const DoctorDashboard = () => {
         const fetchDoctorData = async () => {
             setIsLoading(true);
             try {
-                const doctorName = 'Dr. Michael Chen'; // Demo doctor
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) throw new Error("Not authenticated");
+
+                // Fetch Doctor Profile
+                const { data: profile } = await supabase
+                    .from('doctors')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
                 
-                // Fetch Appointments
+                // If no profile found, use demo data
+                const finalProfile = profile || {
+                    id: user.id,
+                    name: 'Dr. Michael Chen',
+                    specialty: 'Neurology',
+                    image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200'
+                };
+                setDoctorProfile(finalProfile);
+                
+                // Fetch Appointments for this doctor
                 const { data: appts, error: apptError } = await supabase
                     .from('appointments')
-                    .select('*')
-                    .eq('doctor_name', doctorName)
+                    .select('*, patients(name, image)')
+                    .eq('doctor_id', user.id)
                     .order('date', { ascending: true });
                 
                 if (apptError) throw apptError;
-                setAppointments(appts || []);
+                
+                const mappedAppts = (appts || []).map(a => ({
+                    ...a,
+                    patient_name: a.patients?.name || 'Unknown Patient',
+                    patient_image: a.patients?.image || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200'
+                }));
+                setAppointments(mappedAppts);
 
-                // Fetch Lab Requests
+                // Fetch Lab Requests for this doctor
                 const { data: labs, error: labError } = await supabase
                     .from('lab_requests')
                     .select('*')
+                    .eq('doctor_id', user.id)
                     .order('request_date', { ascending: false });
                 
                 if (labError) throw labError;
@@ -80,6 +108,35 @@ const DoctorDashboard = () => {
 
         fetchDoctorData();
     }, []);
+
+    const searchPatient = async () => {
+        if (!searchQuery) return;
+        try {
+            const { data: patient, error } = await supabase
+                .from('patients')
+                .select('*')
+                .or(`name.ilike.%${searchQuery}%,id.eq.${searchQuery}`)
+                .single();
+            
+            if (error) throw error;
+            setFoundPatient(patient);
+
+            // Fetch Vitals
+            const { data: vitals } = await supabase
+                .from('vitals')
+                .select('*')
+                .eq('patient_id', patient.id)
+                .order('recorded_at', { ascending: false })
+                .limit(1)
+                .single();
+            
+            setPatientVitals(vitals);
+            setShowVitalsModal(true);
+        } catch (error) {
+            console.error("Error searching patient:", error);
+            alert("Patient not found.");
+        }
+    };
 
     const handleLabSubmit = async () => {
         try {
@@ -134,10 +191,11 @@ const DoctorDashboard = () => {
                             <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                             <input
                                 type="text"
-                                placeholder="Search patients..."
+                                placeholder="Patient Search (Vitals/History)..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="bg-white border-2 border-slate-100 rounded-2xl pl-12 pr-4 py-2.5 text-sm font-medium w-64 focus:border-indigo-500 transition-all"
+                                onKeyDown={(e) => e.key === 'Enter' && searchPatient()}
+                                className="bg-white border-2 border-slate-100 rounded-2xl pl-12 pr-4 py-2.5 text-sm font-medium w-64 focus:border-indigo-500 transition-all shadow-sm"
                             />
                         </div>
                         <Button className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2" onClick={() => navigate('/appointments')}>
@@ -189,7 +247,18 @@ const DoctorDashboard = () => {
                                     <div className="flex items-center justify-between mb-8">
                                         <h3 className="text-xl font-black text-slate-900 tracking-tight">Active Consultation</h3>
                                         <div className="flex gap-2">
-                                            <span className="px-3 py-1 bg-indigo-100 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-widest">In Progress</span>
+                                            <select 
+                                                className="bg-indigo-100 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-widest px-3 py-1 outline-none cursor-pointer"
+                                                onChange={(e) => {
+                                                    const appt = appointments.find(a => a.id === e.target.value);
+                                                    if (appt) setFoundPatient(appt);
+                                                }}
+                                            >
+                                                <option value="">Select from Queue</option>
+                                                {appointments.filter(a => a.status === 'Scheduled').map(a => (
+                                                    <option key={a.id} value={a.id}>{a.patient_name} ({a.time})</option>
+                                                ))}
+                                            </select>
                                         </div>
                                     </div>
                                     
@@ -197,7 +266,7 @@ const DoctorDashboard = () => {
                                         <div className="flex flex-col md:flex-row items-center gap-10">
                                             <div className="relative">
                                                 <div className="w-32 h-32 rounded-[40px] overflow-hidden border-4 border-white shadow-2xl">
-                                                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200" className="w-full h-full object-cover" />
+                                                    <img src={nextPatient.patient_image || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200"} className="w-full h-full object-cover" />
                                                 </div>
                                                 <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-emerald-500 border-4 border-white rounded-2xl flex items-center justify-center text-white">
                                                     <CheckCircle2 className="w-5 h-5" />
@@ -209,8 +278,11 @@ const DoctorDashboard = () => {
                                                     <Clock className="w-4 h-4 text-indigo-600" /> {nextPatient.time} • {nextPatient.type}
                                                 </p>
                                                 <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                                                    <Button className="bg-slate-900 text-white gap-2">Start Exam</Button>
-                                                    <Button variant="outline" className="gap-2" onClick={() => navigate(`/patients`)}>View History</Button>
+                                                    <Button className="bg-slate-900 text-white gap-2" onClick={() => {
+                                                        setFoundPatient({ id: nextPatient.patient_id, name: nextPatient.patient_name, image: nextPatient.patient_image });
+                                                        searchPatient(); // To load vitals
+                                                    }}>Start Exam</Button>
+                                                    <Button variant="outline" className="gap-2" onClick={() => navigate(`/patients?id=${nextPatient.patient_id}`)}>View History</Button>
                                                     <Button variant="outline" className="gap-2 text-indigo-600 border-indigo-100" onClick={() => setShowRxModal(true)}>Add Prescription</Button>
                                                 </div>
                                             </div>
@@ -222,13 +294,15 @@ const DoctorDashboard = () => {
                                 <div className="px-8 py-4 bg-white/50 border-t border-indigo-50 flex items-center justify-between">
                                     <div className="flex items-center gap-4">
                                         <div className="flex -space-x-2">
-                                            {[1, 2, 3].map(i => (
-                                                <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200"></div>
+                                            {appointments.slice(0, 3).map((a, i) => (
+                                                <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 overflow-hidden">
+                                                    <img src={a.patient_image || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200"} className="w-full h-full object-cover" />
+                                                </div>
                                             ))}
                                         </div>
-                                        <p className="text-xs font-bold text-slate-500">3 more patients in queue</p>
+                                        <p className="text-xs font-bold text-slate-500">{appointments.length > 0 ? `${appointments.length} more patients in queue` : 'Queue empty'}</p>
                                     </div>
-                                    <Button variant="ghost" className="text-indigo-600 font-black text-xs uppercase tracking-widest gap-2">
+                                    <Button variant="ghost" className="text-indigo-600 font-black text-xs uppercase tracking-widest gap-2" onClick={() => navigate('/queue')}>
                                         View All Queue <ChevronRight className="w-4 h-4" />
                                     </Button>
                                 </div>
@@ -276,6 +350,30 @@ const DoctorDashboard = () => {
 
                         {/* Sidebar Column */}
                         <div className="lg:col-span-4 space-y-8">
+                            {/* Doctor Profile Card */}
+                            <Card className="p-8 bg-white border-indigo-100 shadow-xl shadow-indigo-50/50">
+                                <div className="flex items-center gap-6 mb-8">
+                                    <div className="w-20 h-20 rounded-[28px] overflow-hidden border-4 border-indigo-50 shadow-lg">
+                                        <img src={doctorProfile?.image} className="w-full h-full object-cover" alt={doctorProfile?.name} />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Signed In As</p>
+                                        <h3 className="text-xl font-black text-slate-900 tracking-tight">{doctorProfile?.name}</h3>
+                                        <p className="text-sm font-bold text-slate-400">{doctorProfile?.specialty}</p>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="p-4 bg-slate-50 rounded-2xl">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Status</p>
+                                        <p className="text-sm font-black text-emerald-600">{doctorProfile?.status || 'Active'}</p>
+                                    </div>
+                                    <div className="p-4 bg-slate-50 rounded-2xl">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase mb-1">ID</p>
+                                        <p className="text-sm font-black text-slate-900">#{(doctorProfile?.id || '001').slice(0, 6)}</p>
+                                    </div>
+                                </div>
+                            </Card>
+
                             {/* Schedule Overview */}
                             <Card className="p-8 bg-slate-900 text-white border-none shadow-2xl shadow-indigo-200">
                                 <div className="flex items-center justify-between mb-8">
@@ -298,29 +396,46 @@ const DoctorDashboard = () => {
                                     Edit Availability
                                 </Button>
                             </Card>
-
-                            {/* Notifications & Admin Requests */}
-                            <Card className="p-8">
-                                <h3 className="font-black text-slate-900 tracking-tight mb-6">Staff Updates</h3>
-                                <div className="space-y-6">
-                                    {[
-                                        { title: 'New Lab Policy', from: 'Admin', time: '2h ago' },
-                                        { title: 'Patient Re-scheduling', from: 'Front Desk', time: '4h ago' }
-                                    ].map((note, i) => (
-                                        <div key={i} className="flex gap-4">
-                                            <div className="w-2 h-2 rounded-full bg-indigo-600 mt-1.5 shrink-0"></div>
-                                            <div>
-                                                <p className="text-sm font-black text-slate-900 tracking-tight leading-tight">{note.title}</p>
-                                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">{note.from} • {note.time}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </Card>
                         </div>
                     </div>
                 )}
             </div>
+
+            {/* Vitals Modal (Search Result) */}
+            {showVitalsModal && foundPatient && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                    <Card className="w-full max-w-2xl p-10 animate-in fade-in zoom-in-95 duration-300 relative">
+                        <Button variant="ghost" className="absolute top-6 right-6" onClick={() => setShowVitalsModal(false)}><X className="w-6 h-6" /></Button>
+                        <div className="flex items-center gap-6 mb-10">
+                            <div className="w-20 h-20 rounded-3xl overflow-hidden shadow-lg border-4 border-indigo-50">
+                                <img src={foundPatient.image || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200"} className="w-full h-full object-cover" />
+                            </div>
+                            <div>
+                                <h3 className="text-3xl font-black text-slate-900 tracking-tight">{foundPatient.name}</h3>
+                                <p className="text-slate-500 font-bold uppercase text-xs tracking-widest mt-1">Patient ID: {foundPatient.id} • {foundPatient.dob}</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+                            <VitalsCard label="Blood Pressure" value={patientVitals?.blood_pressure || '120/80'} unit="mmHg" />
+                            <VitalsCard label="Heart Rate" value={patientVitals?.heart_rate?.toString() || '72'} unit="bpm" />
+                            <VitalsCard label="Temp" value={patientVitals?.temperature?.toString() || '36.6'} unit="°C" />
+                            <VitalsCard label="Weight" value={patientVitals?.weight?.toString() || '70'} unit="kg" />
+                        </div>
+
+                        <div className="space-y-6 text-left">
+                            <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Recent Diagnosis</h4>
+                                <p className="text-slate-900 font-bold leading-relaxed">{foundPatient.notes || "No critical diagnosis recorded."}</p>
+                            </div>
+                            <div className="flex gap-4">
+                                <Button className="flex-1 bg-indigo-600 text-white" onClick={() => { setShowVitalsModal(false); navigate(`/patients`); }}>Open Full History</Button>
+                                <Button variant="outline" className="flex-1" onClick={() => setShowVitalsModal(false)}>Close</Button>
+                            </div>
+                        </div>
+                    </Card>
+                </div>
+            )}
 
             {/* Lab Modal */}
             {showLabModal && (
@@ -428,6 +543,16 @@ const StatCard = ({ icon: Icon, label, value, color }: any) => (
             </div>
         </div>
     </Card>
+);
+
+const VitalsCard = ({ label, value, unit }: any) => (
+    <div className="p-5 bg-white border border-slate-100 rounded-3xl shadow-sm text-center">
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{label}</p>
+        <div className="flex items-baseline justify-center gap-1">
+            <span className="text-xl font-black text-slate-900">{value}</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase">{unit}</span>
+        </div>
+    </div>
 );
 
 export default DoctorDashboard;

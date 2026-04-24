@@ -11,45 +11,63 @@ const Patients = () => {
     const [patients, setPatients] = useState<Patient[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchPatients = async () => {
-            setIsLoading(true);
-            try {
-                // Fetch patients
-                const { data: patientsData, error: pError } = await supabase.from('patients').select('*');
-                if (pError) throw pError;
+    const fetchData = async () => {
+        setIsLoading(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            const role = localStorage.getItem('userRole') || 'admin';
 
-                // For a real app we'd fetch relations on demand, but for syncing with our old UI:
-                const { data: rxData } = await supabase.from('prescriptions').select('*');
-                const { data: histData } = await supabase.from('medical_history').select('*');
-                const { data: labData } = await supabase.from('lab_results').select('*');
-
-                const mappedPatients: Patient[] = (patientsData || []).map((p: any) => ({
-                    id: p.id,
-                    name: p.name,
-                    email: p.email,
-                    phone: p.phone,
-                    dob: p.dob,
-                    gender: p.gender,
-                    bloodType: p.blood_type,
-                    image: p.image,
-                    lastVisit: p.last_visit,
-                    status: p.status,
-                    allergies: p.allergies || [],
-                    history: (histData || []).filter((h: any) => h.patient_id === p.id),
-                    prescriptions: (rxData || []).filter((rx: any) => rx.patient_id === p.id).map((rx: any) => ({...rx, daysLeft: rx.days_left})),
-                    labs: (labData || []).filter((l: any) => l.patient_id === p.id)
-                }));
-
-                setPatients(mappedPatients);
-            } catch (error) {
-                console.error("Error fetching patients:", error);
-            } finally {
-                setIsLoading(false);
+            // Fetch patients
+            let query = supabase.from('patients').select('*');
+            
+            // If doctor, only show patients who have had appointments with them
+            if (role === 'doctor' && user) {
+                const { data: appts } = await supabase.from('appointments').select('patient_id').eq('doctor_id', user.id);
+                const pIds = [...new Set(appts?.map(a => a.patient_id))];
+                if (pIds.length > 0) {
+                    query = query.in('id', pIds);
+                } else {
+                    setPatients([]);
+                    setIsLoading(false);
+                    return;
+                }
             }
-        };
 
-        fetchPatients();
+            const { data: patientsData, error: pError } = await query;
+            if (pError) throw pError;
+
+            // Fetch relations
+            const { data: rxData } = await supabase.from('prescriptions').select('*');
+            const { data: histData } = await supabase.from('medical_history').select('*');
+            const { data: labData } = await supabase.from('lab_results').select('*');
+
+            const mappedPatients: Patient[] = (patientsData || []).map((p: any) => ({
+                id: p.id,
+                name: p.name,
+                email: p.email,
+                phone: p.phone,
+                dob: p.dob,
+                gender: p.gender,
+                bloodType: p.blood_type,
+                image: p.image,
+                lastVisit: p.last_visit,
+                status: p.status,
+                allergies: p.allergies || [],
+                history: (histData || []).filter((h: any) => h.patient_id === p.id),
+                prescriptions: (rxData || []).filter((rx: any) => rx.patient_id === p.id).map((rx: any) => ({...rx, daysLeft: rx.days_left})),
+                labs: (labData || []).filter((l: any) => l.patient_id === p.id)
+            }));
+
+            setPatients(mappedPatients);
+        } catch (error) {
+            console.error("Error fetching patients:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
     }, []);
 
     const filteredPatients = patients.filter(p => 

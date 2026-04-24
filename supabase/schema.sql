@@ -19,6 +19,17 @@ CREATE POLICY "Allow users to view their own medical records"
 ON storage.objects FOR SELECT TO authenticated
 USING (bucket_id = 'medical-records');
 
+-- Create doctors table
+CREATE TABLE IF NOT EXISTS doctors (
+  id TEXT PRIMARY KEY, -- This will be the auth.uid
+  name TEXT NOT NULL,
+  specialty TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT,
+  image TEXT,
+  status TEXT DEFAULT 'Active'
+);
+
 -- Create patients table
 CREATE TABLE IF NOT EXISTS patients (
   id TEXT PRIMARY KEY,
@@ -78,7 +89,8 @@ END $$;
 CREATE TABLE IF NOT EXISTS appointments (
   id TEXT PRIMARY KEY,
   patient_id TEXT REFERENCES patients(id) ON DELETE CASCADE,
-  doctor_name TEXT NOT NULL,
+  doctor_id TEXT REFERENCES doctors(id) ON DELETE SET NULL,
+  doctor_name TEXT NOT NULL, -- Fallback name
   specialty TEXT NOT NULL,
   date TEXT NOT NULL,
   time TEXT NOT NULL,
@@ -113,11 +125,23 @@ CREATE TABLE IF NOT EXISTS doctor_time_off (
 CREATE TABLE IF NOT EXISTS lab_requests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   patient_id TEXT REFERENCES patients(id) ON DELETE CASCADE,
-  doctor_id TEXT NOT NULL,
+  doctor_id TEXT REFERENCES doctors(id) ON DELETE CASCADE,
   test_name TEXT NOT NULL,
   priority TEXT DEFAULT 'Normal',
   status TEXT DEFAULT 'Pending',
   request_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Vitals
+CREATE TABLE IF NOT EXISTS vitals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  patient_id TEXT REFERENCES patients(id) ON DELETE CASCADE,
+  blood_pressure TEXT,
+  heart_rate INTEGER,
+  temperature DECIMAL,
+  weight DECIMAL,
+  oxygen_sat INTEGER,
+  recorded_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- RLS Policies

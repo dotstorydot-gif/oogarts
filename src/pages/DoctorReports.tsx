@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Layout } from '../components/layout/Layout';
 import { Card, Button, Input, cn } from '../components/layout/BaseUI';
 import {
@@ -18,8 +19,10 @@ import {
     Plus,
     Search,
     X,
-    Check
+    Check,
+    Loader2
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface Prescription {
     id: string;
@@ -30,10 +33,43 @@ interface Prescription {
 }
 
 const DoctorReports = () => {
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const patientId = searchParams.get('id');
     const [activeTab, setActiveTab] = useState('Examination');
     const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
     const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [patient, setPatient] = useState<any>(null);
+    const [vitals, setVitals] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [reportData, setReportData] = useState({
+        examination: '',
+        diagnosis: '',
+        icdCode: 'I10',
+        instructions: ''
+    });
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!patientId) {
+                setIsLoading(false);
+                return;
+            }
+            try {
+                const { data: pt } = await supabase.from('patients').select('*').eq('id', patientId).single();
+                setPatient(pt);
+
+                const { data: vt } = await supabase.from('vitals').select('*').eq('patient_id', patientId).order('recorded_at', { ascending: false }).limit(1).single();
+                setVitals(vt);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchData();
+    }, [patientId]);
 
     const medications = [
         'Amoxicillin 500mg',
@@ -61,8 +97,48 @@ const DoctorReports = () => {
         setSearchQuery('');
     };
 
-    const removePrescription = (id: string) => {
-        setPrescriptions(prescriptions.filter(p => p.id !== id));
+    const handleSubmit = async () => {
+        if (!patientId) return;
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error("Not authenticated");
+
+            // Save medical history
+            const { error: histError } = await supabase.from('medical_history').insert([{
+                patient_id: patientId,
+                doctor_id: user.id,
+                date: new Date().toISOString().split('T')[0],
+                title: 'Clinical Consultation',
+                notes: reportData.diagnosis,
+                findings: reportData.examination,
+                advice: reportData.instructions
+            }]);
+            if (histError) throw histError;
+
+            // Save prescriptions
+            if (prescriptions.length > 0) {
+                const { error: rxError } = await supabase.from('prescriptions').insert(
+                    prescriptions.map(p => ({
+                        patient_id: patientId,
+                        doctor_id: user.id,
+                        name: p.medication,
+                        dosage: p.dosage,
+                        frequency: p.frequency,
+                        status: 'Active'
+                    }))
+                );
+                if (rxError) throw rxError;
+            }
+
+            // Update patient last visit
+            await supabase.from('patients').update({ last_visit: new Date().toISOString().split('T')[0] }).eq('id', patientId);
+
+            alert('Medical report submitted successfully!');
+            navigate('/doctor-dashboard');
+        } catch (error) {
+            console.error("Error submitting report:", error);
+            alert("Failed to submit report.");
+        }
     };
 
     const tabs = ['Examination', 'Diagnosis', 'Treatment', 'Orders'];
@@ -80,13 +156,19 @@ const DoctorReports = () => {
                             <Save className="w-4 h-4" />
                             <span>Save Draft</span>
                         </Button>
-                        <Button className="gap-2 rounded-xl bg-indigo-600 shadow-lg shadow-indigo-100">
+                                <Button className="gap-2 rounded-xl bg-indigo-600 shadow-lg shadow-indigo-100" onClick={handleSubmit}>
                             <Send className="w-4 h-4" />
                             <span>Submit Report</span>
                         </Button>
                     </div>
                 </div>
 
+                {isLoading ? (
+                    <div className="flex flex-col items-center justify-center py-20">
+                        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin mb-4" />
+                        <p className="text-slate-500 font-bold">Synchronizing medical records...</p>
+                    </div>
+                ) : (
                 <div className="grid grid-cols-12 gap-8">
                     {/* Left Column: Patient Profile & Vitals */}
                     <div className="col-span-4 space-y-8">
@@ -96,10 +178,12 @@ const DoctorReports = () => {
                                     <Users className="w-6 h-6 text-indigo-400" />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1.5">Queue Status: Priority</p>
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1.5">Patient ID: {patient?.id || '---'}</p>
                                     <div className="flex items-center gap-3">
-                                        <h2 className="text-2xl font-black tracking-tight">John Smith</h2>
-                                        <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase rounded-full border border-emerald-500/20">Active</span>
+                                        <h2 className="text-2xl font-black tracking-tight">{patient?.name || 'Unknown Patient'}</h2>
+                                        <span className={cn("px-3 py-1 text-[10px] font-black uppercase rounded-full border", patient?.status === 'Active' ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-slate-500/10 text-slate-400 border-slate-500/20")}>
+                                            {patient?.status || 'Inactive'}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -107,11 +191,11 @@ const DoctorReports = () => {
                             <div className="space-y-5">
                                 <div className="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
                                     <span className="text-slate-400 text-xs font-bold">Age / Gender</span>
-                                    <span className="font-black text-sm text-indigo-300">41 yrs, Male</span>
+                                    <span className="font-black text-sm text-indigo-300">{patient?.dob ? `${new Date().getFullYear() - new Date(patient.dob).getFullYear()} yrs` : '--'}, {patient?.gender || '--'}</span>
                                 </div>
                                 <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Chief Complaint</p>
-                                    <p className="text-sm font-bold leading-relaxed text-indigo-100">Patient reports sudden onset chest pain and severe shortness of breath during exertion.</p>
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Patient Profile Notes</p>
+                                    <p className="text-sm font-bold leading-relaxed text-indigo-100">{patient?.allergies?.join(', ') || 'No allergies reported.'}</p>
                                 </div>
                             </div>
                         </Card>
@@ -126,10 +210,10 @@ const DoctorReports = () => {
 
                             <div className="grid grid-cols-2 gap-4">
                                 {[
-                                    { label: 'Temp', value: '98.6°F', icon: Thermometer, color: 'indigo' },
-                                    { label: 'BP', value: '140/90', icon: Heart, color: 'rose' },
-                                    { label: 'Pulse', value: '85', icon: Activity, color: 'emerald' },
-                                    { label: 'O2 Sat', value: '98%', icon: Droplet, color: 'sky' },
+                                    { label: 'Temp', value: vitals?.temp ? `${vitals.temp}°C` : '--', icon: Thermometer, color: 'indigo' },
+                                    { label: 'BP', value: vitals?.bp || '--', icon: Heart, color: 'rose' },
+                                    { label: 'Pulse', value: vitals?.heart_rate || '--', icon: Activity, color: 'emerald' },
+                                    { label: 'Weight', value: vitals?.weight ? `${vitals.weight}kg` : '--', icon: Droplet, color: 'sky' },
                                 ].map((v) => (
                                     <div key={v.label} className="p-5 rounded-[24px] bg-slate-50/50 border border-slate-100/50 hover:bg-white hover:shadow-xl hover:shadow-slate-100 transition-all group overflow-hidden relative">
                                         <div className={cn(
@@ -207,6 +291,8 @@ const DoctorReports = () => {
                                     <textarea
                                         className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 rounded-[32px] p-10 min-h-[400px] text-lg font-medium text-slate-700 focus:bg-white transition-all outline-none shadow-inner"
                                         placeholder="Begin typing clinical observations..."
+                                        value={reportData.examination}
+                                        onChange={(e) => setReportData({ ...reportData, examination: e.target.value })}
                                     />
                                 </div>
                             )}
@@ -230,13 +316,9 @@ const DoctorReports = () => {
                                                     type="text"
                                                     className="flex-1 bg-transparent border-none p-0 font-bold text-lg text-slate-900 focus:ring-0 outline-none placeholder:text-slate-400"
                                                     placeholder="Search ICD-10 code (e.g. I10 for Hypertension)..."
+                                                    value={reportData.icdCode}
+                                                    onChange={(e) => setReportData({ ...reportData, icdCode: e.target.value })}
                                                 />
-                                            </div>
-                                            <div className="flex flex-wrap gap-2">
-                                                <span className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-black flex items-center gap-2 shadow-lg shadow-indigo-100">
-                                                    I10 - Essential Hypertension
-                                                    <CircleDot className="w-3.5 h-3.5" />
-                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -245,6 +327,8 @@ const DoctorReports = () => {
                                         <textarea
                                             className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 rounded-[28px] p-8 min-h-[150px] font-medium text-slate-700 focus:bg-white transition-all outline-none shadow-inner"
                                             placeholder="Enter overall clinical impression..."
+                                            value={reportData.diagnosis}
+                                            onChange={(e) => setReportData({ ...reportData, diagnosis: e.target.value })}
                                         />
                                     </div>
                                 </div>
@@ -278,14 +362,12 @@ const DoctorReports = () => {
                                                                 </p>
                                                             </div>
                                                         </div>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="w-10 h-10 p-0 rounded-xl text-rose-500 hover:bg-rose-50 opacity-0 group-hover:opacity-100 transition-all"
-                                                            onClick={() => removePrescription(p.id)}
+                                                        <button
+                                                            className="w-10 h-10 p-0 rounded-xl text-rose-500 hover:bg-rose-50 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center"
+                                                            onClick={() => setPrescriptions(prescriptions.filter(pr => pr.id !== p.id))}
                                                         >
                                                             <X size={18} />
-                                                        </Button>
+                                                        </button>
                                                     </div>
                                                 ))}
                                             </div>
@@ -307,6 +389,8 @@ const DoctorReports = () => {
                                         <textarea
                                             className="w-full bg-slate-50 border-2 border-transparent focus:border-indigo-100 rounded-[28px] p-8 min-h-[150px] font-medium text-slate-700 focus:bg-white transition-all outline-none shadow-inner"
                                             placeholder="Advice provided to the patient..."
+                                            value={reportData.instructions}
+                                            onChange={(e) => setReportData({ ...reportData, instructions: e.target.value })}
                                         />
                                     </div>
                                 </div>
@@ -348,7 +432,8 @@ const DoctorReports = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
+        </div>
 
             {/* Prescription Selection Modal */}
             {isPrescriptionModalOpen && (
