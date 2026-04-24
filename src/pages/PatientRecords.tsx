@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Card, Button, cn } from '../components/layout/BaseUI';
 import { FileText, Upload, Plus, Clock, Activity, Pill, Download, Loader2 } from 'lucide-react';
@@ -222,8 +221,7 @@ const PatientRecords = () => {
                                 ))}
                             </Card>
                         </div>
-                    </div>
-                    
+                        </div>
                     </>
                 )}
             </div>
