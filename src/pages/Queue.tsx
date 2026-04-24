@@ -8,13 +8,15 @@ import {
     AlertCircle,
     MoreVertical,
     Plus,
-    Loader2
+    Loader2,
+    X
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const Queue = () => {
     const [activeTab, setActiveTab] = useState('active');
     const [showTicketForm, setShowTicketForm] = useState(false);
+    const [showRegistrationModal, setShowRegistrationModal] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [patients, setPatients] = useState<any[]>([]);
     const [allPatients, setAllPatients] = useState<any[]>([]);
@@ -24,6 +26,14 @@ const Queue = () => {
         doctor_id: '', 
         type: 'Clinic Visit',
         specialty: 'General Medicine'
+    });
+
+    const [newPatientData, setNewPatientData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        dob: '',
+        gender: 'Male'
     });
 
     const fetchData = async () => {
@@ -104,6 +114,29 @@ const Queue = () => {
         }
     };
 
+    const handleRegisterAndAdd = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const patientId = `PAT-${Math.floor(1000 + Math.random() * 9000)}`;
+            const { error: regError } = await supabase.from('patients').insert([{
+                id: patientId,
+                ...newPatientData,
+                status: 'Active'
+            }]);
+
+            if (regError) throw regError;
+
+            // Automatically open ticket form for the new patient
+            setNewTicket({ ...newTicket, patient_id: patientId });
+            setShowRegistrationModal(false);
+            setShowTicketForm(true);
+            fetchData();
+        } catch (error) {
+            console.error("Error registering patient:", error);
+            alert("Failed to register patient.");
+        }
+    };
+
     return (
         <Layout>
             <div className="max-w-[1400px] mx-auto">
@@ -116,6 +149,14 @@ const Queue = () => {
                         <Button variant="outline" className="gap-2" onClick={fetchData}>
                             <Loader2 size={16} className={isLoading ? 'animate-spin' : ''} />
                             <span className="text-sm">Refresh Queue</span>
+                        </Button>
+                        <Button
+                            variant="outline"
+                            className="gap-2 border-slate-200 hover:border-slate-900 transition-colors active:scale-95"
+                            onClick={() => setShowRegistrationModal(true)}
+                        >
+                            <Plus size={20} />
+                            <span>Quick Register</span>
                         </Button>
                         <Button
                             variant="dark"
@@ -161,6 +202,45 @@ const Queue = () => {
                                 </Button>
                                 <Button type="button" variant="outline" className="h-[60px] rounded-2xl" onClick={() => setShowTicketForm(false)}>
                                     Cancel
+                                </Button>
+                            </div>
+                        </form>
+                    </Card>
+                )}
+
+                {showRegistrationModal && (
+                    <Card className="mb-10 p-8 border-emerald-100 bg-emerald-50/30 animate-in slide-in-from-top-4 duration-500 relative">
+                        <button onClick={() => setShowRegistrationModal(false)} className="absolute top-6 right-6 p-2 hover:bg-white rounded-full transition-colors text-slate-400">
+                            <X size={20} />
+                        </button>
+                        <div className="mb-8 text-left">
+                            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Register New Patient</h2>
+                            <p className="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">Quick registry for walk-ins</p>
+                        </div>
+                        <form onSubmit={handleRegisterAndAdd} className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <div className="md:col-span-2 text-left">
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Full Name</label>
+                                <input 
+                                    type="text" 
+                                    className="w-full px-6 py-4 bg-white border-2 border-slate-100 focus:border-emerald-200 rounded-2xl font-bold outline-none"
+                                    value={newPatientData.name}
+                                    onChange={(e) => setNewPatientData({...newPatientData, name: e.target.value})}
+                                    required
+                                />
+                            </div>
+                            <div className="text-left">
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Phone</label>
+                                <input 
+                                    type="tel" 
+                                    className="w-full px-6 py-4 bg-white border-2 border-slate-100 focus:border-emerald-200 rounded-2xl font-bold outline-none"
+                                    value={newPatientData.phone}
+                                    onChange={(e) => setNewPatientData({...newPatientData, phone: e.target.value})}
+                                    required
+                                />
+                            </div>
+                            <div className="flex items-end">
+                                <Button type="submit" variant="secondary" className="w-full h-[60px] rounded-2xl">
+                                    Register & Proceed
                                 </Button>
                             </div>
                         </form>
