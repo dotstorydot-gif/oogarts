@@ -55,7 +55,8 @@ const PatientBooking = () => {
     const handleConfirm = async () => {
         setIsSubmitting(true);
         try {
-            const patientId = 'PAT-1001';
+            const { data: { user } } = await supabase.auth.getUser();
+            const patientId = user?.id || 'PAT-1001';
             const doctor = DOCTORS.find(d => d.id === selectedDoctor);
             const specialty = SPECIALTIES.find(s => s.id === selectedSpec);
 

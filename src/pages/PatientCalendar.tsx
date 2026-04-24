@@ -13,7 +13,9 @@ const PatientCalendar = () => {
         const fetchAppointments = async () => {
             setIsLoading(true);
             try {
-                const patientId = 'PAT-1001';
+                const { data: { user } } = await supabase.auth.getUser();
+                const patientId = user?.id || 'PAT-1001';
+                
                 const { data, error } = await supabase
                     .from('appointments')
                     .select('*')

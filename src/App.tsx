@@ -20,6 +20,13 @@ import Telemedicine from './pages/Telemedicine';
 import PatientRecords from './pages/PatientRecords';
 import PatientBilling from './pages/PatientBilling';
 import PatientCalendar from './pages/PatientCalendar';
+import DoctorDashboard from './pages/DoctorDashboard';
+
+const DashboardRouter = () => {
+    const userRole = localStorage.getItem('userRole') || 'admin';
+    if (userRole === 'doctor') return <DoctorDashboard />;
+    return <Dashboard />;
+};
 
 const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) => {
     const isAuthenticated = true; // Temporary simple auth
@@ -42,7 +49,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 
                 {/* Admin & Doctor Routes */}
-                <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin', 'doctor']}><Dashboard /></ProtectedRoute>} />
+                <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin', 'doctor']}><DashboardRouter /></ProtectedRoute>} />
                 <Route path="/appointments" element={<ProtectedRoute allowedRoles={['admin', 'doctor']}><Appointments /></ProtectedRoute>} />
                 <Route path="/queue" element={<ProtectedRoute allowedRoles={['admin']}><Queue /></ProtectedRoute>} />
                 <Route path="/patients" element={<ProtectedRoute allowedRoles={['admin', 'doctor']}><Patients /></ProtectedRoute>} />

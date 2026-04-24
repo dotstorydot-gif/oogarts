@@ -29,14 +29,27 @@ const PatientDashboard = () => {
         const fetchDashboardData = async () => {
             setIsLoading(true);
             try {
-                const patientId = 'PAT-1001';
+                // Try to get current user from Supabase Auth or LocalStorage
+                const { data: { user } } = await supabase.auth.getUser();
+                const patientId = user?.id || 'PAT-1001'; // Fallback to demo ID
+                
                 const { data: patient, error: pError } = await supabase
                     .from('patients')
                     .select('*')
                     .eq('id', patientId)
                     .single();
 
-                if (pError) throw pError;
+                if (pError && patientId !== 'PAT-1001') throw pError;
+
+                // If patient not found in DB, use mock for demo
+                const displayPatient = patient || {
+                    id: 'PAT-1001',
+                    name: 'Sophia Martinez',
+                    email: 'sophia.m@example.com',
+                    blood_type: 'A+',
+                    last_visit: 'Oct 12, 2024',
+                    allergies: ['Penicillin', 'Peanuts']
+                };
 
                 const { data: prescriptions } = await supabase
                     .from('prescriptions')
@@ -56,14 +69,14 @@ const PatientDashboard = () => {
 
                 setAppointments(appts || []);
                 setPatientData({
-                    ...patient,
-                    bloodType: patient.blood_type,
-                    lastVisit: patient.last_visit,
+                    ...displayPatient,
+                    bloodType: displayPatient.blood_type,
+                    lastVisit: displayPatient.last_visit,
                     prescriptions: (prescriptions || []).map((rx: any) => ({ ...rx, daysLeft: rx.days_left })),
                     labs: labs || [],
                     history: [],
-                    allergies: patient.allergies || []
-                });
+                    allergies: displayPatient.allergies || []
+                } as any);
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
             } finally {

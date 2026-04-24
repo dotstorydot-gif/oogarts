@@ -14,7 +14,10 @@ import {
     ShieldCheck,
     Box,
     Loader2,
-    Camera
+    Camera,
+    Calendar,
+    Clock,
+    Plus
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -58,6 +61,7 @@ const Settings = () => {
 
     const allTabs = [
         { icon: User, label: 'Account Profile', roles: ['admin', 'doctor', 'patient'] },
+        { icon: Calendar, label: 'Clinical Schedule', roles: ['doctor'] },
         { icon: Bell, label: 'Notifications', roles: ['admin', 'doctor', 'patient'] },
         { icon: Shield, label: 'Security & Access', roles: ['admin', 'doctor', 'patient'] },
         { icon: Globe, label: 'Localization', roles: ['admin'] },
@@ -188,6 +192,70 @@ const Settings = () => {
                                         </div>
                                         <Button variant="dark">Update Password</Button>
                                     </div>
+                                </Card>
+                            </div>
+                        )}
+
+                        {activeTab === 'Clinical Schedule' && userRole === 'doctor' && (
+                            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+                                <Card className="p-10">
+                                    <div className="flex items-center justify-between mb-8">
+                                        <h3 className="text-xl font-black text-slate-900 flex items-center gap-3">
+                                            <Calendar className="w-6 h-6 text-indigo-600" />
+                                            Weekly Working Hours
+                                        </h3>
+                                        <Button variant="outline" size="sm" className="gap-2">
+                                            <Plus className="w-4 h-4" /> Add Shift
+                                        </Button>
+                                    </div>
+                                    <div className="space-y-4">
+                                        {[
+                                            { day: 'Monday', clinic: '09:00 - 14:00', telemed: '15:00 - 18:00' },
+                                            { day: 'Tuesday', clinic: '09:00 - 17:00', telemed: 'None' },
+                                            { day: 'Wednesday', clinic: '09:00 - 14:00', telemed: '15:00 - 18:00' },
+                                            { day: 'Thursday', clinic: '09:00 - 17:00', telemed: 'None' },
+                                            { day: 'Friday', clinic: '09:00 - 14:00', telemed: 'None' },
+                                        ].map((shift, i) => (
+                                            <div key={i} className="flex items-center justify-between p-5 bg-slate-50 rounded-2xl hover:bg-white hover:shadow-sm transition-all border border-transparent hover:border-slate-100 group">
+                                                <div className="flex items-center gap-8">
+                                                    <span className="w-24 font-black text-slate-900">{shift.day}</span>
+                                                    <div className="flex items-center gap-6">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-2 h-2 rounded-full bg-indigo-500"></div>
+                                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Clinic: {shift.clinic}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-2 h-2 rounded-full bg-sky-400"></div>
+                                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Telemed: {shift.telemed}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <Button variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity text-indigo-600 font-black text-[10px] uppercase tracking-widest">Edit</Button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </Card>
+
+                                <Card className="p-10 border-amber-100 bg-amber-50/10">
+                                    <h3 className="text-xl font-black text-slate-900 mb-8 flex items-center gap-3">
+                                        <Clock className="w-6 h-6 text-amber-500" />
+                                        Vacation & Time Off
+                                    </h3>
+                                    <div className="flex items-center justify-between p-6 bg-white rounded-3xl border border-amber-100">
+                                        <div className="flex items-center gap-6">
+                                            <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center">
+                                                <Calendar className="w-6 h-6 text-amber-500" />
+                                            </div>
+                                            <div className="text-left">
+                                                <p className="font-black text-slate-900 tracking-tight">Annual Leave</p>
+                                                <p className="text-xs text-slate-500 font-medium italic">Dec 20, 2024 - Jan 05, 2025 (Approved)</p>
+                                            </div>
+                                        </div>
+                                        <Button variant="ghost" className="text-rose-500 font-black text-[10px] uppercase tracking-widest">Cancel</Button>
+                                    </div>
+                                    <Button className="w-full mt-6 bg-slate-900 text-white" onClick={() => alert("Vacation request submitted!")}>
+                                        Request New Time Off
+                                    </Button>
                                 </Card>
                             </div>
                         )}

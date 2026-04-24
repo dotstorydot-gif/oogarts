@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Card, Button, cn } from '../components/layout/BaseUI';
 import {
@@ -14,17 +14,41 @@ import {
     X,
     ChevronRight,
     User,
-    Syringe
+    Syringe,
+    Loader2
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 const Laboratory = () => {
     const [showOrderForm, setShowOrderForm] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [labRequests, setLabRequests] = useState<any[]>([]);
     const [activeTests] = useState([
         { name: 'Full Blood Count', id: 'LAB-0842', status: 'In Analysis', priority: 'High', tech: 'Dr. Sarah K.' },
         { name: 'Lipid Profile', id: 'LAB-0911', status: 'Pending Review', priority: 'Routine', tech: 'Dr. Mike R.' },
         { name: 'Blood Glucose', id: 'LAB-1022', status: 'Completed', priority: 'Critical', tech: 'Dr. Anna L.' },
         { name: 'Thyroid Panel', id: 'LAB-1045', status: 'In Analysis', priority: 'Routine', tech: 'Dr. Sarah K.' },
     ]);
+
+    const fetchLabRequests = async () => {
+        setIsLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('lab_requests')
+                .select('*')
+                .order('request_date', { ascending: false });
+            if (error) throw error;
+            setLabRequests(data || []);
+        } catch (error) {
+            console.error("Error fetching lab requests:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchLabRequests();
+    }, []);
 
     return (
         <Layout>
@@ -116,6 +140,48 @@ const Laboratory = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
                     <div className="col-span-1 lg:col-span-8">
+                        <Card className="p-8 border-indigo-100 bg-white mb-8">
+                            <div className="flex items-center justify-between mb-8">
+                                <h3 className="text-xl font-black text-slate-900 tracking-tight">Incoming Doctor Requests</h3>
+                                <div className="flex gap-2">
+                                    <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-lg text-[10px] font-black uppercase tracking-widest">
+                                        {labRequests.filter(r => r.priority === 'Urgent').length} Urgent
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="space-y-4">
+                                {isLoading ? (
+                                    <div className="flex justify-center py-12">
+                                        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+                                    </div>
+                                ) : labRequests.length === 0 ? (
+                                    <p className="text-center py-10 text-slate-400 font-bold italic">No pending diagnostic requests.</p>
+                                ) : (
+                                    labRequests.slice(0, 5).map((req, i) => (
+                                        <div key={i} className="p-4 bg-slate-50 rounded-2xl flex items-center justify-between group hover:bg-indigo-50 transition-colors cursor-pointer">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-slate-300 group-hover:text-indigo-600 transition-colors shadow-sm">
+                                                    <Activity className="w-6 h-6" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-slate-900 text-sm">{req.test_name}</p>
+                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Patient ID: {req.patient_id} • {req.priority} Priority</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <span className={cn(
+                                                    "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest",
+                                                    req.priority === 'Urgent' ? "bg-rose-100 text-rose-700" : "bg-blue-100 text-blue-700"
+                                                )}>{req.priority}</span>
+                                                <span className="text-xs font-bold text-slate-400">{new Date(req.request_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                <Button variant="ghost" size="sm" className="text-indigo-600 font-black text-[10px] uppercase tracking-widest px-4">Accept</Button>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </Card>
+
                         <Card className="p-0 overflow-hidden border-slate-100">
                             <div className="p-8 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
                                 <h3 className="font-black text-slate-900 text-lg tracking-tight">Active Specimens</h3>

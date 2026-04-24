@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Card, Button, cn } from '../components/layout/BaseUI';
 import {
@@ -14,17 +14,43 @@ import {
     ChevronRight,
     X,
     Database,
-    ShieldCheck
+    ShieldCheck,
+    Pill,
+    Loader2
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 const Pharmacy = () => {
     const [showEntryForm, setShowEntryForm] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [prescriptions, setPrescriptions] = useState<any[]>([]);
+    
     const categories = [
         { name: 'Antibiotics', items: 124, status: 'Stable', color: 'bg-indigo-50 text-indigo-600' },
         { name: 'Pain Relief', items: 85, status: 'Low Stock', color: 'bg-rose-50 text-rose-600' },
         { name: 'Cardiology', items: 42, status: 'Stable', color: 'bg-emerald-50 text-emerald-600' },
         { name: 'Vaccines', items: 156, status: 'Restocking', color: 'bg-sky-50 text-sky-600' },
     ];
+
+    const fetchPrescriptions = async () => {
+        setIsLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('prescriptions')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            setPrescriptions(data || []);
+        } catch (error) {
+            console.error("Error fetching prescriptions:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchPrescriptions();
+    }, []);
 
     return (
         <Layout>
@@ -128,7 +154,45 @@ const Pharmacy = () => {
                             </div>
                         </Card>
 
-                        <Card className="min-h-[400px] lg:min-h-[500px] flex flex-col items-center justify-center text-center p-8 lg:p-20 bg-white/40 border-slate-100/50">
+                        <Card className="p-8 border-indigo-100 bg-white shadow-sm">
+                            <div className="flex items-center justify-between mb-8">
+                                <h3 className="text-xl font-black text-slate-900 tracking-tight">Pending Prescriptions</h3>
+                                <div className="flex gap-2">
+                                    <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-widest">
+                                        {prescriptions.filter(p => p.status === 'Active').length} New
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="space-y-4">
+                                {isLoading ? (
+                                    <div className="flex justify-center py-12">
+                                        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+                                    </div>
+                                ) : prescriptions.length === 0 ? (
+                                    <p className="text-center py-10 text-slate-400 font-bold italic">No pending prescriptions.</p>
+                                ) : (
+                                    prescriptions.slice(0, 5).map((rx, i) => (
+                                        <div key={i} className="p-4 bg-slate-50 rounded-2xl flex items-center justify-between group hover:bg-indigo-50 transition-colors cursor-pointer">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-slate-300 group-hover:text-indigo-600 transition-colors shadow-sm">
+                                                    <Pill className="w-6 h-6" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-slate-900 text-sm">{rx.name} {rx.dosage}</p>
+                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Patient ID: {rx.patient_id} • {rx.frequency}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-xs font-bold text-slate-400">{new Date(rx.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                <Button variant="ghost" size="sm" className="text-indigo-600 font-black text-[10px] uppercase tracking-widest px-4">Dispense</Button>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </Card>
+
+                        <Card className="min-h-[400px] flex flex-col items-center justify-center text-center p-8 lg:p-20 bg-white/40 border-slate-100/50">
                             <div className="w-24 h-24 bg-indigo-600/10 rounded-[32px] flex items-center justify-center mb-8">
                                 <Activity className="w-10 h-10 text-indigo-600 animate-pulse" />
                             </div>

@@ -83,7 +83,41 @@ CREATE TABLE IF NOT EXISTS appointments (
   date TEXT NOT NULL,
   time TEXT NOT NULL,
   type TEXT NOT NULL CHECK (type IN ('Clinic Visit', 'Telemedicine')),
-  status TEXT NOT NULL DEFAULT 'Scheduled'
+  status TEXT NOT NULL DEFAULT 'Scheduled',
+  notes TEXT,
+  prescribed_tests TEXT[]
+);
+
+-- Doctor Schedules
+CREATE TABLE IF NOT EXISTS doctor_schedules (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  doctor_id TEXT NOT NULL,
+  day_of_week INTEGER NOT NULL, -- 0-6
+  start_time TEXT NOT NULL,
+  end_time TEXT NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('Clinic Visit', 'Telemedicine')),
+  is_active BOOLEAN DEFAULT true
+);
+
+-- Doctor Time Off
+CREATE TABLE IF NOT EXISTS doctor_time_off (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  doctor_id TEXT NOT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  reason TEXT,
+  status TEXT DEFAULT 'Approved'
+);
+
+-- Lab Requests
+CREATE TABLE IF NOT EXISTS lab_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  patient_id TEXT REFERENCES patients(id) ON DELETE CASCADE,
+  doctor_id TEXT NOT NULL,
+  test_name TEXT NOT NULL,
+  priority TEXT DEFAULT 'Normal',
+  status TEXT DEFAULT 'Pending',
+  request_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- RLS Policies
@@ -92,6 +126,9 @@ ALTER TABLE medical_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE prescriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE lab_results ENABLE ROW LEVEL SECURITY;
 ALTER TABLE appointments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE doctor_schedules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE doctor_time_off ENABLE ROW LEVEL SECURITY;
+ALTER TABLE lab_requests ENABLE ROW LEVEL SECURITY;
 
 -- Development: Allow anon/authenticated full access for demo purposes
 DROP POLICY IF EXISTS "Public Read Access" ON patients;
@@ -109,6 +146,15 @@ CREATE POLICY "Public Read Access" ON lab_results FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Public Read Access" ON appointments;
 CREATE POLICY "Public Read Access" ON appointments FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Public Read Access" ON doctor_schedules;
+CREATE POLICY "Public Read Access" ON doctor_schedules FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Access" ON doctor_time_off;
+CREATE POLICY "Public Read Access" ON doctor_time_off FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Access" ON lab_requests;
+CREATE POLICY "Public Read Access" ON lab_requests FOR SELECT USING (true);
+
 -- Allow service role / authenticated to insert/update
 DROP POLICY IF EXISTS "Full Access for Authenticated" ON patients;
 CREATE POLICY "Full Access for Authenticated" ON patients FOR ALL USING (true) WITH CHECK (true);
@@ -124,3 +170,12 @@ CREATE POLICY "Full Access for Authenticated" ON lab_results FOR ALL USING (true
 
 DROP POLICY IF EXISTS "Full Access for Authenticated" ON appointments;
 CREATE POLICY "Full Access for Authenticated" ON appointments FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Full Access for Authenticated" ON doctor_schedules;
+CREATE POLICY "Full Access for Authenticated" ON doctor_schedules FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Full Access for Authenticated" ON doctor_time_off;
+CREATE POLICY "Full Access for Authenticated" ON doctor_time_off FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Full Access for Authenticated" ON lab_requests;
+CREATE POLICY "Full Access for Authenticated" ON lab_requests FOR ALL USING (true) WITH CHECK (true);

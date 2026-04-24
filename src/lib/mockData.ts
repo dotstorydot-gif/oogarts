@@ -1,5 +1,6 @@
 export interface Appointment {
     id: string;
+    patient_id?: string;
     doctor_name: string;
     specialty: string;
     date: string;
@@ -52,44 +53,92 @@ export interface Patient {
     appointments?: Appointment[];
 }
 
+export interface DoctorSchedule {
+    id: string;
+    doctor_id: string;
+    day_of_week: number;
+    start_time: string;
+    end_time: string;
+    type: 'Clinic Visit' | 'Telemedicine';
+}
+
+export interface DoctorTimeOff {
+    id: string;
+    doctor_id: string;
+    start_date: string;
+    end_date: string;
+    reason: string;
+    status: string;
+}
+
+export interface LabRequest {
+    id: string;
+    patient_id: string;
+    patient_name: string;
+    doctor_id: string;
+    test_name: string;
+    priority: string;
+    status: string;
+    request_date: string;
+}
+
+export const mockPatients: Patient[] = [
+    {
+        id: 'PAT-1001',
+        name: 'Sophia Martinez',
+        email: 'sophia.m@example.com',
+        phone: '+1 (555) 123-4567',
+        dob: '1992-05-15',
+        gender: 'Female',
+        bloodType: 'A+',
+        image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200',
+        lastVisit: 'Oct 12, 2024',
+        status: 'Active',
+        allergies: ['Penicillin', 'Peanuts'],
+        history: [
+            { id: 'h1', title: 'Annual Physical', date: 'Oct 12, 2024', doctor: 'Dr. Michael Chen', type: 'Exam', notes: 'Overall healthy, blood pressure slightly elevated.' },
+            { id: 'h2', title: 'Flu Symptoms', date: 'Jan 15, 2024', doctor: 'Dr. Sarah Smith', type: 'Consultation', notes: 'Prescribed rest and fluids.' }
+        ],
+        prescriptions: [
+            { id: 'p1', name: 'Amoxicillin', dosage: '500mg', frequency: 'Twice daily', status: 'Active', daysLeft: 5 },
+            { id: 'p2', name: 'Lisinopril', dosage: '10mg', frequency: 'Once daily', status: 'Active', daysLeft: 22 }
+        ],
+        labs: [
+            { id: 'l1', name: 'Full Blood Count', date: 'Oct 10, 2024', status: 'Normal' },
+            { id: 'l2', name: 'Lipid Panel', date: 'Oct 10, 2024', status: 'Review' }
+        ]
+    }
+];
+
+export const mockDoctorSchedules: DoctorSchedule[] = [
+    { id: 'ds1', doctor_id: 'DOC-1', day_of_week: 1, start_time: '09:00', end_time: '14:00', type: 'Clinic Visit' },
+    { id: 'ds2', doctor_id: 'DOC-1', day_of_week: 1, start_time: '15:00', end_time: '18:00', type: 'Telemedicine' },
+    { id: 'ds3', doctor_id: 'DOC-1', day_of_week: 2, start_time: '09:00', end_time: '17:00', type: 'Clinic Visit' }
+];
+
+export const mockLabRequests: LabRequest[] = [
+    { id: 'lr1', patient_id: 'PAT-1001', patient_name: 'Sophia Martinez', doctor_id: 'DOC-1', test_name: 'MRI Brain Scan', priority: 'Urgent', status: 'Pending', request_date: '2024-10-24' },
+    { id: 'lr2', patient_id: 'PAT-1002', patient_name: 'James Wilson', doctor_id: 'DOC-1', test_name: 'Thyroid Function', priority: 'Normal', status: 'Completed', request_date: '2024-10-22' }
+];
+
 export const MOCK_DATABASE: { patients: Patient[] } = {
     patients: [
         {
             id: 'PAT-1001',
             name: 'Sophia Martinez',
             email: 'sophia.m@example.com',
-            phone: '+1 (555) 019-2834',
-            dob: '1992-04-15',
+            phone: '+1 (555) 123-4567',
+            dob: '1992-05-15',
             gender: 'Female',
-            bloodType: 'O+',
+            bloodType: 'A+',
             image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200',
             lastVisit: 'Oct 12, 2024',
             status: 'Active',
             allergies: ['Penicillin', 'Peanuts'],
-            appointments: [
-                {
-                    id: 'APP-1',
-                    doctor_name: 'Dr. Michael Chen',
-                    specialty: 'Neurology',
-                    date: 'Oct 30, 2024',
-                    time: '10:30 AM',
-                    type: 'Clinic Visit',
-                    status: 'Scheduled'
-                },
-                {
-                    id: 'APP-2',
-                    doctor_name: 'Dr. Sarah Jenkins',
-                    specialty: 'General Medicine',
-                    date: 'Nov 05, 2024',
-                    time: '02:00 PM',
-                    type: 'Telemedicine',
-                    status: 'Scheduled'
-                }
-            ],
             history: [
                 {
                     id: 'H-1',
-                    title: 'Comprehensive Neurology Follow-up',
+                    title: 'Migraine Follow-up',
                     date: 'Oct 12, 2024',
                     doctor: 'Dr. Michael Chen',
                     type: 'Consultation',
