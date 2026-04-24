@@ -1,18 +1,19 @@
-export interface Patient {
+export interface Appointment {
+    id: string;
+    doctor_name: string;
+    specialty: string;
+    date: string;
+    time: string;
+    type: 'Clinic Visit' | 'Telemedicine';
+    status: 'Scheduled' | 'Completed' | 'Cancelled';
+}
+
+export interface LabResult {
     id: string;
     name: string;
-    email: string;
-    phone: string;
-    dob: string;
-    gender: string;
-    bloodType: string;
-    image: string;
-    lastVisit: string;
-    status: 'Active' | 'Inactive';
-    allergies: string[];
-    history: MedicalHistory[];
-    prescriptions: Prescription[];
-    labs: LabResult[];
+    date: string;
+    status: 'Normal' | 'Review' | 'Critical';
+    result_details?: string;
 }
 
 export interface MedicalHistory {
@@ -33,11 +34,22 @@ export interface Prescription {
     daysLeft: number;
 }
 
-export interface LabResult {
+export interface Patient {
     id: string;
     name: string;
-    date: string;
-    status: 'Normal' | 'Review' | 'Critical';
+    email: string;
+    phone: string;
+    dob: string;
+    gender: string;
+    bloodType: string;
+    image: string;
+    lastVisit: string;
+    status: 'Active' | 'Inactive';
+    allergies: string[];
+    history: MedicalHistory[];
+    prescriptions: Prescription[];
+    labs: LabResult[];
+    appointments?: Appointment[];
 }
 
 export const MOCK_DATABASE: { patients: Patient[] } = {
@@ -54,6 +66,26 @@ export const MOCK_DATABASE: { patients: Patient[] } = {
             lastVisit: 'Oct 12, 2024',
             status: 'Active',
             allergies: ['Penicillin', 'Peanuts'],
+            appointments: [
+                {
+                    id: 'APP-1',
+                    doctor_name: 'Dr. Michael Chen',
+                    specialty: 'Neurology',
+                    date: 'Oct 30, 2024',
+                    time: '10:30 AM',
+                    type: 'Clinic Visit',
+                    status: 'Scheduled'
+                },
+                {
+                    id: 'APP-2',
+                    doctor_name: 'Dr. Sarah Jenkins',
+                    specialty: 'General Medicine',
+                    date: 'Nov 05, 2024',
+                    time: '02:00 PM',
+                    type: 'Telemedicine',
+                    status: 'Scheduled'
+                }
+            ],
             history: [
                 {
                     id: 'H-1',
@@ -91,9 +123,20 @@ export const MOCK_DATABASE: { patients: Patient[] } = {
                 }
             ],
             labs: [
-                { id: 'L-1', name: 'Comprehensive Metabolic Panel', date: 'Oct 15, 2024', status: 'Normal' },
-                { id: 'L-2', name: 'Lipid Panel', date: 'Oct 15, 2024', status: 'Review' },
-                { id: 'L-3', name: 'CBC with Differential', date: 'Oct 15, 2024', status: 'Normal' }
+                { 
+                    id: 'L-1', 
+                    name: 'Comprehensive Metabolic Panel', 
+                    date: 'Oct 15, 2024', 
+                    status: 'Normal',
+                    result_details: 'Glucose: 92 mg/dL (Normal: 70-99). BUN: 14 mg/dL (Normal: 7-20). Creatinine: 0.9 mg/dL (Normal: 0.6-1.2).'
+                },
+                { 
+                    id: 'L-2', 
+                    name: 'Lipid Panel', 
+                    date: 'Oct 15, 2024', 
+                    status: 'Review',
+                    result_details: 'Total Cholesterol: 210 mg/dL (High). LDL: 135 mg/dL (Borderline High). HDL: 45 mg/dL (Normal).'
+                }
             ]
         },
         {
@@ -108,6 +151,7 @@ export const MOCK_DATABASE: { patients: Patient[] } = {
             lastVisit: 'Sep 05, 2024',
             status: 'Active',
             allergies: ['Sulfa Drugs'],
+            appointments: [],
             history: [
                 {
                     id: 'H-3',
@@ -144,6 +188,7 @@ export const MOCK_DATABASE: { patients: Patient[] } = {
             lastVisit: 'Oct 20, 2024',
             status: 'Active',
             allergies: [],
+            appointments: [],
             history: [
                 {
                     id: 'H-4',

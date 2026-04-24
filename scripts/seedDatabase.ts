@@ -84,10 +84,27 @@ async function seed() {
                 patient_id: patient.id,
                 name: lab.name,
                 date: lab.date,
-                status: lab.status
+                status: lab.status,
+                result_details: lab.result_details
             }));
             const { error: labError } = await supabaseAdmin.from('lab_results').upsert(labData);
             if (labError) console.error(`Failed to insert labs for ${patient.name}:`, labError);
+        }
+
+        // Insert Appointments
+        if (patient.appointments && patient.appointments.length > 0) {
+            const apptData = patient.appointments.map(appt => ({
+                id: appt.id,
+                patient_id: patient.id,
+                doctor_name: appt.doctor_name,
+                specialty: appt.specialty,
+                date: appt.date,
+                time: appt.time,
+                type: appt.type,
+                status: appt.status
+            }));
+            const { error: apptError } = await supabaseAdmin.from('appointments').upsert(apptData);
+            if (apptError) console.error(`Failed to insert appointments for ${patient.name}:`, apptError);
         }
     }
 

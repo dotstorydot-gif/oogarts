@@ -2,28 +2,33 @@ import { Layout } from '../components/layout/Layout';
 import { Card, Button, cn } from '../components/layout/BaseUI';
 import {
     Activity,
-    FileText,
     Pill,
-    Clock,
     ChevronRight,
     AlertCircle,
-    Loader2
+    Loader2,
+    X,
+    Calendar as CalendarIcon,
+    Upload,
+    Mail,
+    Plus
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useEffect, useState } from 'react';
-import { Patient } from '../lib/mockData';
+import { Patient, Appointment, LabResult } from '../lib/mockData';
 
 const PatientDashboard = () => {
     const navigate = useNavigate();
     const [patientData, setPatientData] = useState<Patient | null>(null);
+    const [appointments, setAppointments] = useState<Appointment[]>([]);
+    const [selectedLab, setSelectedLab] = useState<LabResult | null>(null);
+    const [selectedRx, setSelectedRx] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
             setIsLoading(true);
             try {
-                // Fetch the specific patient (Sophia Martinez for demo)
                 const patientId = 'PAT-1001';
                 const { data: patient, error: pError } = await supabase
                     .from('patients')
@@ -42,14 +47,21 @@ const PatientDashboard = () => {
                     .from('lab_results')
                     .select('*')
                     .eq('patient_id', patientId);
+                
+                const { data: appts } = await supabase
+                    .from('appointments')
+                    .select('*')
+                    .eq('patient_id', patientId)
+                    .order('date', { ascending: true });
 
+                setAppointments(appts || []);
                 setPatientData({
                     ...patient,
                     bloodType: patient.blood_type,
                     lastVisit: patient.last_visit,
                     prescriptions: (prescriptions || []).map((rx: any) => ({ ...rx, daysLeft: rx.days_left })),
                     labs: labs || [],
-                    history: [], // We fetch history on the records page
+                    history: [],
                     allergies: patient.allergies || []
                 });
             } catch (error) {
@@ -74,6 +86,8 @@ const PatientDashboard = () => {
     }
 
     if (!patientData) return null;
+
+    const nextAppointment = appointments.find(a => a.status === 'Scheduled');
 
     return (
         <Layout>
@@ -107,32 +121,36 @@ const PatientDashboard = () => {
                         {/* Upcoming Appointment */}
                         <div className="flex items-center justify-between">
                             <h2 className="text-xl font-black text-slate-900 tracking-tight">Next Appointment</h2>
-                            <Button variant="ghost" className="text-indigo-600 font-bold hover:bg-indigo-50" onClick={() => navigate('/patient-booking')}>View Calendar</Button>
+                            <Button variant="ghost" className="text-indigo-600 font-bold hover:bg-indigo-50" onClick={() => navigate('/patient-calendar')}>View Calendar</Button>
                         </div>
 
                         <Card className="p-0 overflow-hidden border-indigo-100 group hover:shadow-xl hover:shadow-indigo-50 transition-all duration-300">
-                            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-indigo-100/50 rounded-xl flex items-center justify-center">
-                                        <Activity className="w-5 h-5 text-indigo-600" />
+                            <div className="p-6 border-b border-slate-100 bg-slate-50/50">
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-100">
+                                        <CalendarIcon className="w-7 h-7 text-white" />
                                     </div>
                                     <div>
-                                        <p className="text-xs font-black text-indigo-600 uppercase tracking-widest mb-0.5">Telemedicine</p>
-                                        <p className="font-bold text-slate-900">Dr. Michael Chen</p>
+                                        <h3 className="text-xl font-black text-slate-900">{nextAppointment?.date || 'No upcoming appointments'}</h3>
+                                        <p className="text-slate-500 font-medium">{nextAppointment ? `${nextAppointment.time} • ${nextAppointment.type}` : 'Schedule a follow-up today'}</p>
                                     </div>
                                 </div>
-                                <div className="text-right">
-                                    <p className="font-black text-slate-900 text-lg">Thursday</p>
-                                    <p className="text-sm font-bold text-slate-500">10:30 AM</p>
-                                </div>
+                                {nextAppointment && (
+                                    <div className="bg-white rounded-2xl p-4 mb-6 border border-slate-100">
+                                        <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">With Doctor</p>
+                                        <p className="text-slate-900 font-bold">{nextAppointment.doctor_name} ({nextAppointment.specialty})</p>
+                                    </div>
+                                )}
                             </div>
                             <div className="p-6 flex items-center justify-between bg-white">
                                 <p className="text-sm font-medium text-slate-500 flex items-center gap-2">
-                                    <Activity className="w-4 h-4" /> Comprehensive Neurology Follow-up
+                                    {nextAppointment ? "Ready for your consultation?" : "No pending consultations"}
                                 </p>
-                                <Button className="bg-indigo-600 hover:bg-indigo-700 shadow-md " onClick={() => navigate('/telemedicine')}>
-                                    Join Call
-                                </Button>
+                                {nextAppointment && (
+                                    <Button className="bg-indigo-600 hover:bg-indigo-700 shadow-md " onClick={() => navigate('/telemedicine')}>
+                                        Join Call
+                                    </Button>
+                                )}
                             </div>
                         </Card>
 
@@ -169,23 +187,16 @@ const PatientDashboard = () => {
 
                         <Card className="p-0 border-slate-100 overflow-hidden divide-y divide-slate-50">
                             {patientData.labs.map((lab) => (
-                                <div key={lab.id} className="p-5 flex items-center justify-between hover:bg-slate-50 group transition-colors cursor-pointer">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 bg-slate-100 text-slate-500 rounded-xl flex items-center justify-center group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
-                                            <FileText className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <p className="font-bold text-slate-900 text-sm mb-0.5">{lab.name}</p>
-                                            <p className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
-                                                <Clock className="w-3 h-3" /> {lab.date}
-                                            </p>
-                                        </div>
+                                <div key={lab.id} className="p-4 flex items-center justify-between hover:bg-slate-50 group transition-colors cursor-pointer" onClick={() => setSelectedLab(lab)}>
+                                    <div>
+                                        <p className="font-bold text-slate-900 text-sm mb-0.5">{lab.name}</p>
+                                        <p className="text-[10px] font-medium text-slate-400">{lab.date}</p>
                                     </div>
-                                    <div className="flex items-center gap-4">
-                                        <span className={cn("px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest", lab.status === 'Normal' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600')}>
+                                    <div className="flex items-center gap-3">
+                                        <span className={cn("px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-widest", lab.status === 'Normal' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600')}>
                                             {lab.status}
                                         </span>
-                                        <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-indigo-600" />
+                                        <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                                     </div>
                                 </div>
                             ))}
@@ -194,22 +205,119 @@ const PatientDashboard = () => {
                         <div className="flex items-center justify-between pt-4">
                             <h2 className="text-xl font-black text-slate-900 tracking-tight">Quick Actions</h2>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <Card className="p-6 text-center cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all border-slate-100" onClick={() => navigate('/patient-records')}>
-                                <div className="w-12 h-12 mx-auto bg-slate-50 text-slate-600 rounded-2xl flex items-center justify-center mb-4">
-                                    <FileText className="w-6 h-6" />
-                                </div>
-                                <h4 className="font-bold text-slate-900 text-sm">Medical Records</h4>
-                            </Card>
-                            <Card className="p-6 text-center cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all border-slate-100" onClick={() => navigate('/patient-billing')}>
-                                <div className="w-12 h-12 mx-auto bg-slate-50 text-slate-600 rounded-2xl flex items-center justify-center mb-4">
-                                    <Activity className="w-6 h-6" />
-                                </div>
-                                <h4 className="font-bold text-slate-900 text-sm">Billing & Claims</h4>
-                            </Card>
+                        <div className="space-y-4">
+                            <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white gap-2 py-6 rounded-2xl shadow-xl shadow-slate-100" onClick={() => navigate('/patient-records')}>
+                                <Upload className="w-5 h-5" /> Upload Medical Document
+                            </Button>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Button variant="outline" className="flex flex-col h-auto py-8 gap-3 border-slate-100 hover:border-indigo-100 hover:bg-indigo-50/50 transition-all rounded-2xl" onClick={() => alert("Refill request sent to your doctor.")}>
+                                    <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center">
+                                        <Plus className="w-6 h-6" />
+                                    </div>
+                                    <span className="font-bold text-slate-700">Request Refill</span>
+                                </Button>
+                                <Button variant="outline" className="flex flex-col h-auto py-8 gap-3 border-slate-100 hover:border-indigo-100 hover:bg-indigo-50/50 transition-all rounded-2xl" onClick={() => alert("Secure messaging initialized with your physician.")}>
+                                    <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center">
+                                        <Mail className="w-6 h-6" />
+                                    </div>
+                                    <span className="font-bold text-slate-700">Message Doctor</span>
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                {/* Lab Result Modal */}
+                {selectedLab && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+                        <Card className="w-full max-w-2xl p-0 overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+                            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-white">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center">
+                                        <Activity className="w-6 h-6 text-indigo-600" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-black text-slate-900">{selectedLab.name}</h2>
+                                        <p className="text-sm font-medium text-slate-500">Recorded on {selectedLab.date}</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setSelectedLab(null)} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
+                                    <X className="w-6 h-6 text-slate-400" />
+                                </button>
+                            </div>
+                            <div className="p-8">
+                                <div className="mb-8">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <span className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Clinical Findings</span>
+                                        <span className={cn("px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest", selectedLab.status === 'Normal' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700')}>
+                                            Status: {selectedLab.status}
+                                        </span>
+                                    </div>
+                                    <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                                        <p className="text-slate-700 font-medium leading-relaxed whitespace-pre-wrap">
+                                            {selectedLab.result_details || "Full result details are currently being processed by the lab. Please check back later or contact your physician for a detailed breakdown."}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-4">
+                                    <Button className="flex-1 bg-indigo-600 text-white" onClick={() => window.print()}>Download PDF Report</Button>
+                                    <Button variant="outline" className="gap-2 border-slate-200" onClick={() => navigate('/patient-calendar')}>
+                                        <CalendarIcon className="w-4 h-4" />
+                                        View Calendar
+                                    </Button>
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
+                )}
+
+                {/* Prescription Detail Modal */}
+                {selectedRx && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+                        <Card className="w-full max-w-xl p-0 overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+                            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-white">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-sky-50 rounded-xl flex items-center justify-center">
+                                        <Pill className="w-6 h-6 text-sky-600" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-black text-slate-900">{selectedRx.name}</h2>
+                                        <p className="text-sm font-medium text-slate-500">{selectedRx.dosage}</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setSelectedRx(null)} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
+                                    <X className="w-6 h-6 text-slate-400" />
+                                </button>
+                            </div>
+                            <div className="p-8">
+                                <div className="space-y-6 mb-8">
+                                    <div>
+                                        <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Instructions</p>
+                                        <p className="text-slate-900 font-bold text-lg">{selectedRx.frequency}</p>
+                                    </div>
+                                    <div className="flex justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                        <div>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                                            <span className={cn("px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest", selectedRx.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600')}>{selectedRx.status}</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Supply Remaining</p>
+                                            <p className="text-slate-900 font-black">{selectedRx.daysLeft} Days</p>
+                                        </div>
+                                    </div>
+                                    <div className="pt-4">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Pharmacist Notes</p>
+                                        <p className="text-slate-600 text-sm italic">"Take with food to avoid stomach upset. Do not skip doses."</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-4">
+                                    <Button className="flex-1 bg-indigo-600 text-white" onClick={() => alert("Refill request sent.")}>Request Refill</Button>
+                                    <Button variant="outline" className="flex-1" onClick={() => setSelectedRx(null)}>Close</Button>
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
+                )}
             </div>
         </Layout>
     );

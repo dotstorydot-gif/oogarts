@@ -14,6 +14,7 @@ import {
     CheckCircle2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 
 const SPECIALTIES = [
     { id: 'gen', name: 'General Medicine', icon: Activity, description: 'Primary care and general health checkups', available: 4 },
@@ -49,6 +50,37 @@ const PatientBooking = () => {
     const [selectedDoctor, setSelectedDoctor] = useState<number | null>(null);
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleConfirm = async () => {
+        setIsSubmitting(true);
+        try {
+            const patientId = 'PAT-1001';
+            const doctor = DOCTORS.find(d => d.id === selectedDoctor);
+            const specialty = SPECIALTIES.find(s => s.id === selectedSpec);
+
+            const { error } = await supabase
+                .from('appointments')
+                .insert({
+                    id: `APP-${Math.floor(Math.random() * 10000)}`,
+                    patient_id: patientId,
+                    doctor_name: doctor?.name || 'Dr. Unknown',
+                    specialty: specialty?.name || 'General',
+                    date: selectedDate || 'Today',
+                    time: selectedTime || '10:00 AM',
+                    type: consultType === 'telemedicine' ? 'Telemedicine' : 'Clinic Visit',
+                    status: 'Scheduled'
+                });
+
+            if (error) throw error;
+            navigate('/patient-dashboard');
+        } catch (error) {
+            console.error("Error booking appointment:", error);
+            alert("Failed to book appointment. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     const filteredDoctors = DOCTORS.filter(d => d.spec === selectedSpec);
 
@@ -293,8 +325,10 @@ const PatientBooking = () => {
                             </div>
 
                             <div className="flex gap-4">
-                                <Button variant="outline" className="flex-1 py-4" onClick={() => setStep(1)}>Cancel</Button>
-                                <Button className="flex-1 py-4 shadow-xl shadow-indigo-200" onClick={() => navigate('/patient-dashboard')}>Confirm Appointment</Button>
+                                <Button variant="outline" className="flex-1 py-4" onClick={() => setStep(1)} disabled={isSubmitting}>Cancel</Button>
+                                <Button className="flex-1 py-4 shadow-xl shadow-indigo-200" onClick={handleConfirm} disabled={isSubmitting}>
+                                    {isSubmitting ? 'Booking...' : 'Confirm Appointment'}
+                                </Button>
                             </div>
                         </Card>
                     </div>

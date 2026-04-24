@@ -20,7 +20,8 @@ import {
     Activity,
     Menu,
     X,
-    Home
+    Home,
+    Video
 } from 'lucide-react';
 import { cn, Button, Card } from './BaseUI';
 
@@ -120,8 +121,9 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                             <div className="px-6 mb-8">
                                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-4 mb-6 opacity-60">Personal Health</h3>
                                 <SidebarItem to="/patient-dashboard" icon={LayoutDashboard} label="My Hub" />
-                                <SidebarItem to="/patient-booking" icon={Calendar} label="Book Appointment" />
-                                <SidebarItem to="/telemedicine" icon={Activity} label="My Consultations" />
+                                <SidebarItem to="/patient-calendar" icon={Calendar} label="My Schedule" />
+                                <SidebarItem to="/patient-booking" icon={Plus} label="Book Appointment" />
+                                <SidebarItem to="/telemedicine" icon={Video} label="My Consultations" />
                                 <SidebarItem to="/patient-records" icon={FileText} label="Medical Records" />
                             </div>
                             <div className="px-6 mb-8">

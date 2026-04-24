@@ -19,6 +19,7 @@ import PatientBooking from './pages/PatientBooking';
 import Telemedicine from './pages/Telemedicine';
 import PatientRecords from './pages/PatientRecords';
 import PatientBilling from './pages/PatientBilling';
+import PatientCalendar from './pages/PatientCalendar';
 
 const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) => {
     const isAuthenticated = true; // Temporary simple auth
@@ -57,6 +58,7 @@ function App() {
                 {/* Patient Routes */}
                 <Route path="/patient-dashboard" element={<ProtectedRoute allowedRoles={['patient']}><PatientDashboard /></ProtectedRoute>} />
                 <Route path="/patient-booking" element={<ProtectedRoute allowedRoles={['patient']}><PatientBooking /></ProtectedRoute>} />
+                <Route path="/patient-calendar" element={<ProtectedRoute allowedRoles={['patient']}><PatientCalendar /></ProtectedRoute>} />
                 <Route path="/patient-records" element={<ProtectedRoute allowedRoles={['patient']}><PatientRecords /></ProtectedRoute>} />
                 <Route path="/patient-billing" element={<ProtectedRoute allowedRoles={['patient']}><PatientBilling /></ProtectedRoute>} />
                 

@@ -3,11 +3,18 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('medical-records', 'medical-records', false)
 ON CONFLICT (id) DO NOTHING;
 
+-- Enable Storage
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('medical-records', 'medical-records', false)
+ON CONFLICT (id) DO NOTHING;
+
 -- Storage Policies
+DROP POLICY IF EXISTS "Allow authenticated users to upload medical records" ON storage.objects;
 CREATE POLICY "Allow authenticated users to upload medical records"
 ON storage.objects FOR INSERT TO authenticated
 WITH CHECK (bucket_id = 'medical-records');
 
+DROP POLICY IF EXISTS "Allow users to view their own medical records" ON storage.objects;
 CREATE POLICY "Allow users to view their own medical records"
 ON storage.objects FOR SELECT TO authenticated
 USING (bucket_id = 'medical-records');
@@ -55,7 +62,28 @@ CREATE TABLE IF NOT EXISTS lab_results (
   patient_id TEXT REFERENCES patients(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   date TEXT NOT NULL,
-  status TEXT NOT NULL
+  status TEXT NOT NULL,
+  result_details TEXT
+);
+
+-- Ensure column exists if table was already created
+DO $$ 
+BEGIN 
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='lab_results' AND column_name='result_details') THEN
+    ALTER TABLE lab_results ADD COLUMN result_details TEXT;
+  END IF;
+END $$;
+
+-- Create appointments table
+CREATE TABLE IF NOT EXISTS appointments (
+  id TEXT PRIMARY KEY,
+  patient_id TEXT REFERENCES patients(id) ON DELETE CASCADE,
+  doctor_name TEXT NOT NULL,
+  specialty TEXT NOT NULL,
+  date TEXT NOT NULL,
+  time TEXT NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('Clinic Visit', 'Telemedicine')),
+  status TEXT NOT NULL DEFAULT 'Scheduled'
 );
 
 -- RLS Policies
@@ -63,16 +91,36 @@ ALTER TABLE patients ENABLE ROW LEVEL SECURITY;
 ALTER TABLE medical_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE prescriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE lab_results ENABLE ROW LEVEL SECURITY;
+ALTER TABLE appointments ENABLE ROW LEVEL SECURITY;
 
 -- Development: Allow anon/authenticated full access for demo purposes
--- (In a production HIPAA app, these would be restricted by user_id)
+DROP POLICY IF EXISTS "Public Read Access" ON patients;
 CREATE POLICY "Public Read Access" ON patients FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Access" ON medical_history;
 CREATE POLICY "Public Read Access" ON medical_history FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Access" ON prescriptions;
 CREATE POLICY "Public Read Access" ON prescriptions FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public Read Access" ON lab_results;
 CREATE POLICY "Public Read Access" ON lab_results FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Public Read Access" ON appointments;
+CREATE POLICY "Public Read Access" ON appointments FOR SELECT USING (true);
+
 -- Allow service role / authenticated to insert/update
+DROP POLICY IF EXISTS "Full Access for Authenticated" ON patients;
 CREATE POLICY "Full Access for Authenticated" ON patients FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Full Access for Authenticated" ON medical_history;
 CREATE POLICY "Full Access for Authenticated" ON medical_history FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Full Access for Authenticated" ON prescriptions;
 CREATE POLICY "Full Access for Authenticated" ON prescriptions FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Full Access for Authenticated" ON lab_results;
 CREATE POLICY "Full Access for Authenticated" ON lab_results FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Full Access for Authenticated" ON appointments;
+CREATE POLICY "Full Access for Authenticated" ON appointments FOR ALL USING (true) WITH CHECK (true);
