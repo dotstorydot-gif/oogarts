@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Card, Button, cn } from '../components/layout/BaseUI';
-import { Users, Search, Plus, FileText, Activity, Clock, ChevronRight, Pill, Calendar, Mail, Phone, MapPin, X, Loader2 } from 'lucide-react';
+import { Search, Plus, FileText, Activity, Clock, ChevronRight, Pill, Calendar, Mail, Phone, X, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Patient } from '../lib/mockData';
-import { useEffect } from 'react';
 
 const Patients = () => {
     const [searchQuery, setSearchQuery] = useState('');
