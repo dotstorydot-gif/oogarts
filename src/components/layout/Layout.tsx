@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard,
@@ -24,6 +24,7 @@ import {
     Video
 } from 'lucide-react';
 import { cn, Button, Card } from './BaseUI';
+import { supabase } from '../../lib/supabase';
 
 const SidebarItem = ({ to, icon: Icon, label, hasSubmenu = false }: any) => {
     const location = useLocation();
