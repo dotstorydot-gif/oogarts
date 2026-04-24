@@ -57,8 +57,8 @@ const Reports = () => {
                             </div>
                             <span className="text-xs font-black text-indigo-600 uppercase tracking-[0.2em]">Business Intelligence</span>
                         </div>
-                        <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2 italic">System Reports</h1>
-                        <p className="text-slate-500 font-medium">Global analytics engine for clinical and operational performance.</p>
+                        <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2 italic">Advanced Analytics Engine</h1>
+                        <p className="text-slate-500 font-medium">Deep-level clinical and operational performance intelligence.</p>
                     </div>
                     <div className="flex gap-4">
                         <Button variant="outline" className="gap-2">

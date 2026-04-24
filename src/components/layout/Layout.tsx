@@ -21,7 +21,8 @@ import {
     Menu,
     X,
     Home,
-    Video
+    Video,
+    BarChart3
 } from 'lucide-react';
 import { cn, Button, Card } from './BaseUI';
 import { supabase } from '../../lib/supabase';
@@ -197,7 +198,7 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                                 <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-4 mb-6 opacity-60">System</h3>
                                 <SidebarItem to="/settings" icon={Settings} label="Global Settings" />
                                 <SidebarItem to="/help" icon={HelpCircle} label="Help Center" />
-                                {userRole === 'admin' && <SidebarItem to="/reports" icon={FileText} label="System Logs" />}
+                                {userRole === 'admin' && <SidebarItem to="/reports" icon={BarChart3} label="Advanced Analytics" />}
                             </div>
                         </>
                     )}
