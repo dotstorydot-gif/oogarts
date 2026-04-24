@@ -40,6 +40,17 @@ const Settings = () => {
                         .single();
                     if (error) throw error;
                     setUserData(data);
+                } else if (userRole === 'doctor') {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        const { data, error } = await supabase
+                            .from('doctors')
+                            .select('*')
+                            .eq('id', user.id)
+                            .single();
+                        if (error) throw error;
+                        setUserData(data);
+                    }
                 } else {
                     // Mock Admin Data
                     setUserData({

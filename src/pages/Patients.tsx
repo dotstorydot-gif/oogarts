@@ -75,6 +75,10 @@ const Patients = () => {
         }
     };
 
+    useEffect(() => {
+        fetchData();
+    }, []);
+
     const registerPatient = async (e: React.FormEvent) => {
         e.preventDefault();
         try {

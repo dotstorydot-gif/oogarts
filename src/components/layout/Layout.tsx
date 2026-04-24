@@ -73,7 +73,20 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
                         .single();
                     setUserData(data);
                 } else if (userRole === 'doctor') {
-                    setUserData({ name: 'Dr. Michael Chen', title: 'Neurology', image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200' });
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        const { data: profile } = await supabase
+                            .from('doctors')
+                            .select('name, specialty, image')
+                            .eq('id', user.id)
+                            .single();
+                        
+                        setUserData(profile || { 
+                            name: 'Dr. Michael Chen', 
+                            title: 'Neurology', 
+                            image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200' 
+                        });
+                    }
                 } else {
                     setUserData({ name: 'Jack Chain', title: 'Super Admin', image: '/avatars/jack_chain.png' });
                 }
