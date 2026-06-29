@@ -30,7 +30,13 @@ const Laboratory = () => {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const { data: { user } } = await supabase.auth.getUser();
+            let user = null;
+            try {
+                const { data } = await supabase.auth.getUser();
+                user = data.user;
+            } catch (err) {
+                console.warn("Could not retrieve user for laboratory:", err);
+            }
             const role = localStorage.getItem('userRole') || 'admin';
 
             let query = supabase.from('lab_requests').select('*, patients(name)').order('request_date', { ascending: false });
@@ -39,8 +45,30 @@ const Laboratory = () => {
                 query = query.eq('doctor_id', user.id);
             }
 
-            const { data, error } = await query;
+            let { data, error } = await query;
             if (error) throw error;
+
+            if (!data || data.length === 0) {
+                console.log("Lab requests empty. Seeding defaults...");
+                // Fetch a default patient and doctor to link to the seeded requests
+                const { data: defaultPts } = await supabase.from('patients').select('id').limit(1);
+                const { data: defaultDocs } = await supabase.from('doctors').select('id').limit(1);
+                
+                const pId = defaultPts?.[0]?.id || 'PAT-1001';
+                const dId = defaultDocs?.[0]?.id || 'DOC-2';
+
+                const defaultLabs = [
+                    { patient_id: pId, doctor_id: dId, test_name: 'Complete Blood Count (CBC)', priority: 'Normal', status: 'Pending' },
+                    { patient_id: pId, doctor_id: dId, test_name: 'Lipid Panel', priority: 'Urgent', status: 'In Analysis' },
+                    { patient_id: pId, doctor_id: dId, test_name: 'Thyroid Stimulating Hormone (TSH)', priority: 'Normal', status: 'Completed' },
+                    { patient_id: pId, doctor_id: dId, test_name: 'Basic Metabolic Panel (BMP)', priority: 'Urgent', status: 'Pending' }
+                ];
+
+                await supabase.from('lab_requests').insert(defaultLabs);
+                const { data: updatedLabs } = await query;
+                data = updatedLabs;
+            }
+
             setLabRequests(data || []);
         } catch (error) {
             console.error("Error fetching lab requests:", error);

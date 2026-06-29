@@ -28,7 +28,23 @@ const Inventory = () => {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const { data } = await supabase.from('inventory').select('*').order('name');
+            let { data } = await supabase.from('inventory').select('*').order('name');
+            
+            if (!data || data.length === 0) {
+                console.log("Inventory empty. Seeding defaults...");
+                const defaultInventory = [
+                    { name: 'Surgical Gloves', category: 'Clinical Supplies', status: 'normal', stock: 1200, unit: 'Pairs', trend: '+12%' },
+                    { name: 'Syringes 5ml', category: 'Clinical Supplies', status: 'normal', stock: 800, unit: 'Units', trend: '-5%' },
+                    { name: 'Paracetamol 500mg', category: 'Pharmacy', status: 'normal', stock: 2500, unit: 'Tablets', trend: '+8%' },
+                    { name: 'Amoxicillin 250mg', category: 'Pharmacy', status: 'low', stock: 35, unit: 'Bottles', trend: '+15%' },
+                    { name: 'MRI Contrast Agent', category: 'Diagnostics', status: 'normal', stock: 120, unit: 'Vials', trend: '0%' },
+                    { name: 'Defibrillator Pads', category: 'Devices', status: 'low', stock: 12, unit: 'Sets', trend: '-20%' }
+                ];
+                await supabase.from('inventory').insert(defaultInventory);
+                const { data: updatedData } = await supabase.from('inventory').select('*').order('name');
+                data = updatedData;
+            }
+
             setStockItems(data || []);
         } catch (error) {
             console.error("Error fetching inventory:", error);
