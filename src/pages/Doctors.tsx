@@ -33,8 +33,45 @@ const Doctors = () => {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const { data: docs } = await supabase.from('doctors').select('*').order('name');
-            const { data: specs } = await supabase.from('specialties').select('*').order('name');
+            let { data: docs } = await supabase.from('doctors').select('*').order('name');
+            let { data: specs } = await supabase.from('specialties').select('*').order('name');
+
+            // If empty, auto-seed default doctors and specialties
+            if ((!docs || docs.length === 0) || (!specs || specs.length === 0)) {
+                console.log("Database empty. Seeding defaults...");
+                
+                // Seed specialties
+                if (!specs || specs.length === 0) {
+                    await supabase.from('specialties').insert([
+                        { name: 'General Medicine', description: 'Primary care and general health checkups', icon: 'Stethoscope', doctor_count: 1 },
+                        { name: 'Cardiology', description: 'Heart and cardiovascular system', icon: 'Heart', doctor_count: 1 },
+                        { name: 'Neurology', description: 'Brain, spinal cord, and nervous system', icon: 'Brain', doctor_count: 1 },
+                        { name: 'Pediatrics', description: 'Medical care for infants and children', icon: 'Baby', doctor_count: 1 },
+                        { name: 'Orthopedics', description: 'Bones, joints, ligaments, tendons', icon: 'Bone', doctor_count: 1 },
+                        { name: 'Ophthalmology', description: 'Eye and vision care', icon: 'Eye', doctor_count: 1 }
+                    ]);
+                    const { data: updatedSpecs } = await supabase.from('specialties').select('*').order('name');
+                    specs = updatedSpecs;
+                }
+
+                // Seed doctors
+                if (!docs || docs.length === 0) {
+                    const defaultDocs = [
+                        { id: 'DOC-1', name: 'Dr. Sarah Jenkins', specialty: 'General Medicine', email: 'sarah.j@example.com', phone: '+1 (555) 987-6543', status: 'Active', image: 'https://images.unsplash.com/photo-1559839734-2b71f1536783?auto=format&fit=crop&q=80&w=200' },
+                        { id: 'DOC-2', name: 'Dr. Michael Chen', specialty: 'Neurology', email: 'michael.c@example.com', phone: '+1 (555) 019-2834', status: 'Active', image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200' },
+                        { id: 'DOC-3', name: 'Dr. Emily Parker', specialty: 'Pediatrics', email: 'emily.p@example.com', phone: '+1 (555) 456-7890', status: 'Active', image: 'https://images.unsplash.com/photo-1594824432257-f67b5cbeb730?auto=format&fit=crop&q=80&w=200' },
+                        { id: 'DOC-4', name: 'Dr. James Wilson', specialty: 'Orthopedics', email: 'james.w@example.com', phone: '+1 (555) 321-0987', status: 'Active', image: 'https://images.unsplash.com/photo-1537368910025-7028a609b13c?auto=format&fit=crop&q=80&w=200' },
+                        { id: 'DOC-5', name: 'Dr. Lisa Torres', specialty: 'Cardiology', email: 'lisa.t@example.com', phone: '+1 (555) 123-9876', status: 'Active', image: 'https://images.unsplash.com/photo-1622253692010-333f2da60318?auto=format&fit=crop&q=80&w=200' },
+                        { id: 'DOC-6', name: 'Dr. Robert Kim', specialty: 'Ophthalmology', email: 'robert.k@example.com', phone: '+1 (555) 789-0123', status: 'Active', image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200' }
+                    ];
+                    for (const doc of defaultDocs) {
+                        await supabase.from('doctors').upsert(doc);
+                    }
+                    const { data: updatedDocs } = await supabase.from('doctors').select('*').order('name');
+                    docs = updatedDocs;
+                }
+            }
+
             setDoctors(docs || []);
             setSpecialties(specs || []);
         } catch (error) {

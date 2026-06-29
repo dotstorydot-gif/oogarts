@@ -51,12 +51,75 @@ const Appointments = () => {
 
             setUserProfile({ id: userId, role });
 
-            // Fetch Patients for selection
-            const { data: pts } = await supabase.from('patients').select('id, name').order('name');
-            setPatients(pts || []);
+            // Fetch Patients, Doctors, Specialties
+            let { data: pts } = await supabase.from('patients').select('id, name').order('name');
+            let { data: docs } = await supabase.from('doctors').select('id, name, specialty').order('name');
+            let { data: specs } = await supabase.from('specialties').select('id');
 
-            // Fetch Doctors for selection
-            const { data: docs } = await supabase.from('doctors').select('id, name, specialty').order('name');
+            // If empty, auto-seed
+            if ((!docs || docs.length === 0) || (!specs || specs.length === 0) || (!pts || pts.length === 0)) {
+                console.log("Appointments detection: DB lookup data empty, seeding defaults...");
+                
+                // Seed specialties
+                if (!specs || specs.length === 0) {
+                    await supabase.from('specialties').insert([
+                        { name: 'General Medicine', description: 'Primary care and general health checkups', icon: 'Stethoscope', doctor_count: 1 },
+                        { name: 'Cardiology', description: 'Heart and cardiovascular system', icon: 'Heart', doctor_count: 1 },
+                        { name: 'Neurology', description: 'Brain, spinal cord, and nervous system', icon: 'Brain', doctor_count: 1 },
+                        { name: 'Pediatrics', description: 'Medical care for infants and children', icon: 'Baby', doctor_count: 1 },
+                        { name: 'Orthopedics', description: 'Bones, joints, ligaments, tendons', icon: 'Bone', doctor_count: 1 },
+                        { name: 'Ophthalmology', description: 'Eye and vision care', icon: 'Eye', doctor_count: 1 }
+                    ]);
+                }
+
+                // Seed doctors
+                if (!docs || docs.length === 0) {
+                    const defaultDocs = [
+                        { id: 'DOC-1', name: 'Dr. Sarah Jenkins', specialty: 'General Medicine', email: 'sarah.j@example.com', phone: '+1 (555) 987-6543', status: 'Active', image: 'https://images.unsplash.com/photo-1559839734-2b71f1536783?auto=format&fit=crop&q=80&w=200' },
+                        { id: 'DOC-2', name: 'Dr. Michael Chen', specialty: 'Neurology', email: 'michael.c@example.com', phone: '+1 (555) 019-2834', status: 'Active', image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200' },
+                        { id: 'DOC-3', name: 'Dr. Emily Parker', specialty: 'Pediatrics', email: 'emily.p@example.com', phone: '+1 (555) 456-7890', status: 'Active', image: 'https://images.unsplash.com/photo-1594824432257-f67b5cbeb730?auto=format&fit=crop&q=80&w=200' },
+                        { id: 'DOC-4', name: 'Dr. James Wilson', specialty: 'Orthopedics', email: 'james.w@example.com', phone: '+1 (555) 321-0987', status: 'Active', image: 'https://images.unsplash.com/photo-1537368910025-7028a609b13c?auto=format&fit=crop&q=80&w=200' },
+                        { id: 'DOC-5', name: 'Dr. Lisa Torres', specialty: 'Cardiology', email: 'lisa.t@example.com', phone: '+1 (555) 123-9876', status: 'Active', image: 'https://images.unsplash.com/photo-1622253692010-333f2da60318?auto=format&fit=crop&q=80&w=200' },
+                        { id: 'DOC-6', name: 'Dr. Robert Kim', specialty: 'Ophthalmology', email: 'robert.k@example.com', phone: '+1 (555) 789-0123', status: 'Active', image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200' }
+                    ];
+                    for (const doc of defaultDocs) {
+                        await supabase.from('doctors').upsert(doc);
+                    }
+                    const { data: updatedDocs } = await supabase.from('doctors').select('id, name, specialty').order('name');
+                    docs = updatedDocs;
+                }
+
+                // Seed patients
+                if (!pts || pts.length === 0) {
+                    const demoPatientId = 'PAT-1001';
+                    await supabase.from('patients').insert([{
+                        id: demoPatientId,
+                        name: 'Sophia Martinez',
+                        email: 'sophia.m@example.com',
+                        phone: '+1 (555) 123-4567',
+                        dob: '1992-05-15',
+                        gender: 'Female',
+                        blood_type: 'A+',
+                        status: 'Active',
+                        image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200',
+                        last_visit: 'Oct 12, 2024'
+                    }]);
+
+                    await supabase.from('vitals').insert([{
+                        patient_id: demoPatientId,
+                        blood_pressure: '120/80',
+                        heart_rate: 72,
+                        temperature: 36.6,
+                        weight: 70,
+                        oxygen_sat: 98
+                    }]);
+
+                    const { data: updatedPts } = await supabase.from('patients').select('id, name').order('name');
+                    pts = updatedPts;
+                }
+            }
+
+            setPatients(pts || []);
             setDoctors(docs || []);
 
             // Fetch Appointments
