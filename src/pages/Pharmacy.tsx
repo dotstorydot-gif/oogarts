@@ -14,7 +14,7 @@ import {
     Pill,
     Loader2
 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase, ensureDatabaseSeeded } from '../lib/supabase';
 
 const Pharmacy = () => {
     const [showEntryForm, setShowEntryForm] = useState(false);
@@ -39,29 +39,13 @@ const Pharmacy = () => {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            let { data: pts } = await supabase.from('patients').select('id, name').order('name');
-            let { data: rxData } = await supabase
+            await ensureDatabaseSeeded();
+
+            const { data: pts } = await supabase.from('patients').select('id, name').order('name');
+            const { data: rxData } = await supabase
                 .from('prescriptions')
                 .select('*, patients(name)')
                 .order('id', { ascending: false });
-
-            if (!rxData || rxData.length === 0) {
-                console.log("Pharmacy empty. Seeding defaults...");
-                const pId = pts?.[0]?.id || 'PAT-1001';
-
-                const defaultRx = [
-                    { id: `RX-1021`, patient_id: pId, name: 'Lisinopril 10mg', dosage: '1 tablet daily', frequency: 'Daily', status: 'Active', days_left: 30 },
-                    { id: `RX-2934`, patient_id: pId, name: 'Atorvastatin 20mg', dosage: '1 tablet nightly', frequency: 'Nightly', status: 'Active', days_left: 14 },
-                    { id: `RX-4921`, patient_id: pId, name: 'Amoxicillin 500mg', dosage: '1 capsule three times daily', frequency: 'TID', status: 'Active', days_left: 7 },
-                    { id: `RX-5912`, patient_id: pId, name: 'Metformin 850mg', dosage: '1 tablet twice daily with meals', frequency: 'BID', status: 'Suspended', days_left: 0 }
-                ];
-                await supabase.from('prescriptions').insert(defaultRx);
-                const { data: updatedRx } = await supabase
-                    .from('prescriptions')
-                    .select('*, patients(name)')
-                    .order('id', { ascending: false });
-                rxData = updatedRx;
-            }
             
             setPrescriptions(rxData || []);
             setPatients(pts || []);
@@ -71,7 +55,6 @@ const Pharmacy = () => {
             setIsLoading(false);
         }
     };
-
     useEffect(() => {
         fetchData();
     }, []);
@@ -90,9 +73,9 @@ const Pharmacy = () => {
             setShowEntryForm(false);
             setNewMed({ patient_id: '', name: '', dosage: '', frequency: '', days_left: 30 });
             fetchData();
-        } catch (error) {
-            console.error("Error adding medication:", error);
-            alert("Failed to add medication.");
+        } catch (error: any) {
+            console.error("Error creating prescription:", error);
+            alert(`Failed to register prescription: ${error?.message || JSON.stringify(error)}`);
         }
     };
 
