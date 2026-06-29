@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Card, Button, cn } from '../components/layout/BaseUI';
 import {
@@ -11,27 +11,37 @@ import {
     Baby,
     Bone,
     Eye,
-    CheckCircle2
+    CheckCircle2,
+    Heart
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
-const SPECIALTIES = [
-    { id: 'gen', name: 'General Medicine', icon: Activity, description: 'Primary care and general health checkups', available: 4 },
-    { id: 'cardio', name: 'Cardiology', icon: Activity, description: 'Heart and cardiovascular system', available: 2 },
-    { id: 'neuro', name: 'Neurology', icon: Brain, description: 'Brain, spinal cord, and nervous system', available: 1 },
-    { id: 'peds', name: 'Pediatrics', icon: Baby, description: 'Medical care for infants and children', available: 3 },
-    { id: 'ortho', name: 'Orthopedics', icon: Bone, description: 'Bones, joints, ligaments, tendons', available: 2 },
-    { id: 'ophtha', name: 'Ophthalmology', icon: Eye, description: 'Eye and vision care', available: 1 },
+const iconMap: any = {
+    'General Medicine': Activity,
+    'Cardiology': Heart,
+    'Neurology': Brain,
+    'Pediatrics': Baby,
+    'Orthopedics': Bone,
+    'Ophthalmology': Eye
+};
+
+const STATIC_SPECIALTIES = [
+    { id: 'General Medicine', name: 'General Medicine', icon: Activity, description: 'Primary care and general health checkups', available: 4 },
+    { id: 'Cardiology', name: 'Cardiology', icon: Heart, description: 'Heart and cardiovascular system', available: 2 },
+    { id: 'Neurology', name: 'Neurology', icon: Brain, description: 'Brain, spinal cord, and nervous system', available: 1 },
+    { id: 'Pediatrics', name: 'Pediatrics', icon: Baby, description: 'Medical care for infants and children', available: 3 },
+    { id: 'Orthopedics', name: 'Orthopedics', icon: Bone, description: 'Bones, joints, ligaments, tendons', available: 2 },
+    { id: 'Ophthalmology', name: 'Ophthalmology', icon: Eye, description: 'Eye and vision care', available: 1 },
 ];
 
-const DOCTORS = [
-    { id: 1, name: 'Dr. Sarah Jenkins', spec: 'gen', rating: 4.9, image: 'https://images.unsplash.com/photo-1559839734-2b71f1536783?auto=format&fit=crop&q=80&w=200' },
-    { id: 2, name: 'Dr. Michael Chen', spec: 'neuro', rating: 4.8, image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200' },
-    { id: 3, name: 'Dr. Emily Parker', spec: 'peds', rating: 5.0, image: 'https://images.unsplash.com/photo-1594824432257-f67b5cbeb730?auto=format&fit=crop&q=80&w=200' },
-    { id: 4, name: 'Dr. James Wilson', spec: 'ortho', rating: 4.7, image: 'https://images.unsplash.com/photo-1537368910025-7028a609b13c?auto=format&fit=crop&q=80&w=200' },
-    { id: 5, name: 'Dr. Lisa Torres', spec: 'cardio', rating: 4.9, image: 'https://images.unsplash.com/photo-1622253692010-333f2da60318?auto=format&fit=crop&q=80&w=200' },
-    { id: 6, name: 'Dr. Robert Kim', spec: 'ophtha', rating: 4.8, image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200' },
+const STATIC_DOCTORS = [
+    { id: 'DOC-1', name: 'Dr. Sarah Jenkins', spec: 'General Medicine', rating: 4.9, image: 'https://images.unsplash.com/photo-1559839734-2b71f1536783?auto=format&fit=crop&q=80&w=200' },
+    { id: 'DOC-2', name: 'Dr. Michael Chen', spec: 'Neurology', rating: 4.8, image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200' },
+    { id: 'DOC-3', name: 'Dr. Emily Parker', spec: 'Pediatrics', rating: 5.0, image: 'https://images.unsplash.com/photo-1594824432257-f67b5cbeb730?auto=format&fit=crop&q=80&w=200' },
+    { id: 'DOC-4', name: 'Dr. James Wilson', spec: 'Orthopedics', rating: 4.7, image: 'https://images.unsplash.com/photo-1537368910025-7028a609b13c?auto=format&fit=crop&q=80&w=200' },
+    { id: 'DOC-5', name: 'Dr. Lisa Torres', spec: 'Cardiology', rating: 4.9, image: 'https://images.unsplash.com/photo-1622253692010-333f2da60318?auto=format&fit=crop&q=80&w=200' },
+    { id: 'DOC-6', name: 'Dr. Robert Kim', spec: 'Ophthalmology', rating: 4.8, image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200' },
 ];
 
 const TIME_SLOTS = [
@@ -43,30 +53,68 @@ const TIME_SLOTS = [
 const PatientBooking = () => {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
+    const [specialties, setSpecialties] = useState<any[]>(STATIC_SPECIALTIES);
+    const [doctors, setDoctors] = useState<any[]>(STATIC_DOCTORS);
 
     // Booking State
     const [consultType, setConsultType] = useState<'in-person' | 'telemedicine' | null>(null);
     const [selectedSpec, setSelectedSpec] = useState<string | null>(null);
-    const [selectedDoctor, setSelectedDoctor] = useState<number | null>(null);
+    const [selectedDoctor, setSelectedDoctor] = useState<string | null>(null);
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        const fetchSpecsAndDocs = async () => {
+            try {
+                // Fetch Specialties
+                const { data: specs } = await supabase.from('specialties').select('*').order('name');
+                if (specs && specs.length > 0) {
+                    const mappedSpecs = specs.map(s => ({
+                        id: s.name,
+                        name: s.name,
+                        icon: iconMap[s.name] || Activity,
+                        description: s.description || 'Medical Specialty Department',
+                        available: s.doctor_count || 1
+                    }));
+                    setSpecialties(mappedSpecs);
+                }
+
+                // Fetch Doctors
+                const { data: docs } = await supabase.from('doctors').select('*').order('name');
+                if (docs && docs.length > 0) {
+                    const mappedDocs = docs.map(d => ({
+                        id: d.id,
+                        name: d.name,
+                        spec: d.specialty,
+                        rating: 4.7 + parseFloat((Math.random() * 0.3).toFixed(1)),
+                        image: d.image || 'https://images.unsplash.com/photo-1559839734-2b71f1536783?auto=format&fit=crop&q=80&w=200'
+                    }));
+                    setDoctors(mappedDocs);
+                }
+            } catch (err) {
+                console.error("Failed to load clinical listings from Supabase:", err);
+            }
+        };
+        fetchSpecsAndDocs();
+    }, []);
 
     const handleConfirm = async () => {
         setIsSubmitting(true);
         try {
             const { data: { user } } = await supabase.auth.getUser();
             const patientId = user?.id || 'PAT-1001';
-            const doctor = DOCTORS.find(d => d.id === selectedDoctor);
-            const specialty = SPECIALTIES.find(s => s.id === selectedSpec);
+            const doctor = doctors.find(d => d.id === selectedDoctor);
+            const specialty = specialties.find(s => s.id === selectedSpec);
 
             const { error } = await supabase
                 .from('appointments')
                 .insert({
                     id: `APP-${Math.floor(Math.random() * 10000)}`,
                     patient_id: patientId,
+                    doctor_id: selectedDoctor,
                     doctor_name: doctor?.name || 'Dr. Unknown',
-                    specialty: specialty?.name || 'General',
+                    specialty: specialty?.name || 'General Medicine',
                     date: selectedDate || 'Today',
                     time: selectedTime || '10:00 AM',
                     type: consultType === 'telemedicine' ? 'Telemedicine' : 'Clinic Visit',
@@ -83,7 +131,7 @@ const PatientBooking = () => {
         }
     };
 
-    const filteredDoctors = DOCTORS.filter(d => d.spec === selectedSpec);
+    const filteredDoctors = doctors.filter(d => d.spec === selectedSpec);
 
     return (
         <Layout>
@@ -157,7 +205,7 @@ const PatientBooking = () => {
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-10">
-                            {SPECIALTIES.map(spec => (
+                            {specialties.map(spec => (
                                 <Card
                                     key={spec.id}
                                     className={cn(
@@ -177,31 +225,35 @@ const PatientBooking = () => {
                             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 border-t border-slate-100 pt-10">
                                 <h2 className="text-xl font-black text-slate-900 mb-6">Select a Doctor</h2>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {filteredDoctors.map(doctor => (
-                                        <Card
-                                            key={doctor.id}
-                                            className={cn(
-                                                "p-4 cursor-pointer transition-all duration-300 border-2 flex items-center justify-between",
-                                                selectedDoctor === doctor.id ? "border-indigo-600 shadow-md bg-indigo-50/10" : "border-slate-100 hover:border-indigo-200"
-                                            )}
-                                            onClick={() => setSelectedDoctor(doctor.id)}
-                                        >
-                                            <div className="flex items-center gap-4">
-                                                <img src={doctor.image} className="w-12 h-12 rounded-full object-cover shadow-sm" />
-                                                <div>
-                                                    <h4 className="font-bold text-slate-900">{doctor.name}</h4>
-                                                    <div className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">
-                                                        <span className="text-amber-500">★ {doctor.rating}</span>
-                                                        <span>•</span>
-                                                        <span>{SPECIALTIES.find(s => s.id === doctor.spec)?.name}</span>
+                                    {filteredDoctors.length === 0 ? (
+                                        <p className="text-slate-400 font-bold col-span-2">No active doctors currently registered in this specialty.</p>
+                                    ) : (
+                                        filteredDoctors.map(doctor => (
+                                            <Card
+                                                key={doctor.id}
+                                                className={cn(
+                                                    "p-4 cursor-pointer transition-all duration-300 border-2 flex items-center justify-between",
+                                                    selectedDoctor === doctor.id ? "border-indigo-600 shadow-md bg-indigo-50/10" : "border-slate-100 hover:border-indigo-200"
+                                                )}
+                                                onClick={() => setSelectedDoctor(doctor.id)}
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <img src={doctor.image} className="w-12 h-12 rounded-full object-cover shadow-sm" />
+                                                    <div>
+                                                        <h4 className="font-bold text-slate-900">{doctor.name}</h4>
+                                                        <div className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">
+                                                            <span className="text-amber-500">★ {doctor.rating}</span>
+                                                            <span>•</span>
+                                                            <span>{specialties.find(s => s.id === doctor.spec)?.name}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center", selectedDoctor === doctor.id ? "border-indigo-600 bg-indigo-600" : "border-slate-200")}>
-                                                {selectedDoctor === doctor.id && <div className="w-2 h-2 bg-white rounded-full" />}
-                                            </div>
-                                        </Card>
-                                    ))}
+                                                <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center", selectedDoctor === doctor.id ? "border-indigo-600 bg-indigo-600" : "border-slate-200")}>
+                                                    {selectedDoctor === doctor.id && <div className="w-2 h-2 bg-white rounded-full" />}
+                                                </div>
+                                            </Card>
+                                        ))
+                                    )}
                                 </div>
                                 <div className="mt-8 flex justify-end">
                                     <Button
@@ -295,8 +347,8 @@ const PatientBooking = () => {
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Doctor</p>
-                                        <p className="font-black text-lg text-slate-900">{DOCTORS.find(d => d.id === selectedDoctor)?.name}</p>
-                                        <p className="text-sm font-bold text-slate-500">{SPECIALTIES.find(s => s.id === selectedSpec)?.name}</p>
+                                        <p className="font-black text-lg text-slate-900">{doctors.find(d => d.id === selectedDoctor)?.name}</p>
+                                        <p className="text-sm font-bold text-slate-500">{specialties.find(s => s.id === selectedSpec)?.name}</p>
                                     </div>
                                 </div>
 

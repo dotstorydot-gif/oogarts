@@ -112,18 +112,36 @@ const DoctorReports = () => {
     const handleSubmit = async () => {
         if (!patientId) return;
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error("Not authenticated");
+            let user = null;
+            try {
+                const { data } = await supabase.auth.getUser();
+                user = data.user;
+            } catch (err) {
+                console.warn("Could not fetch Auth user for report submit:", err);
+            }
+
+            let doctorName = 'Dr. Michael Chen';
+            if (user) {
+                const { data: docProfile } = await supabase
+                    .from('doctors')
+                    .select('name')
+                    .eq('id', user.id)
+                    .single();
+                if (docProfile) {
+                    doctorName = docProfile.name;
+                }
+            }
 
             // Save medical history
+            const notesContent = `Diagnosis: ${reportData.diagnosis}\nExamination: ${reportData.examination}\nInstructions: ${reportData.instructions}`;
             const { error: histError } = await supabase.from('medical_history').insert([{
+                id: `H-${Math.floor(1000 + Math.random() * 9000)}`,
                 patient_id: patientId,
-                doctor_id: user.id,
-                date: new Date().toISOString().split('T')[0],
                 title: 'Clinical Consultation',
-                notes: reportData.diagnosis,
-                findings: reportData.examination,
-                advice: reportData.instructions
+                date: new Date().toISOString().split('T')[0],
+                doctor: doctorName,
+                type: 'Consultation',
+                notes: notesContent
             }]);
             if (histError) throw histError;
 
@@ -131,12 +149,13 @@ const DoctorReports = () => {
             if (prescriptions.length > 0) {
                 const { error: rxError } = await supabase.from('prescriptions').insert(
                     prescriptions.map(p => ({
+                        id: `RX-${Math.floor(1000 + Math.random() * 9000)}`,
                         patient_id: patientId,
-                        doctor_id: user.id,
                         name: p.medication,
                         dosage: p.dosage,
                         frequency: p.frequency,
-                        status: 'Active'
+                        status: 'Active',
+                        days_left: parseInt(p.duration) || 7
                     }))
                 );
                 if (rxError) throw rxError;

@@ -12,6 +12,7 @@ const Appointments = () => {
     const [isRegistering, setIsRegistering] = useState(false);
     const [appointments, setAppointments] = useState<any[]>([]);
     const [patients, setPatients] = useState<any[]>([]);
+    const [doctors, setDoctors] = useState<any[]>([]);
     const [userProfile, setUserProfile] = useState<any>(null);
     const [isNewPatient, setIsNewPatient] = useState(false);
     const [formData, setFormData] = useState({
@@ -28,20 +29,40 @@ const Appointments = () => {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error("Not authenticated");
+            let user = null;
+            try {
+                const { data } = await supabase.auth.getUser();
+                user = data.user;
+            } catch (err) {
+                console.warn("Auth check failed, using simulated login:", err);
+            }
 
             const role = localStorage.getItem('userRole') || 'admin';
-            setUserProfile({ id: user.id, role });
+            let userId = user?.id || '';
+
+            if (!userId) {
+                if (role === 'doctor') {
+                    const { data: docList } = await supabase.from('doctors').select('id').limit(1);
+                    userId = docList?.[0]?.id || 'DOC-1001';
+                } else {
+                    userId = 'ADMIN-1001';
+                }
+            }
+
+            setUserProfile({ id: userId, role });
 
             // Fetch Patients for selection
             const { data: pts } = await supabase.from('patients').select('id, name').order('name');
             setPatients(pts || []);
 
+            // Fetch Doctors for selection
+            const { data: docs } = await supabase.from('doctors').select('id, name, specialty').order('name');
+            setDoctors(docs || []);
+
             // Fetch Appointments
             let query = supabase.from('appointments').select('*, patients(name)').order('date', { ascending: true });
             if (role === 'doctor') {
-                query = query.eq('doctor_id', user.id);
+                query = query.eq('doctor_id', userId);
             }
             const { data: appts, error } = await query;
             if (error) throw error;
@@ -54,8 +75,13 @@ const Appointments = () => {
 
             // Auto-fill doctor if role is doctor
             if (role === 'doctor') {
-                const { data: doc } = await supabase.from('doctors').select('name, specialty').eq('id', user.id).single();
-                setFormData(prev => ({ ...prev, doctor_id: user.id, doctor_name: doc?.name || 'Dr. Michael Chen', specialty: doc?.specialty || 'General Medicine' }));
+                const { data: doc } = await supabase.from('doctors').select('name, specialty').eq('id', userId).single();
+                setFormData(prev => ({ 
+                    ...prev, 
+                    doctor_id: userId, 
+                    doctor_name: doc?.name || 'Dr. Michael Chen', 
+                    specialty: doc?.specialty || 'General Medicine' 
+                }));
             }
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -191,14 +217,25 @@ const Appointments = () => {
                                                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Assign Doctor</label>
                                                 <div className="relative">
                                                     <Stethoscope className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Doctor Name"
-                                                        className="w-full pl-14 pr-6 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-[20px] font-bold outline-none transition-all"
-                                                        value={formData.doctor_name}
-                                                        onChange={(e) => setFormData({ ...formData, doctor_name: e.target.value })}
+                                                    <select
+                                                        className="w-full pl-14 pr-6 py-4 bg-slate-50 border-2 border-transparent focus:border-indigo-100 focus:bg-white rounded-[20px] font-bold outline-none transition-all appearance-none"
+                                                        value={formData.doctor_id}
+                                                        onChange={(e) => {
+                                                            const doc = doctors.find(d => d.id === e.target.value);
+                                                            setFormData({ 
+                                                                ...formData, 
+                                                                doctor_id: e.target.value, 
+                                                                doctor_name: doc?.name || '', 
+                                                                specialty: doc?.specialty || 'General Medicine' 
+                                                            });
+                                                        }}
                                                         required
-                                                    />
+                                                    >
+                                                        <option value="">Select Doctor</option>
+                                                        {doctors.map(d => (
+                                                            <option key={d.id} value={d.id}>{d.name} ({d.specialty})</option>
+                                                        ))}
+                                                    </select>
                                                 </div>
                                             </div>
                                         )}

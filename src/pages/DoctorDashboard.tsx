@@ -46,30 +46,52 @@ const DoctorDashboard = () => {
         const fetchDoctorData = async () => {
             setIsLoading(true);
             try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) throw new Error("Not authenticated");
+                let user = null;
+                try {
+                    const { data } = await supabase.auth.getUser();
+                    user = data.user;
+                } catch (err) {
+                    console.warn("Could not retrieve Auth user, trying mock fallback:", err);
+                }
 
-                // Fetch Doctor Profile
-                const { data: profile } = await supabase
-                    .from('doctors')
-                    .select('*')
-                    .eq('id', user.id)
-                    .single();
-                
-                // If no profile found, use demo data
-                const finalProfile = profile || {
-                    id: user.id,
-                    name: 'Dr. Michael Chen',
-                    specialty: 'Neurology',
-                    image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200'
-                };
+                let userId = '';
+                let finalProfile = null;
+
+                if (user) {
+                    userId = user.id;
+                    const { data: profile } = await supabase
+                        .from('doctors')
+                        .select('*')
+                        .eq('id', user.id)
+                        .single();
+                    finalProfile = profile;
+                }
+
+                if (!finalProfile) {
+                    // Fall back to first doctor or a mock profile
+                    const { data: allDocs } = await supabase.from('doctors').select('*').limit(1);
+                    if (allDocs && allDocs.length > 0) {
+                        finalProfile = allDocs[0];
+                        userId = finalProfile.id;
+                    } else {
+                        finalProfile = {
+                            id: 'DOC-1001',
+                            name: 'Dr. Michael Chen',
+                            specialty: 'Neurology',
+                            image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200',
+                            status: 'Active'
+                        };
+                        userId = 'DOC-1001';
+                    }
+                }
+
                 setDoctorProfile(finalProfile);
                 
                 // Fetch Appointments for this doctor
                 const { data: appts, error: apptError } = await supabase
                     .from('appointments')
                     .select('*, patients(name, image)')
-                    .eq('doctor_id', user.id)
+                    .eq('doctor_id', userId)
                     .order('date', { ascending: true });
                 
                 if (apptError) throw apptError;
@@ -85,7 +107,7 @@ const DoctorDashboard = () => {
                 const { data: labs, error: labError } = await supabase
                     .from('lab_requests')
                     .select('*')
-                    .eq('doctor_id', user.id)
+                    .eq('doctor_id', userId)
                     .order('request_date', { ascending: false });
                 
                 if (labError) throw labError;
@@ -144,7 +166,7 @@ const DoctorDashboard = () => {
                 .maybeSingle();
             
             setPatientVitals(vitals);
-            // setShowVitalsModal(true); // Don't auto-show modal, just load data in dashboard
+            setShowVitalsModal(true); // Open vitals/diagnostics modal for the doctor
         } catch (error) {
             console.error("Error searching patient:", error);
             alert("Error retrieving patient data.");
@@ -157,7 +179,7 @@ const DoctorDashboard = () => {
         try {
             const { error } = await supabase.from('lab_requests').insert([{
                 patient_id: nextPatient?.patient_id || 'PAT-1001',
-                doctor_id: 'DOC-1',
+                doctor_id: doctorProfile?.id || 'DOC-1001',
                 test_name: newLabRequest.testName,
                 priority: newLabRequest.priority,
                 status: 'Pending'
@@ -166,7 +188,7 @@ const DoctorDashboard = () => {
             setShowLabModal(false);
             setNewLabRequest({ testName: '', priority: 'Normal' });
             // Refresh lab requests
-            const { data } = await supabase.from('lab_requests').select('*').order('request_date', { ascending: false });
+            const { data } = await supabase.from('lab_requests').select('*').eq('doctor_id', doctorProfile?.id || 'DOC-1001').order('request_date', { ascending: false });
             setLabRequests(data || []);
         } catch (error) {
             console.error("Error submitting lab request:", error);
@@ -176,6 +198,7 @@ const DoctorDashboard = () => {
     const handleRxSubmit = async () => {
         try {
             const { error } = await supabase.from('prescriptions').insert([{
+                id: `RX-${Math.floor(1000 + Math.random() * 9000)}`,
                 patient_id: nextPatient?.patient_id || 'PAT-1001',
                 name: newRx.name,
                 dosage: newRx.dosage,
@@ -186,6 +209,7 @@ const DoctorDashboard = () => {
             if (error) throw error;
             setShowRxModal(false);
             setNewRx({ name: '', dosage: '', frequency: '' });
+            alert("Prescription added successfully!");
         } catch (error) {
             console.error("Error submitting prescription:", error);
         }
